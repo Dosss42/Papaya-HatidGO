@@ -19,7 +19,7 @@ A separate Angular **Admin Web Dashboard** is a supporting system that will be b
   - GPS: Capacitor geolocation behind `LocationService`.
   - Maps: behind `MapService`, so the provider is replaceable. **Open decision:** which provider.
   - Push notifications: Firebase Cloud Messaging.
-  - Payments: behind `PaymentService`, so the provider is replaceable. Online payment for **subscriptions** is in the MVP; ride fares stay cash. **Confirmed:** payments run in the gateway's **test/sandbox mode only**; no real money moves. PayMongo is the recommended gateway (Xendit is the alternative), pending the student's final pick.
+  - Payments: behind `PaymentService`, so the provider is replaceable. Online payment for **subscriptions** is in the MVP; ride fares stay cash. **Confirmed:** payments run in the gateway's **test/sandbox mode only**; no real money moves. **Gateway: PayMongo** (confirmed; Xendit was tried and set aside). It stays behind `PaymentService`, so it can still be swapped.
 - **Tooling:** VS Code, Android Studio, Git/GitHub, Postman, Docker, Android Emulator, physical Android device.
 
 ## Users
