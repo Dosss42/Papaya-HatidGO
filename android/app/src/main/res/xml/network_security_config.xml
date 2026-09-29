@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android blocks plain http:// (cleartext) by default since Android 9.
+  Development only needs http to the Laravel server on the developer's PC:
+    - 127.0.0.1 / localhost : a USB phone after `adb reverse tcp:8000 tcp:8000`
+    - 10.0.2.2              : the Android emulator's address for the host PC
+  Every other domain stays HTTPS-only (the production API must use HTTPS).
+  These three addresses can never reach a real server, so this is harmless in a release build.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">127.0.0.1</domain>
+        <domain includeSubdomains="false">localhost</domain>
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+</network-security-config>

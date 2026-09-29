@@ -1,13 +1,128 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>register</ion-title>
+<ion-header class="ion-no-border">
+  <ion-toolbar class="hg-toolbar">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/auth/welcome" text="" />
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">register</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  <form class="hg-column auth-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <header class="hg-head">
+      <h1 class="hg-head__title">Gumawa ng account</h1>
+    </header>
+
+    <fieldset class="role-plates">
+      <legend class="hg-field__label">Sino ka?</legend>
+      <div class="role-plates__row" role="radiogroup" aria-label="Sino ka?">
+        <button
+          type="button"
+          class="role-plate"
+          role="radio"
+          [attr.aria-checked]="form.controls.role.value === 'passenger'"
+          [class.role-plate--on]="form.controls.role.value === 'passenger'"
+          (click)="chooseRole('passenger')"
+        >
+          <ion-icon class="role-plate__icon" name="person-outline" aria-hidden="true" />
+          <span class="role-plate__title">Pasahero</span>
+          @if (form.controls.role.value === 'passenger') {
+            <ion-icon class="role-plate__check" name="checkmark-circle" aria-hidden="true" />
+          }
+        </button>
+        <button
+          type="button"
+          class="role-plate"
+          role="radio"
+          [attr.aria-checked]="form.controls.role.value === 'driver'"
+          [class.role-plate--on]="form.controls.role.value === 'driver'"
+          (click)="chooseRole('driver')"
+        >
+          <ion-icon class="role-plate__icon" name="tricycle" aria-hidden="true" />
+          <span class="role-plate__title">Driver</span>
+          @if (form.controls.role.value === 'driver') {
+            <ion-icon class="role-plate__check" name="checkmark-circle" aria-hidden="true" />
+          }
+        </button>
+      </div>
+      @if (form.controls.role.value === 'driver') {
+        <p class="role-plates__note">
+          Pagkatapos mag-register, ia-upload mo ang license at mga papeles ng tricycle mo para ma-verify.
+        </p>
+      }
+    </fieldset>
+
+    @if (error(); as e) {
+      @if (!hasFieldErrors(e)) {
+        <p class="hg-notice hg-notice--alert" role="alert">
+          <ion-icon name="alert-circle" aria-hidden="true" />
+          <span>{{ e.message }}</span>
+        </p>
+      }
+    }
+
+    <div class="name-pair">
+      <label class="hg-field">
+        <span class="hg-field__label">Pangalan</span>
+        <ion-input formControlName="first_name" fill="outline" autocomplete="given-name" autocapitalize="words" />
+        @if (fieldError('first_name'); as msg) {
+          <span class="hg-field__error"><ion-icon name="alert-circle" aria-hidden="true" />{{ msg }}</span>
+        }
+      </label>
+      <label class="hg-field">
+        <span class="hg-field__label">Apelyido</span>
+        <ion-input formControlName="last_name" fill="outline" autocomplete="family-name" autocapitalize="words" />
+        @if (fieldError('last_name'); as msg) {
+          <span class="hg-field__error"><ion-icon name="alert-circle" aria-hidden="true" />{{ msg }}</span>
+        }
+      </label>
+    </div>
+
+    <label class="hg-field">
+      <span class="hg-field__label">Mobile number</span>
+      <ion-input formControlName="phone" fill="outline" type="tel" inputmode="tel" autocomplete="tel" placeholder="hal. 0917 123 4567" />
+      @if (fieldError('phone'); as msg) {
+        <span class="hg-field__error"><ion-icon name="alert-circle" aria-hidden="true" />{{ msg }}</span>
+      }
+    </label>
+
+    <label class="hg-field">
+      <span class="hg-field__label">Email</span>
+      <span class="hg-field__hint">Dito namin ipapadala ang code kung makalimutan mo ang password.</span>
+      <ion-input formControlName="email" fill="outline" type="email" inputmode="email" autocomplete="email" placeholder="hal. juan@gmail.com" />
+      @if (fieldError('email'); as msg) {
+        <span class="hg-field__error"><ion-icon name="alert-circle" aria-hidden="true" />{{ msg }}</span>
+      }
+    </label>
+
+    <label class="hg-field">
+      <span class="hg-field__label">Password</span>
+      <span class="hg-field__hint">8 o higit pang character, may letra at numero.</span>
+      <ion-input formControlName="password" fill="outline" type="password" autocomplete="new-password">
+        <ion-input-password-toggle slot="end" color="medium" showLabel="Ipakita ang password" hideLabel="Itago ang password" />
+      </ion-input>
+      @if (fieldError('password'); as msg) {
+        <span class="hg-field__error"><ion-icon name="alert-circle" aria-hidden="true" />{{ msg }}</span>
+      }
+    </label>
+
+    <label class="hg-field">
+      <span class="hg-field__label">Ulitin ang password</span>
+      <ion-input formControlName="password_confirmation" fill="outline" type="password" autocomplete="new-password">
+        <ion-input-password-toggle slot="end" color="medium" showLabel="Ipakita ang password" hideLabel="Itago ang password" />
+      </ion-input>
+      @if (fieldError('password_confirmation'); as msg) {
+        <span class="hg-field__error"><ion-icon name="alert-circle" aria-hidden="true" />{{ msg }}</span>
+      }
+    </label>
+
+    <button class="hg-button hg-button--primary" type="submit" [disabled]="submitting()">
+      @if (submitting()) {
+        <ion-spinner name="crescent" aria-hidden="true" /> Ginagawa ang account…
+      } @else {
+        Gumawa ng account
+      }
+    </button>
+
+    <a class="hg-button hg-button--text" routerLink="/auth/login"><span>May account na? <span class="hg-nowrap">Mag-login</span></span></a>
+  </form>
 </ion-content>

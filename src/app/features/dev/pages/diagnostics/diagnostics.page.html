@@ -63,6 +63,28 @@
 
   <ion-list>
     <ion-list-header>
+      <ion-label>API (Laravel)</ion-label>
+    </ion-list-header>
+    <ion-item>
+      <ion-label class="ion-text-wrap">Address</ion-label>
+      <ion-note slot="end">{{ apiUrl }}</ion-note>
+    </ion-item>
+    @if (apiResult(); as r) {
+      <ion-item [color]="r.reachable ? 'success' : 'danger'">
+        <ion-label class="ion-text-wrap">
+          <strong>{{ r.message }}</strong><br />
+          HTTP {{ r.status }} · {{ r.latencyMs }} ms
+        </ion-label>
+      </ion-item>
+    }
+  </ion-list>
+
+  <ion-button expand="block" fill="outline" (click)="checkApi()" [disabled]="apiChecking()">
+    {{ apiChecking() ? 'Checking API…' : 'Check API' }}
+  </ion-button>
+
+  <ion-list>
+    <ion-list-header>
       <ion-label>Network</ion-label>
     </ion-list-header>
     <ion-item>

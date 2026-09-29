@@ -13,8 +13,8 @@ export class PassengerAccountPage {
   protected readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
-  logout(): void {
-    this.auth.logout();
-    this.router.navigateByUrl('/auth/welcome', { replaceUrl: true });
+  async logout(): Promise<void> {
+    await this.auth.logout(); // revokes the token on the server, then forgets it on the phone
+    await this.router.navigateByUrl('/auth/welcome', { replaceUrl: true });
   }
 }

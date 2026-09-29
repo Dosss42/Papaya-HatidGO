@@ -5,6 +5,6 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <p>Logged in as: {{ auth.currentUser()?.name }}</p>
+  <p>Logged in as: {{ auth.currentUser()?.full_name }} ({{ auth.currentUser()?.phone }})</p>
   <ion-button expand="block" color="medium" (click)="logout()">Logout</ion-button>
 </ion-content>

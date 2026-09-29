@@ -1,0 +1,53 @@
+// Auth form screens: a calm reading column under the white toolbar.
+// Component-scoped (each page @use's this file), built from the world tokens.
+
+.auth-form {
+  padding: 0 4px calc(env(safe-area-inset-bottom) + 24px);
+
+  &__lead {
+    margin: 4px 0 22px;
+    font-size: 1.05rem;
+    line-height: 1.45;
+    color: var(--hg-ink-soft);
+  }
+
+  &__divider {
+    height: 0;
+    margin: 18px 0;
+    border-top: 2px solid var(--hg-line);
+  }
+
+  &__dev {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 28px;
+    padding: 12px;
+    border: 2px dashed var(--hg-line);
+    border-radius: 12px;
+    font-size: 1rem;
+    color: var(--hg-ink-soft);
+
+    span {
+      width: 100%;
+    }
+
+    button {
+      min-height: 44px;
+      padding: 0 12px;
+      border: 1px solid var(--hg-field-line);
+      border-radius: 10px;
+      background: transparent;
+      color: var(--hg-ink);
+      font: inherit;
+    }
+  }
+}
+
+.auth-steps {
+  margin: 0 0 18px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--hg-ink-soft);
+}

@@ -1,0 +1,86 @@
+// Get Started: the logo and name in the open upper area, the two ways forward in the thumb zone.
+
+.welcome__layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: calc(env(safe-area-inset-top) + 24px) 20px calc(env(safe-area-inset-bottom) + 24px);
+}
+
+.welcome__brand {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+  // Signature moment: the logo and name settle in once.
+  animation: welcome-rise 500ms cubic-bezier(0.16, 1, 0.3, 1) 80ms both;
+}
+
+.welcome__disc {
+  display: grid;
+  place-items: center;
+  width: 232px;
+  height: 232px;
+  margin-bottom: 8px;
+  border-radius: 50%;
+  background: var(--hg-orange-tint);
+}
+
+.welcome__name {
+  margin: 0;
+  font-size: clamp(2rem, 11vw, 2.5rem); // ~40px, fits one line on a 360dp phone
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.welcome__papaya {
+  color: var(--hg-orange);
+}
+
+.welcome__hatidgo {
+  color: var(--hg-green);
+}
+
+.welcome__line {
+  margin: 0;
+  max-width: 22ch;
+  text-wrap: balance;
+  font-size: 1.15rem;
+  line-height: 1.4;
+  color: var(--hg-ink-soft);
+}
+
+.welcome__actions {
+  display: grid;
+  gap: 14px;
+  padding-top: 24px;
+}
+
+.welcome__dev {
+  display: block;
+  padding: 8px;
+  text-align: center;
+  font-size: 1rem;
+  color: var(--hg-ink-soft);
+}
+
+@keyframes welcome-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome__brand {
+    animation: none;
+  }
+}

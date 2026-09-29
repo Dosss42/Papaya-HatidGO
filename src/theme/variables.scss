@@ -1,2 +1,77 @@
-// For information on how to create your own theme, please refer to:
-// https://ionicframework.com/docs/theming/
+// Papaya HatidGo visual world: the user's mockup look (white, papaya orange, leaf green),
+// rebuilt for older users. Direction contract: .impeccable/surfaces/src-app-features-auth.md
+//
+// Contrast (checked, WCAG): white on orange 5.2:1 · ink on white 17.8:1 · soft ink on white 7.9:1
+// · green on white 5.1:1 · error on white 6.6:1. The bright papaya (#F57C00) is 2.7:1 with white,
+// so it lives only inside the logo artwork, never behind or as text.
+
+// ---------- The one scheme: white (read outdoors, in the sun) ----------
+:root {
+  --hg-ground: #ffffff; // screen background
+  --hg-surface: #f7f3ee; // warm off-white: fields, cards
+  --hg-line: #d8cfc6; // hairlines and card borders (decorative)
+  --hg-field-line: #8a7f77; // field borders: 3.9:1, meets the 3:1 rule for controls
+  --hg-orange: #c2410c; // deep papaya: primary buttons, links (carries white text)
+  --hg-orange-pressed: #9a3412;
+  --hg-orange-tint: #fff1e6; // selected cards, the logo disc
+  --hg-papaya: #f57c00; // bright papaya: logo artwork only
+  --hg-green: #2e7d32; // papaya leaf: wordmark, success, selected check
+  --hg-green-tint: #e8f5e9;
+  --hg-ink: #1c1714; // reading text
+  --hg-ink-soft: #5a4f47; // secondary text (tinted from ink, never gray)
+  --hg-on-orange: #ffffff;
+  --hg-alert: #b42318; // errors only, always with a mark
+  --hg-alert-ground: #fef0ee;
+  --hg-focus: #1c1714; // focus ring: ink, 17:1 on white (orange would vanish on orange buttons)
+
+  --hg-radius: 16px;
+  --hg-font: 'Atkinson Hyperlegible Next', 'Roboto', sans-serif;
+
+  // Ionic tokens mapped from the world
+  --ion-font-family: var(--hg-font);
+  --ion-background-color: var(--hg-ground);
+  --ion-background-color-rgb: 255, 255, 255;
+  --ion-text-color: var(--hg-ink);
+  --ion-text-color-rgb: 28, 23, 20;
+  --ion-toolbar-background: var(--hg-ground);
+  --ion-toolbar-color: var(--hg-ink);
+  --ion-tab-bar-background: var(--hg-ground);
+  --ion-tab-bar-color: var(--hg-ink-soft);
+  --ion-tab-bar-color-selected: var(--hg-orange);
+  --ion-item-background: transparent;
+  --ion-placeholder-color: var(--hg-ink-soft);
+
+  --ion-color-primary: #c2410c;
+  --ion-color-primary-rgb: 194, 65, 12;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #9a3412;
+  --ion-color-primary-tint: #c8541f;
+
+  --ion-color-success: #2e7d32;
+  --ion-color-success-rgb: 46, 125, 50;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-success-contrast-rgb: 255, 255, 255;
+  --ion-color-success-shade: #286e2c;
+  --ion-color-success-tint: #438a47;
+
+  --ion-color-danger: #b42318;
+  --ion-color-danger-rgb: 180, 35, 24;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade: #9e1f15;
+  --ion-color-danger-tint: #bc392f;
+
+  --ion-color-medium: #5a4f47;
+  --ion-color-medium-rgb: 90, 79, 71;
+  --ion-color-medium-contrast: #ffffff;
+  --ion-color-medium-contrast-rgb: 255, 255, 255;
+  --ion-color-medium-shade: #4f463e;
+  --ion-color-medium-tint: #6b6159;
+
+  color-scheme: light;
+}
+
+// No dark scheme: the pinned look is white, and Android battery saver would otherwise switch
+// low-battery phones (outdoors, in the sun) to a dark app. A night mode can return later as an
+// explicit user setting.

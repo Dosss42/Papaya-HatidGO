@@ -14,7 +14,9 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/angular';
+import { ApiHealthResult, ApiHealthService } from '../../../../core/services/api-health.service';
 import { AppLifecycleService } from '../../../../core/services/app-lifecycle.service';
+import { environment } from '../../../../../environments/environment';
 import { LocationService } from '../../../../core/services/location.service';
 import { NetworkService } from '../../../../core/services/network.service';
 import { LocationError } from '../../../../shared/models/location.model';
@@ -48,6 +50,11 @@ export class DiagnosticsPage implements OnDestroy {
   protected readonly location = inject(LocationService);
   protected readonly network = inject(NetworkService);
   private readonly lifecycle = inject(AppLifecycleService);
+  private readonly apiHealth = inject(ApiHealthService);
+
+  protected readonly apiUrl = environment.apiUrl;
+  protected readonly apiResult = signal<ApiHealthResult | null>(null);
+  protected readonly apiChecking = signal(false);
 
   protected readonly busy = signal(false);
   protected readonly lastError = signal<LocationError | null>(null);
@@ -90,6 +97,14 @@ export class DiagnosticsPage implements OnDestroy {
     } catch (err) {
       this.lastError.set(LocationError.from(err));
     }
+  }
+
+  async checkApi(): Promise<void> {
+    this.apiChecking.set(true);
+    const result = await this.apiHealth.check();
+    this.apiResult.set(result);
+    this.apiChecking.set(false);
+    this.addLog(`API: ${result.reachable ? 'OK' : 'FAILED'} (HTTP ${result.status}, ${result.latencyMs} ms)`);
   }
 
   async stopWatch(): Promise<void> {

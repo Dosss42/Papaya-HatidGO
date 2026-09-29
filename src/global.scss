@@ -1,13 +1,12 @@
 /*
  * App Global CSS
  * ----------------------------------------------------------------------------
- * Put style rules here that you want to apply globally. These styles are for
- * the entire app and not just one component. Additionally, this file can be
- * used as an entry point to import other CSS/Sass files to be included in the
- * output CSS.
- * For more information on global stylesheets, visit the documentation:
- * https://ionicframework.com/docs/layout/global-stylesheets
+ * Ionic's required CSS, the self-hosted fonts, and the Papaya HatidGo world
+ * (tokens: theme/variables.scss · shared components: theme/world.scss).
  */
+
+/* World components (Sass @use must come before other rules). */
+@use "./theme/world";
 
 /* Core CSS required for Ionic components to work properly */
 @import "@ionic/angular/css/core.css";
@@ -25,13 +24,44 @@
 @import "@ionic/angular/css/text-transformation.css";
 @import "@ionic/angular/css/flex-utils.css";
 
-/**
- * Ionic Dark Mode
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
+/*
+ * No dark mode: the app is always white (see theme/variables.scss). Ionic dark.system.css stays out.
  */
 
-/* @import "@ionic/angular/css/palettes/dark.always.css"; */
-/* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import '@ionic/angular/css/palettes/dark.system.css';
+/*
+ * Fonts, self-hosted (bundled into the app: work offline, no third-party requests).
+ * Atkinson Hyperlegible Next: designed for low-vision readers (I/l/1 and O/0 never confused).
+ */
+@import "@fontsource/atkinson-hyperlegible-next/400.css";
+@import "@fontsource/atkinson-hyperlegible-next/700.css";
+@import "@fontsource/atkinson-hyperlegible-next/800.css";
+
+
+/* Base: large, legible reading text for older users (never below 16px anywhere). */
+html {
+  font-size: 18px;
+}
+
+body {
+  font-family: var(--hg-font);
+  color: var(--hg-ink);
+  background: var(--hg-ground);
+  -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums; // fares, phone numbers, codes line up like a price board
+}
+
+/* Browser surfaces carry the world too. */
+::selection {
+  background: var(--hg-orange);
+  color: var(--hg-on-orange);
+}
+
+input,
+textarea {
+  caret-color: var(--hg-orange);
+}
+
+:focus-visible {
+  outline: 3px solid var(--hg-focus);
+  outline-offset: 3px;
+}

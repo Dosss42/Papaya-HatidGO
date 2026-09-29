@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-29T00:00:00Z",
+  "title": "Design System: Papaya HatidGo",
+  "extensions": {
+    "colorMeta": {
+      "ground": { "role": "neutral", "displayName": "White Ground", "canonical": "#ffffff", "tonalRamp": ["#262626", "#474747", "#6b6b6b", "#8f8f8f", "#b3b3b3", "#d6d6d6", "#f0f0f0", "#ffffff"] },
+      "surface": { "role": "neutral", "displayName": "Warm Field", "canonical": "#f7f3ee", "tonalRamp": ["#2a2520", "#4a433c", "#6d655d", "#918880", "#b5ada5", "#d8d0c8", "#ede7e0", "#f7f3ee"] },
+      "line": { "role": "neutral", "displayName": "Hairline", "canonical": "#d8cfc6", "tonalRamp": ["#2b241e", "#4b423a", "#6e645a", "#92877d", "#b5aba1", "#d8cfc6", "#ebe5df", "#f7f3ee"] },
+      "field-line": { "role": "neutral", "displayName": "Field Line", "canonical": "#8a7f77", "tonalRamp": ["#221d19", "#3f3833", "#5f5650", "#8a7f77", "#a69c94", "#c4bbb4", "#e0d9d3", "#f5f1ee"] },
+      "papaya-deep": { "role": "primary", "displayName": "Deep Papaya", "canonical": "#c2410c", "tonalRamp": ["#3b1204", "#6a2207", "#9a3412", "#c2410c", "#e0662f", "#f59a6b", "#fcc9a8", "#fff1e6"] },
+      "papaya-deep-pressed": { "role": "primary", "displayName": "Ripe Papaya Pressed", "canonical": "#9a3412", "tonalRamp": ["#3b1204", "#6a2207", "#9a3412", "#c2410c", "#e0662f", "#f59a6b", "#fcc9a8", "#fff1e6"] },
+      "papaya-tint": { "role": "primary", "displayName": "Papaya Tint", "canonical": "#fff1e6", "tonalRamp": ["#3b1204", "#6a2207", "#9a3412", "#c2410c", "#e0662f", "#f59a6b", "#fcc9a8", "#fff1e6"] },
+      "papaya-bright": { "role": "primary", "displayName": "Bright Papaya (logo only)", "canonical": "#f57c00", "tonalRamp": ["#3d1f00", "#6b3600", "#a35200", "#d66b00", "#f57c00", "#ffa24d", "#ffcc99", "#fff0e0"] },
+      "leaf-green": { "role": "secondary", "displayName": "Papaya Leaf", "canonical": "#2e7d32", "tonalRamp": ["#0d2a0f", "#1b5e20", "#2e7d32", "#43a047", "#66bb6a", "#a5d6a7", "#c8e6c9", "#e8f5e9"] },
+      "leaf-tint": { "role": "secondary", "displayName": "Leaf Tint", "canonical": "#e8f5e9", "tonalRamp": ["#0d2a0f", "#1b5e20", "#2e7d32", "#43a047", "#66bb6a", "#a5d6a7", "#c8e6c9", "#e8f5e9"] },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#1c1714", "tonalRamp": ["#1c1714", "#3a322c", "#5a4f47", "#7a6e65", "#9b8f86", "#bdb2a9", "#ddd4cc", "#f7f3ee"] },
+      "ink-soft": { "role": "neutral", "displayName": "Soft Ink", "canonical": "#5a4f47", "tonalRamp": ["#1c1714", "#3a322c", "#5a4f47", "#7a6e65", "#9b8f86", "#bdb2a9", "#ddd4cc", "#f7f3ee"] },
+      "on-orange": { "role": "neutral", "displayName": "On Orange", "canonical": "#ffffff", "tonalRamp": ["#262626", "#474747", "#6b6b6b", "#8f8f8f", "#b3b3b3", "#d6d6d6", "#f0f0f0", "#ffffff"] },
+      "alert": { "role": "error", "displayName": "Alert", "canonical": "#b42318", "tonalRamp": ["#3a0b07", "#6b150e", "#9e1f15", "#b42318", "#d9493d", "#f08a80", "#f9c6c0", "#fef0ee"] },
+      "alert-ground": { "role": "error", "displayName": "Alert Ground", "canonical": "#fef0ee", "tonalRamp": ["#3a0b07", "#6b150e", "#9e1f15", "#b42318", "#d9493d", "#f08a80", "#f9c6c0", "#fef0ee"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "The wordmark on Get Started only (Papaya in Deep Papaya, HatidGo in Papaya Leaf)." },
+      "headline": { "displayName": "Headline", "purpose": "One page heading per screen." },
+      "title": { "displayName": "Title", "purpose": "Button labels, role card names; typed field text at 400." },
+      "body": { "displayName": "Body", "purpose": "Notices, hints, notes. Tabular numerals app-wide." },
+      "lead": { "displayName": "Lead", "purpose": "One calm soft-ink line under a heading." },
+      "label": { "displayName": "Label", "purpose": "Field labels, step counters, field errors." }
+    },
+    "contrast": [
+      { "pair": "#ffffff on #c2410c", "ratio": "5.18:1", "use": "primary button label" },
+      { "pair": "#1c1714 on #ffffff", "ratio": "17.8:1", "use": "reading text, focus ring" },
+      { "pair": "#5a4f47 on #ffffff", "ratio": "7.9:1", "use": "secondary text, placeholders" },
+      { "pair": "#2e7d32 on #ffffff", "ratio": "5.13:1", "use": "wordmark, success marks" },
+      { "pair": "#b42318 on #ffffff", "ratio": "6.6:1", "use": "errors" },
+      { "pair": "#8a7f77 on #ffffff", "ratio": "3.9:1", "use": "control borders (3:1 rule)" },
+      { "pair": "#f57c00 with #ffffff", "ratio": "2.7:1", "use": "logo artwork only; never text or behind text" }
+    ],
+    "shadows": [],
+    "focus": [
+      { "name": "focus-ring", "value": "outline: 3px solid #1c1714; outline-offset: 3px", "purpose": "All :focus-visible; ink so it shows on orange buttons." }
+    ],
+    "motion": [
+      { "name": "ease-settle", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Button press scale (160ms) and the logo rise." },
+      { "name": "press", "value": "transform 160ms ease-settle, background-color 160ms ease-out; scale(0.98)", "purpose": "Button pressed feedback." },
+      { "name": "logo-rise", "value": "500ms ease-settle 80ms; translateY(16px) + opacity 0 to rest", "purpose": "Get Started logo and name settle in once." },
+      { "name": "reduced-motion", "value": "prefers-reduced-motion: reduce -> transition: none; animation: none", "purpose": "Always respected." }
+    ],
+    "breakpoints": [
+      { "name": "name-pair", "value": "400px", "purpose": "First/last name fields sit side by side at and above this width." },
+      { "name": "column", "value": "34rem", "purpose": "Max reading column width." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one next action on the screen. Exactly one per screen.",
+      "html": "<button class=\"ds-btn-primary\">Magsimula</button>",
+      "css": ".ds-btn-primary { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 60px; padding: 0 20px; border: 0; border-radius: 16px; background: #c2410c; color: #ffffff; font-family: 'Atkinson Hyperlegible Next', Roboto, sans-serif; font-size: 20px; font-weight: 700; line-height: 1.2; cursor: pointer; transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1), background-color 160ms ease-out; } .ds-btn-primary:active { background: #9a3412; transform: scale(0.98); } .ds-btn-primary:focus-visible { outline: 3px solid #1c1714; outline-offset: 3px; }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "The second way forward, same size, quieter.",
+      "html": "<button class=\"ds-btn-outline\">May account na ako</button>",
+      "css": ".ds-btn-outline { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 60px; padding: 0 20px; border: 0; border-radius: 16px; background: #ffffff; color: #c2410c; box-shadow: inset 0 0 0 2px #c2410c; font-family: 'Atkinson Hyperlegible Next', Roboto, sans-serif; font-size: 20px; font-weight: 700; cursor: pointer; transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1), background-color 160ms ease-out; } .ds-btn-outline:active { background: #fff1e6; transform: scale(0.98); } .ds-btn-outline:focus-visible { outline: 3px solid #1c1714; outline-offset: 3px; }"
+    },
+    {
+      "name": "Text Button",
+      "kind": "button",
+      "refersTo": "button-text",
+      "description": "Underlined link action that stays a 56px touch target.",
+      "html": "<button class=\"ds-btn-text\">Nakalimutan ang password?</button>",
+      "css": ".ds-btn-text { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 56px; padding: 0 20px; border: 0; background: transparent; color: #c2410c; font-family: 'Atkinson Hyperlegible Next', Roboto, sans-serif; font-size: 20px; font-weight: 700; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 5px; cursor: pointer; } .ds-btn-text:focus-visible { outline: 3px solid #1c1714; outline-offset: 3px; }"
+    },
+    {
+      "name": "Field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "Persistent label, optional hint, 60px input, one marked error line.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field__label\">Mobile number</span><input class=\"ds-field__input\" type=\"tel\" placeholder=\"hal. 0917 123 4567\"><span class=\"ds-field__error\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 512 512\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M256 48C141 48 48 141 48 256s93 208 208 208 208-93 208-208S371 48 256 48zm0 319a20 20 0 1 1 0-40 20 20 0 0 1 0 40zm22-204-6 128h-32l-6-128z\"/></svg>Ilagay ang mobile number mo.</span></label>",
+      "css": ".ds-field { display: grid; gap: 6px; margin-bottom: 20px; font-family: 'Atkinson Hyperlegible Next', Roboto, sans-serif; } .ds-field__label { font-size: 18px; font-weight: 700; color: #1c1714; } .ds-field__input { min-height: 60px; padding: 0 12px 0 16px; border: 2px solid #8a7f77; border-radius: 16px; background: #f7f3ee; color: #1c1714; font: inherit; font-size: 20px; caret-color: #c2410c; } .ds-field__input::placeholder { color: #5a4f47; opacity: 1; } .ds-field__input:focus { outline: none; border-color: #c2410c; } .ds-field__error { display: flex; gap: 6px; align-items: flex-start; font-size: 18px; font-weight: 700; color: #b42318; }"
+    },
+    {
+      "name": "Role Card",
+      "kind": "chip",
+      "refersTo": "role-card-selected",
+      "description": "Two-way choice card; selected = 3px orange border, tint, and a green check mark.",
+      "html": "<div class=\"ds-role\"><button class=\"ds-role__card\">Pasahero</button><button class=\"ds-role__card ds-role__card--on\"><svg class=\"ds-role__check\" width=\"26\" height=\"26\" viewBox=\"0 0 512 512\" aria-hidden=\"true\"><circle cx=\"256\" cy=\"256\" r=\"208\" fill=\"#2e7d32\"/><path d=\"M352 176 217 336l-57-64\" fill=\"none\" stroke=\"#fff\" stroke-width=\"32\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg><svg width=\"36\" height=\"36\" viewBox=\"40 56 464 464\" aria-hidden=\"true\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"32\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M64 336V176a32 32 0 0 1 32-32h160v192H64\"/><path d=\"M112 200h96v64h-96z\"/><path d=\"M256 288h96l40-96\"/><path d=\"M368 176h56\"/><path d=\"M392 192l40 192\"/><circle cx=\"144\" cy=\"384\" r=\"48\"/><circle cx=\"432\" cy=\"384\" r=\"48\"/></g></svg><span>Driver</span></button></div>",
+      "css": ".ds-role { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; } .ds-role__card { position: relative; display: grid; justify-items: center; align-content: center; gap: 6px; min-height: 104px; padding: 16px 8px; border: 2px solid #8a7f77; border-radius: 16px; background: #f7f3ee; color: #1c1714; font-family: 'Atkinson Hyperlegible Next', Roboto, sans-serif; font-size: 20px; font-weight: 700; cursor: pointer; transition: background-color 160ms ease-out, border-color 160ms ease-out; } .ds-role__card--on { border: 3px solid #c2410c; background: #fff1e6; } .ds-role__card--on svg:not(.ds-role__check) { color: #c2410c; } .ds-role__check { position: absolute; top: 8px; right: 8px; } .ds-role__card:focus-visible { outline: 3px solid #1c1714; outline-offset: 3px; }"
+    },
+    {
+      "name": "Alert Notice",
+      "kind": "custom",
+      "refersTo": "notice-alert",
+      "description": "Form-level error, always led by an icon.",
+      "html": "<p class=\"ds-notice ds-notice--alert\" role=\"alert\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 512 512\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M256 48C141 48 48 141 48 256s93 208 208 208 208-93 208-208S371 48 256 48zm0 319a20 20 0 1 1 0-40 20 20 0 0 1 0 40zm22-204-6 128h-32l-6-128z\"/></svg><span>Mali ang email o password.</span></p>",
+      "css": ".ds-notice { display: flex; align-items: flex-start; gap: 10px; margin: 0 0 20px; padding: 14px 16px; border-radius: 16px; font-family: 'Atkinson Hyperlegible Next', Roboto, sans-serif; font-size: 18px; line-height: 1.4; } .ds-notice svg { flex: none; } .ds-notice--alert { background: #fef0ee; color: #b42318; box-shadow: inset 0 0 0 2px #b42318; }"
+    },
+    {
+      "name": "OK Notice",
+      "kind": "custom",
+      "refersTo": "notice-ok",
+      "description": "Success or info message with a green mark.",
+      "html": "<p class=\"ds-notice-ok\" role=\"status\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 512 512\" aria-hidden=\"true\"><circle cx=\"256\" cy=\"256\" r=\"208\" fill=\"#2e7d32\"/><path d=\"M352 176 217 336l-57-64\" fill=\"none\" stroke=\"#fff\" stroke-width=\"32\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg><span>Napalitan na ang password mo.</span></p>",
+      "css": ".ds-notice-ok { display: flex; align-items: flex-start; gap: 10px; margin: 0 0 20px; padding: 14px 16px; border-radius: 16px; background: #e8f5e9; color: #1c1714; box-shadow: inset 0 0 0 2px #2e7d32; font-family: 'Atkinson Hyperlegible Next', Roboto, sans-serif; font-size: 18px; line-height: 1.4; } .ds-notice-ok svg { flex: none; }"
+    },
+    {
+      "name": "Toolbar",
+      "kind": "nav",
+      "refersTo": "toolbar",
+      "description": "White form-screen toolbar with only a 52px ink back button; the heading lives in the page.",
+      "html": "<nav class=\"ds-toolbar\"><button class=\"ds-toolbar__back\" aria-label=\"Bumalik\"><svg width=\"28\" height=\"28\" viewBox=\"0 0 512 512\" aria-hidden=\"true\"><path d=\"M244 400 100 256l144-144M120 256h292\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"48\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></button></nav>",
+      "css": ".ds-toolbar { display: flex; align-items: center; min-height: 60px; background: #ffffff; color: #1c1714; } .ds-toolbar__back { display: grid; place-items: center; min-width: 52px; min-height: 52px; border: 0; background: transparent; color: #1c1714; cursor: pointer; } .ds-toolbar__back:focus-visible { outline: 3px solid #1c1714; outline-offset: 3px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Readable in the Noon Sun",
+    "overview": "A calm, bright, white ride app that an older tricycle driver can read outdoors, one-handed, on a low-end Android phone. The look is the user's own mockup, pinned as canon: clean white screens, deep papaya orange for the one next action, papaya-leaf green for the brand and for success, and the tricycle + papaya-leaf logo. Everything else is white space and big near-black text.\n\nDensity is low on purpose. One family (Atkinson Hyperlegible Next, built for low-vision readers) sits on an 18px root, so the smallest text is 18px and nothing is ever below 16px. Controls are full-width, soft-cornered and tall (56px minimum, 60px for buttons and fields). Labels stay above their fields, examples are written in Taglish as \"hal. ...\", and every state carries a mark as well as a color.\n\nThe app is always white. There is no dark scheme: the status bar always uses dark icons (Capacitor StatusBar Style.Light), and a phone in dark theme still shows the white app. A night mode may return later only as an explicit in-app user setting, never by following the system.",
+    "keyCharacteristics": [
+      "White ground, warm off-white fields, near-black warm ink.",
+      "One orange primary action per screen; green only for brand and success.",
+      "Atkinson Hyperlegible Next 400/700/800, 18px root, never below 16px.",
+      "Tall, full-width, 16px-radius controls; flat, no shadows.",
+      "States shown by mark plus color; Taglish copy with \"hal.\" examples."
+    ],
+    "rules": [
+      { "name": "The One Orange Rule", "body": "Each screen has exactly one filled orange button: the next action. Every other way forward is an outline or text button.", "section": "colors" },
+      { "name": "The Bright Papaya Stays in the Logo Rule", "body": "#f57c00 appears only inside the logo artwork. Any orange behind or as text is #c2410c.", "section": "colors" },
+      { "name": "The Always White Rule", "body": "The app does not follow the system dark theme. Status bar icons are always dark.", "section": "colors" },
+      { "name": "The 16px Floor Rule", "body": "No text anywhere is below 16px. The 18px root makes 1rem the working minimum.", "section": "typography" },
+      { "name": "The Labels Stay Rule", "body": "Every field has a visible label above it; placeholders are only Taglish examples (\"hal. 0917 123 4567\", \"hal. juan@gmail.com\", \"hal. 0917 123 4567 o email\"), never the label.", "section": "typography" },
+      { "name": "The Flat Sun Rule", "body": "Nothing floats. A boundary is a 2px line (3px on a selected card), never a shadow.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do give every screen exactly one Deep Papaya (#c2410c) filled button for the next action; later screens (booking map, active ride, driver home) follow this too.",
+      "Do make every control at least 56px tall and every button and field 60px.",
+      "Do keep all text at 16px or larger (1rem = 18px root).",
+      "Do put a visible label above every field and use placeholders only for Taglish \"hal.\" examples.",
+      "Do show every state by a mark plus color: error icon plus red, check mark plus orange border, success icon plus green border.",
+      "Do write copy in plain Taglish.",
+      "Do honor prefers-reduced-motion: transitions and the logo rise turn off.",
+      "Do keep the app white and the status bar icons dark, whatever the phone theme."
+    ],
+    "donts": [
+      "Don't use Bright Papaya (#f57c00) for text or behind text (2.7:1 with white).",
+      "Don't signal a state with color alone.",
+      "Don't use Hairline (#d8cfc6) as a control border; controls use Field Line (#8a7f77).",
+      "Don't add drop shadows; boundaries are 2px lines.",
+      "Don't follow the system dark theme; a night mode may come back only as an explicit user setting.",
+      "Don't set inputmode=\"email\" on a field that also accepts a mobile number."
+    ]
+  }
+}

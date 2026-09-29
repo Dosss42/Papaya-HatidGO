@@ -1,14 +1,24 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Welcome</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content [fullscreen]="true" class="welcome">
+  <div class="welcome__layout hg-column">
+    <header class="welcome__brand">
+      <div class="welcome__disc">
+        <app-brand-logo [size]="168" />
+      </div>
 
-<ion-content class="ion-padding">
-  <p>Papaya HatidGo (Phase 2 skeleton)</p>
-  <ion-button expand="block" routerLink="/auth/login">Go to Login</ion-button>
+      <h1 class="welcome__name">
+        <span class="welcome__papaya">Papaya</span>&ngsp;<span class="welcome__hatidgo">HatidGo</span>
+      </h1>
 
-  @if (isDev) {
-    <ion-button expand="block" fill="clear" routerLink="/dev/diagnostics">Diagnostics (dev)</ion-button>
-  }
+      <p class="welcome__line">Tricycle sa Papaya, isang tap lang.</p>
+    </header>
+
+    <nav class="welcome__actions" aria-label="Magsimula o mag-login">
+      <a class="hg-button hg-button--primary" routerLink="/auth/register">Magsimula</a>
+      <a class="hg-button hg-button--outline" routerLink="/auth/login">May account na ako</a>
+
+      @if (isDev) {
+        <a class="welcome__dev" routerLink="/dev/diagnostics">Diagnostics (dev)</a>
+      }
+    </nav>
+  </div>
 </ion-content>

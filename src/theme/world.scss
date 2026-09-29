@@ -1,0 +1,211 @@
+// Papaya HatidGo shared components: buttons, fields, notices, page heads, the white toolbar.
+// Built from the tokens in variables.scss. Touch targets: every control is at least 56px tall
+// (Material asks 48dp; older users get more).
+
+// ---------- Page head (big heading + one calm line under it) ----------
+.hg-head {
+  margin: 8px 0 24px;
+
+  &__title {
+    margin: 0;
+    font-size: 1.75rem; // ~32px
+    font-weight: 800;
+    line-height: 1.15;
+    color: var(--hg-ink);
+    text-wrap: balance;
+  }
+
+  &__lead {
+    margin: 8px 0 0;
+    font-size: 1.05rem;
+    line-height: 1.45;
+    color: var(--hg-ink-soft);
+  }
+}
+
+// ---------- Buttons ----------
+.hg-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 60px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: var(--hg-radius);
+  font-family: var(--hg-font);
+  font-size: 1.1rem; // ~20px
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+  text-align: center;
+  text-wrap: balance; // at large system text, wrap into even lines
+  cursor: pointer;
+  transition:
+    transform 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 160ms ease-out;
+
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: default;
+  }
+
+  // The one next action on the screen.
+  &--primary {
+    background: var(--hg-orange);
+    color: var(--hg-on-orange);
+
+    &:active:not(:disabled) {
+      background: var(--hg-orange-pressed);
+    }
+  }
+
+  // The second way forward (same size, quieter).
+  &--outline {
+    background: var(--hg-ground);
+    color: var(--hg-orange);
+    box-shadow: inset 0 0 0 2px var(--hg-orange);
+
+    &:active:not(:disabled) {
+      background: var(--hg-orange-tint);
+    }
+  }
+
+  // Text-only link action, still a full-height touch target.
+  &--text {
+    background: transparent;
+    color: var(--hg-orange);
+    min-height: 56px;
+    text-decoration: underline;
+    text-underline-offset: 5px;
+    text-decoration-thickness: 2px;
+  }
+
+  ion-spinner {
+    width: 22px;
+    height: 22px;
+    color: currentColor;
+  }
+}
+
+// ---------- Fields (persistent labels, big targets, one clear error per field) ----------
+.hg-field {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 20px;
+
+  &__label {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--hg-ink);
+  }
+
+  &__hint {
+    font-size: 1rem;
+    line-height: 1.4;
+    color: var(--hg-ink-soft);
+  }
+
+  ion-input,
+  ion-input[fill='outline'] {
+    --background: var(--hg-surface);
+    --color: var(--hg-ink);
+    --placeholder-color: var(--hg-ink-soft);
+    --placeholder-opacity: 1;
+    --padding-start: 16px;
+    --padding-end: 12px;
+    --border-radius: var(--hg-radius);
+    --border-width: 2px;
+    --border-color: var(--hg-field-line);
+    --highlight-color-focused: var(--hg-orange);
+    --highlight-color-valid: var(--hg-field-line);
+    --highlight-color-invalid: var(--hg-alert);
+    min-height: 60px;
+    font-size: 1.1rem; // ~20px typed text
+  }
+
+  &__error {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--hg-alert);
+
+    ion-icon {
+      flex: none;
+      margin-top: 2px;
+      font-size: 20px;
+    }
+  }
+}
+
+// ---------- A marked message (errors/info always carry an icon, never color alone) ----------
+.hg-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0 0 20px;
+  padding: 14px 16px;
+  border-radius: var(--hg-radius);
+  font-size: 1rem;
+  line-height: 1.4;
+
+  ion-icon {
+    flex: none;
+    font-size: 24px;
+  }
+
+  &--alert {
+    background: var(--hg-alert-ground);
+    color: var(--hg-alert);
+    box-shadow: inset 0 0 0 2px var(--hg-alert);
+  }
+
+  &--ok {
+    background: var(--hg-green-tint);
+    color: var(--hg-ink);
+    box-shadow: inset 0 0 0 2px var(--hg-green);
+
+    ion-icon {
+      color: var(--hg-green);
+    }
+  }
+}
+
+// ---------- The white toolbar on form screens (back button only; the heading is in the page) ----------
+ion-toolbar.hg-toolbar {
+  --background: var(--hg-ground);
+  --color: var(--hg-ink);
+  --min-height: 60px;
+  --border-width: 0;
+
+  ion-back-button {
+    --color: var(--hg-ink);
+    --min-height: 52px;
+    --min-width: 52px;
+    --icon-font-size: 28px;
+  }
+}
+
+// Reading column: comfortable measure on every phone width.
+.hg-column {
+  max-width: 34rem;
+  margin: 0 auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hg-button {
+    transition: none;
+  }
+}
+
+// Keep a Taglish compound (Mag-login, Mag-book) on one line: never split at its hyphen.
+.hg-nowrap {
+  white-space: nowrap;
+}

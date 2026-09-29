@@ -1,0 +1,84 @@
+@use '../../auth-form';
+
+// Role choice: two big cards. Chosen = orange border + tint + check mark (mark AND color, never color alone).
+.role-plates {
+  margin: 0 0 24px;
+  padding: 0;
+  border: 0;
+
+  &__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  &__note {
+    margin: 12px 0 0;
+    font-size: 1rem;
+    line-height: 1.45;
+    color: var(--hg-ink-soft);
+  }
+}
+
+.role-plate {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  min-height: 104px;
+  padding: 16px 8px;
+  border: 2px solid var(--hg-field-line);
+  border-radius: var(--hg-radius);
+  background: var(--hg-surface);
+  color: var(--hg-ink);
+  font-family: var(--hg-font);
+  cursor: pointer;
+  transition:
+    background-color 160ms ease-out,
+    border-color 160ms ease-out;
+
+  &__icon {
+    font-size: 36px;
+    color: var(--hg-ink);
+  }
+
+  &__title {
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+
+  &__check {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 26px;
+    color: var(--hg-green);
+  }
+
+  &--on {
+    border: 3px solid var(--hg-orange);
+    background: var(--hg-orange-tint);
+
+    .role-plate__icon {
+      color: var(--hg-orange);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .role-plate {
+    transition: none;
+  }
+}
+
+// First and last name side by side when the phone is wide enough.
+.name-pair {
+  display: grid;
+  grid-template-columns: 1fr;
+  column-gap: 12px;
+
+  @media (min-width: 400px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}

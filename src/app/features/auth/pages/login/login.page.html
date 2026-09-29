@@ -1,11 +1,73 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Login</ion-title>
+<ion-header class="ion-no-border">
+  <ion-toolbar class="hg-toolbar">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/auth/welcome" text="" />
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <p>Temporary test login (Phase 2). The real form arrives in Phase 5.</p>
-  <ion-button expand="block" (click)="loginAs('passenger')">Login as Passenger (test)</ion-button>
-  <ion-button expand="block" (click)="loginAs('driver')">Login as Driver (test)</ion-button>
+  <form class="hg-column auth-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <header class="hg-head">
+      <h1 class="hg-head__title">Mag-login</h1>
+      <p class="hg-head__lead">Gamitin ang email o mobile number ng account mo.</p>
+    </header>
+
+    @if (error(); as e) {
+      @if (!e.fieldErrors['login'] && !e.fieldErrors['password']) {
+        <p class="hg-notice hg-notice--alert" role="alert">
+          <ion-icon name="alert-circle" aria-hidden="true" />
+          <span>{{ e.message }}</span>
+        </p>
+      }
+    }
+
+    <label class="hg-field">
+      <span class="hg-field__label">Email o mobile number</span>
+      <ion-input
+        formControlName="login"
+        fill="outline"
+        type="text"
+        autocomplete="username"
+        placeholder="hal. 0917 123 4567 o email"
+        [clearInput]="true"
+      />
+      @if (fieldError('login'); as msg) {
+        <span class="hg-field__error"><ion-icon name="alert-circle" aria-hidden="true" />{{ msg }}</span>
+      }
+    </label>
+
+    <label class="hg-field">
+      <span class="hg-field__label">Password</span>
+      <ion-input formControlName="password" fill="outline" type="password" autocomplete="current-password">
+        <ion-input-password-toggle slot="end" color="medium" showLabel="Ipakita ang password" hideLabel="Itago ang password" />
+      </ion-input>
+      @if (fieldError('password'); as msg) {
+        <span class="hg-field__error"><ion-icon name="alert-circle" aria-hidden="true" />{{ msg }}</span>
+      }
+    </label>
+
+    <button class="hg-button hg-button--primary" type="submit" [disabled]="submitting()">
+      @if (submitting()) {
+        <ion-spinner name="crescent" aria-hidden="true" /> Nagla-login…
+      } @else {
+        Mag-login
+      }
+    </button>
+
+    <a class="hg-button hg-button--text" routerLink="/auth/forgot-password">Nakalimutan ang password?</a>
+
+    <div class="auth-form__divider" aria-hidden="true"></div>
+
+    <a class="hg-button hg-button--outline" routerLink="/auth/register">Wala pang account? Gumawa</a>
+
+    @if (isDev) {
+      <div class="auth-form__dev">
+        <span>Dev accounts · password "password"</span>
+        <button type="button" (click)="fillDev('pasahero1@example.test')">Maria · pasahero</button>
+        <button type="button" (click)="fillDev('driver1@example.test')">Juan · driver</button>
+        <button type="button" (click)="fillDev('admin@example.test')">Ana · admin</button>
+      </div>
+    }
+  </form>
 </ion-content>
