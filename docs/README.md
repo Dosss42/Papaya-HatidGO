@@ -16,6 +16,7 @@ Index of the project's design and development documents. Each phase leaves a rec
 | [phase-4-laravel-mysql.md](phase-4-laravel-mysql.md) | Phase 4 plan + normalization record + report: Laravel 13 + MySQL 8.4 |
 | [phase-5-authentication.md](phase-5-authentication.md) | Phase 5 plan + report: auth API, secure token storage, first real design (mockup look), Taglish validation |
 | [../DESIGN.md](../DESIGN.md) | The design system (colors, type, buttons, fields, rules every screen follows), recorded from the Phase 5 build |
+| [phase-6-sqlite.md](phase-6-sqlite.md) | Phase 6 plan + report: local SQLite (local user, settings), offline start, versioned schema, token-in-log fix |
 | [IMPECCABLE-GUIDE.md](IMPECCABLE-GUIDE.md) | When and how to use the impeccable design skill |
 | [design-briefs/passenger-booking.md](design-briefs/passenger-booking.md) | ✅ Confirmed UX brief: passenger booking flow (pickup → destination → choose ride + Mag-book) |
 | [design-briefs/active-ride.md](design-briefs/active-ride.md) | ✅ Confirmed UX brief: passenger active ride screen (searching → arriving → trip/Balikan legs → pay + rate) |
@@ -34,7 +35,7 @@ Phase numbers follow [phase-0-analysis.md § M](phase-0-analysis.md#m-developmen
 | 3 | Capacitor native proof (GPS, network, lifecycle) | ✅ Done (core verified; phone error-case tests T4–T9 pending) |
 | 4 | Laravel + MySQL (WAMP MySQL 8.4, repo papaya-hatidgo-api) | ✅ Done (30 tables, 34 integrity tests, health endpoint) |
 | 5 | Authentication (+ first impeccable build → DESIGN.md) | ✅ Done (Sanctum auth, secure token, Get Started + auth screens, DESIGN.md, 41 API tests) |
-| 6 | SQLite | ⏳ |
+| 6 | SQLite (`local_user`, `app_settings`, offline start) | ✅ Done (versioned schema, offline start, returning users → Login, CRUD tested on the Redmi, 33 unit tests) |
 | 7 | Driver requirements + vehicles | ⏳ |
 | 8 | Subscriptions + PayMongo (test mode) | ⏳ |
 | 9 | Ride state machine + matching (backend) | ⏳ |

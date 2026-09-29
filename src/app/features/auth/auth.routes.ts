@@ -1,4 +1,6 @@
+import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 
 // Routes for the auth area. Mounted at /auth by app.routes.ts,
 // so 'login' here becomes the URL /auth/login.
@@ -20,5 +22,5 @@ export const AUTH_ROUTES: Routes = [
     loadComponent: () =>
       import('./pages/forgot-password/forgot-password.page').then((m) => m.ForgotPasswordPage),
   },
-  { path: '', redirectTo: 'welcome', pathMatch: 'full' },
+  { path: '', redirectTo: () => inject(AuthService).guestStartUrl(), pathMatch: 'full' },
 ];

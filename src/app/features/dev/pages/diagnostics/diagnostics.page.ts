@@ -14,15 +14,29 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/angular';
+import { AppSettingsRepository } from '../../../../core/database/app-settings.repository';
+import { LocalUser, LocalUserRepository } from '../../../../core/database/local-user.repository';
+import { SQLiteService } from '../../../../core/database/sqlite.service';
 import { ApiHealthResult, ApiHealthService } from '../../../../core/services/api-health.service';
 import { AppLifecycleService } from '../../../../core/services/app-lifecycle.service';
 import { environment } from '../../../../../environments/environment';
 import { LocationService } from '../../../../core/services/location.service';
 import { NetworkService } from '../../../../core/services/network.service';
 import { LocationError } from '../../../../shared/models/location.model';
+import { CrudStep, runSettingsCrud } from './sqlite-check';
+
+/** What the SQLite card shows. */
+interface DbInfo {
+  engine: string;
+  schemaVersion: number | null;
+  appliedAt: string | null;
+  localUser: LocalUser | null;
+  settings: { key: string; value: string }[] | null; // null = can't list (browser memory mode)
+}
 
 /**
- * DEV ONLY (Phase 3): proves GPS, network and app lifecycle work on a real phone.
+ * DEV ONLY (Phase 3, SQLite card Phase 6): proves GPS, network, app lifecycle and the local
+ * database work on a real phone.
  * The route exists only in development builds (see app.routes.ts).
  */
 @Component({
@@ -51,6 +65,9 @@ export class DiagnosticsPage implements OnDestroy {
   protected readonly network = inject(NetworkService);
   private readonly lifecycle = inject(AppLifecycleService);
   private readonly apiHealth = inject(ApiHealthService);
+  private readonly sqlite = inject(SQLiteService);
+  private readonly settings = inject(AppSettingsRepository);
+  private readonly localUser = inject(LocalUserRepository);
 
   protected readonly apiUrl = environment.apiUrl;
   protected readonly apiResult = signal<ApiHealthResult | null>(null);
@@ -60,6 +77,11 @@ export class DiagnosticsPage implements OnDestroy {
   protected readonly lastError = signal<LocationError | null>(null);
   protected readonly watchUpdates = signal(0);
   protected readonly log = signal<string[]>([]);
+
+  protected readonly dbInfo = signal<DbInfo | null>(null);
+  protected readonly dbError = signal<string | null>(null);
+  protected readonly crudSteps = signal<CrudStep[] | null>(null);
+  protected readonly dbBusy = signal(false);
 
   constructor() {
     // Each effect re-runs when the signals it reads change, so every pause/resume
@@ -72,6 +94,43 @@ export class DiagnosticsPage implements OnDestroy {
         this.network.online() ? `Network: online (${this.network.connectionType()})` : 'Network: OFFLINE',
       ),
     );
+    void this.refreshDb();
+  }
+
+  /** Reads what is in the local database right now. */
+  async refreshDb(): Promise<void> {
+    this.dbError.set(null);
+    try {
+      const localUser = await this.localUser.get();
+      if (!this.sqlite.isAvailable) {
+        this.dbInfo.set({ engine: 'memory (browser)', schemaVersion: null, appliedAt: null, localUser, settings: null });
+        return;
+      }
+      const [version] = await this.sqlite.query<{ version: number; applied_at: string }>(
+        'SELECT version, applied_at FROM schema_version ORDER BY version DESC LIMIT 1',
+      );
+      const settings = await this.sqlite.query<{ key: string; value: string }>(
+        'SELECT key, value FROM app_settings ORDER BY key',
+      );
+      this.dbInfo.set({
+        engine: `Android SQLite · ${SQLiteService.DB_NAME}`,
+        schemaVersion: version?.version ?? 0,
+        appliedAt: version?.applied_at ?? null,
+        localUser,
+        settings,
+      });
+    } catch (err) {
+      this.dbError.set(err instanceof Error ? err.message : String(err));
+    }
+  }
+
+  async runCrud(): Promise<void> {
+    this.dbBusy.set(true);
+    const steps = await runSettingsCrud(this.settings);
+    this.crudSteps.set(steps);
+    this.addLog(`SQLite CRUD: ${steps.every((s) => s.ok) ? 'PASS' : 'FAIL'} (${steps.filter((s) => s.ok).length}/${steps.length})`);
+    await this.refreshDb();
+    this.dbBusy.set(false);
   }
 
   async getLocation(): Promise<void> {

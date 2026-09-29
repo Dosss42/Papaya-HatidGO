@@ -7,4 +7,7 @@
 <ion-content class="ion-padding">
   <p>Logged in as: {{ auth.currentUser()?.full_name }} ({{ auth.currentUser()?.phone }})</p>
   <ion-button expand="block" color="medium" (click)="logout()">Logout</ion-button>
+  @if (isDev) {
+    <ion-button expand="block" fill="clear" routerLink="/dev/diagnostics">Diagnostics (dev)</ion-button>
+  }
 </ion-content>

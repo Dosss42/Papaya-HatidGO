@@ -85,6 +85,64 @@
 
   <ion-list>
     <ion-list-header>
+      <ion-label>SQLite (Phase 6)</ion-label>
+    </ion-list-header>
+    @if (dbError(); as e) {
+      <ion-item color="danger">
+        <ion-label class="ion-text-wrap"><strong>Database error</strong><br />{{ e }}</ion-label>
+      </ion-item>
+    }
+    @if (dbInfo(); as db) {
+      <ion-item>
+        <ion-label>Storage</ion-label>
+        <ion-note slot="end">{{ db.engine }}</ion-note>
+      </ion-item>
+      @if (db.schemaVersion !== null) {
+        <ion-item>
+          <ion-label class="ion-text-wrap">Schema version</ion-label>
+          <ion-note slot="end">{{ db.schemaVersion }} · since {{ db.appliedAt | date: 'MMM d, HH:mm' }}</ion-note>
+        </ion-item>
+      }
+      <ion-item>
+        <ion-label>local_user</ion-label>
+        <ion-note slot="end" class="ion-text-wrap">
+          @if (db.localUser; as u) {
+            {{ u.user.full_name }} ({{ u.user.role }}) · {{ u.lastSyncedAt | date: 'HH:mm:ss' }}
+          } @else {
+            (empty)
+          }
+        </ion-note>
+      </ion-item>
+      @if (db.settings; as rows) {
+        <ion-item>
+          <ion-label>app_settings</ion-label>
+          <ion-note slot="end" class="ion-text-wrap">
+            @for (row of rows; track row.key) {
+              {{ row.key }} = {{ row.value }}<br />
+            } @empty {
+              (empty)
+            }
+          </ion-note>
+        </ion-item>
+      }
+    }
+    @for (step of crudSteps(); track step.label) {
+      <ion-item [color]="step.ok ? 'success' : 'danger'">
+        <ion-label class="ion-text-wrap">
+          <strong>{{ step.ok ? '✔' : '✖' }} {{ step.label }}</strong><br />
+          {{ step.detail }}
+        </ion-label>
+      </ion-item>
+    }
+  </ion-list>
+
+  <ion-button expand="block" fill="outline" (click)="runCrud()" [disabled]="dbBusy()">
+    {{ dbBusy() ? 'Testing…' : 'Run CRUD test' }}
+  </ion-button>
+  <ion-button expand="block" fill="clear" (click)="refreshDb()">Refresh database view</ion-button>
+
+  <ion-list>
+    <ion-list-header>
       <ion-label>Network</ion-label>
     </ion-list-header>
     <ion-item>

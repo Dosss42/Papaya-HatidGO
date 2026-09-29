@@ -1,13 +1,16 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>driver-home</ion-title>
+<ion-header class="ion-no-border">
+  <ion-toolbar class="hg-toolbar">
+    <ion-title>Home</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">driver-home</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  <div class="hg-column">
+    <app-offline-notice />
+
+    <header class="hg-head">
+      <h1 class="hg-head__title">Kumusta, {{ firstName() }}!</h1>
+      <p class="hg-head__lead">Dito mo makikita ang mga booking. (Darating sa Phase 11.)</p>
+    </header>
+  </div>
 </ion-content>

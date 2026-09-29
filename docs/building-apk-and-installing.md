@@ -2,11 +2,13 @@
 
 A step-by-step checklist for:
 
+0. [**Quick start: from opening VS Code to seeing your design change on the phone**](#0-quick-start-from-a-design-change-to-the-phone) (read this first)
 1. [Opening the existing project in VS Code again](#1-open-the-existing-project-in-vs-code)
 2. [Running Papaya HatidGo on the phone over USB](#2-daily-run-papaya-hatidgo-on-the-phone-usb) (what you'll do most days)
 3. [Building a real `.apk` file](#3-build-an-apk-file) that you can copy to a phone and install
 4. [Turning another web app into an Android app](#4-turn-another-app-into-an-installable-android-app) (for your other app)
-5. [Troubleshooting](#5-troubleshooting)
+5. [**Creating a brand-new app from scratch to APK**](#5-create-a-brand-new-app-from-scratch-to-apk)
+6. [Troubleshooting](#6-troubleshooting)
 
 The one-time setup (JDK 21, Android SDK, `JAVA_HOME`, `ANDROID_HOME`, `adb` on PATH) is already done. See [environment-setup.md](environment-setup.md). If something breaks, run the health check in section 7 of that file first.
 
@@ -28,6 +30,97 @@ The one-time setup (JDK 21, Android SDK, `JAVA_HOME`, `ANDROID_HOME`, `adb` on P
 ```
 
 **Rule to remember:** every time you change code in `src/`, you must **build + sync again**. Otherwise the phone keeps running the old `www/`.
+
+---
+
+## 0. Quick start: from a design change to the phone
+
+Use this when you've changed a design in VS Code (HTML, SCSS, a component) and want to see it in the app on your phone.
+
+### What "build" and "sync" mean
+| Word | What it does | Command |
+|---|---|---|
+| **Build** | Compiles your Angular code in `src/` into plain HTML/CSS/JS in the `www/` folder | `ng build --configuration development` |
+| **Sync** | Copies `www/` into the Android project (`android/app/src/main/assets/public`) and updates native plugins | `npx cap sync android` |
+| **Both at once** | The project shortcut in `package.json` | **`npm run android:dev`** |
+
+Android Studio **never reads `src/` directly**. It only sees the copy that sync puts into `android/`. That's why a change you save in VS Code doesn't show up in Android Studio until you build and sync.
+
+### Step 1: Open the project in VS Code
+**File → Open Recent → `papaya-hatid-go`**, or in a terminal:
+```powershell
+cd "C:\Users\ron28\Desktop\Papaya HatidGO\papaya-hatid-go"
+code .
+```
+
+### Step 2: Open the terminal in VS Code
+**Terminal → New Terminal** (`` Ctrl+` ``). Check that it's in the right folder. The prompt should end in `papaya-hatid-go>`.
+
+First time on this PC, or after `git pull` changed `package.json`:
+```powershell
+npm install
+```
+
+### Step 3: Change the design and check it in the browser (optional but fastest)
+```powershell
+npm start
+```
+Open `http://localhost:4200`. Press **F12**, then `Ctrl+Shift+M` for phone size. Edit your files and press **Ctrl+S**. The browser refreshes by itself.
+When you're happy with the design, stop the server with `Ctrl+C` in the terminal.
+
+### Step 4: Build and sync
+```powershell
+npm run android:dev
+```
+Wait until you see:
+```text
+✔ Copying web assets from www to android\app\src\main\assets\public
+✔ Updating Android plugins
+[info] Sync finished
+```
+If the build shows a red **ERROR**, fix that file first. Nothing gets copied to Android until the build passes.
+
+### Step 5: Plug in the phone
+Connect it by USB (USB debugging on), then check:
+```powershell
+adb devices
+```
+The phone should be listed as `device`.
+
+### Step 6: Put it on the phone
+**Option A: Android Studio**
+```powershell
+npx cap open android
+```
+Choose your phone at the top and press the green **▶ Run**. If Android Studio is already open, just press **▶ Run** again. You don't need to reopen it.
+
+**Option B: terminal only**
+```powershell
+npx cap run android
+```
+Pick your phone and press Enter.
+
+### Step 7: If the screen uses the backend (login, register, …)
+Start Laravel in the `papaya-hatidgo-api` window (`php artisan serve`, with WAMP running), then:
+```powershell
+npm run adb:reverse
+```
+
+### Every change after that
+You don't repeat Steps 1–2. Just:
+```text
+edit + Ctrl+S  →  npm run android:dev  →  ▶ Run (or npx cap run android)
+```
+
+### When do I need build + sync?
+| You changed… | Need `npm run android:dev`? |
+|---|---|
+| `.html`, `.scss`, `.ts` in `src/` (designs, pages, logic) | ✅ Yes, then ▶ Run |
+| Images/fonts in `src/assets/` | ✅ Yes, then ▶ Run |
+| Installed a new Capacitor plugin (`npm install @capacitor/...`) | ✅ Yes (sync registers the plugin), then ▶ Run |
+| `capacitor.config.ts` | ✅ Yes, then ▶ Run |
+| Files inside `android/` (e.g. `AndroidManifest.xml`) | ❌ No. Just ▶ Run. |
+| Laravel backend code | ❌ No. The server picks it up on its own. |
 
 ---
 
@@ -258,7 +351,143 @@ Then each update is just `npm run android` → **▶ Run**.
 
 ---
 
-## 5. Troubleshooting
+## 5. Create a brand-new app from scratch to APK
+
+Use this when you start a **completely new** app (nothing exists yet) and want it on your phone as an APK. It uses the same tools as Papaya HatidGo: **Ionic + Angular + Capacitor**.
+
+You only need the PC setup once. Papaya HatidGo already did it, so on this PC you can skip to Step 1.
+| Needed | Check with | Expected |
+|---|---|---|
+| Node.js (LTS) | `node -v` | `v22.x` or newer |
+| JDK 21 | `java -version` | `21.x` |
+| Android Studio + SDK | `echo $env:ANDROID_HOME` | `C:\Users\ron28\AppData\Local\Android\Sdk` |
+| adb | `adb version` | `Android Debug Bridge ...` |
+
+### Step 1: Install the Ionic CLI (once per PC)
+```powershell
+npm install -g @ionic/cli
+ionic -v
+```
+The Ionic CLI is the program that creates new Ionic projects. `-g` installs it for the whole PC, not just one project.
+
+### Step 2: Create the project
+Go to the folder where you keep projects, then create the app:
+```powershell
+cd "C:\Users\ron28\Desktop"
+ionic start my-new-app tabs --type=angular --capacitor
+```
+| Part | Meaning |
+|---|---|
+| `my-new-app` | Folder name. Lowercase, no spaces. |
+| `tabs` | Starter template: `tabs`, `sidemenu`, or `blank` |
+| `--type=angular` | Use Angular (same as Papaya HatidGo) |
+| `--capacitor` | Include Capacitor so it can become an Android app |
+
+If it asks questions:
+- **Standalone or NgModules?** → **Standalone** (what Papaya HatidGo uses)
+- **Create a free Ionic account?** → **No**
+
+It downloads packages. Wait until it says `Your Ionic app is ready!`
+
+### Step 3: Open it in VS Code
+```powershell
+cd my-new-app
+code .
+```
+From now on, use the terminal **inside VS Code** (`` Ctrl+` ``).
+
+### Step 4: Run it in the browser first
+```powershell
+npm start
+```
+Open `http://localhost:4200` (or the address it prints). You should see the starter tabs. Press `Ctrl+C` to stop it.
+
+### Step 5: Set the app name and App ID (before adding Android)
+Open `capacitor.config.ts` and change:
+```ts
+appId: 'com.yourname.mynewapp',   // unique, lowercase, reverse-domain; hard to change later
+appName: 'My New App',            // the name shown under the icon
+webDir: 'www',
+```
+Set these **now**. The App ID is copied into the Android project in the next step, and the phone uses it to tell apps apart.
+
+### Step 6: Add Android
+```powershell
+npm install @capacitor/android
+npm run build
+npx cap add android
+```
+- `npm install @capacitor/android` downloads Capacitor's Android part.
+- `npm run build` creates `www/`. `cap add` needs it to exist.
+- `npx cap add android` creates the `android/` folder, a real Android Studio project.
+
+### Step 7: Add a build-and-sync shortcut
+In `package.json` → `"scripts"`, add:
+```json
+"android:dev": "ng build --configuration development && npx cap sync android"
+```
+Now every update is one command: `npm run android:dev` (same as Papaya HatidGo).
+
+### Step 8: Run it on the phone
+Plug in the phone (USB debugging on, see [section 2, Step 1](#step-1-prepare-the-phone-only-once-per-phone)), then:
+```powershell
+adb devices
+npm run android:dev
+npx cap open android
+```
+In Android Studio:
+1. Wait for the Gradle sync.
+2. **File → Settings → Build, Execution, Deployment → Build Tools → Gradle → Gradle JDK = `JAVA_HOME` (21)**. Do this once per project.
+3. Choose your phone → **▶ Run**.
+
+The app opens on the phone.
+
+### Step 9: Build the APK file
+```powershell
+npm run android:dev
+cd android
+.\gradlew assembleDebug
+cd ..
+explorer android\app\build\outputs\apk\debug
+```
+Your file is **`app-debug.apk`**. Install it with `adb install -r android\app\build\outputs\apk\debug\app-debug.apk`, or send it to the phone and tap it ([section 3, Step 4](#step-4-install-the-apk)).
+
+### Step 10 (optional): Your own app icon and splash screen
+1. Make a **1024 × 1024 PNG** icon and save it as `assets/icon.png` in the project root (the folder with `package.json`, not `src/assets`).
+2. Optional: `assets/splash.png` (2732 × 2732) and `assets/splash-dark.png`.
+3. Run:
+   ```powershell
+   npm install -D @capacitor/assets
+   npx capacitor-assets generate --android
+   ```
+4. Build the APK again (Step 9).
+
+### Step 11: Save it with Git
+```powershell
+git init
+git add .
+git commit -m "Create new app with Ionic + Capacitor Android"
+```
+The starter's `.gitignore` already skips `node_modules/`, `www/`, and the Android build folders.
+
+### Summary: from nothing to APK
+```text
+npm install -g @ionic/cli                          (once per PC)
+ionic start my-new-app tabs --type=angular --capacitor
+cd my-new-app; code .
+edit capacitor.config.ts  (appId + appName)
+npm install @capacitor/android
+npm run build
+npx cap add android
+npm run android:dev
+npx cap open android → Gradle JDK 21 → ▶ Run      (test on phone)
+cd android; .\gradlew assembleDebug; cd ..         (make the APK)
+→ android\app\build\outputs\apk\debug\app-debug.apk
+```
+
+---
+
+## 6. Troubleshooting
 
 | Problem | Likely cause | Fix |
 |---|---|---|

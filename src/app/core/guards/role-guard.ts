@@ -5,7 +5,7 @@ import { Role } from '../../shared/models/user.model';
 
 /**
  * Guard factory: roleGuard('driver') returns a guard that only lets drivers in.
- * Anyone else is sent to their own home (or the welcome page).
+ * Anyone else is sent to their own home (or, logged out, to Get Started / Login).
  */
 export function roleGuard(allowed: Role): CanActivateFn {
   return () => {
@@ -15,6 +15,6 @@ export function roleGuard(allowed: Role): CanActivateFn {
     if (auth.role() === allowed) {
       return true;
     }
-    return router.parseUrl(auth.homeUrlFor(auth.role()) ?? '/auth/welcome');
+    return router.parseUrl(auth.homeUrlFor(auth.role()) ?? auth.guestStartUrl());
   };
 }

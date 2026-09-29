@@ -1,13 +1,17 @@
+import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth-guard';
 import { guestGuard } from './core/guards/guest-guard';
 import { roleGuard } from './core/guards/role-guard';
+import { AuthService } from './core/services/auth.service';
 import { environment } from '../environments/environment';
 
 // Top level only: which AREA of the app, and who may enter it.
 // Guards are UX only; Laravel enforces real security (Phase 5+).
 export const routes: Routes = [
-  { path: '', redirectTo: 'auth/welcome', pathMatch: 'full' },
+  // Start: Get Started the first time on this phone, Login afterwards (Phase 6). A logged-in
+  // user is then sent on to their home by guestGuard.
+  { path: '', redirectTo: () => inject(AuthService).guestStartUrl(), pathMatch: 'full' },
   {
     path: 'auth',
     canActivate: [guestGuard],
