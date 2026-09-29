@@ -1,0 +1,13 @@
+// Book preview: map area on top, then step 1 of the booking sheet (design-briefs/passenger-booking.md).
+
+.hg-map-placeholder p {
+  margin: 6px 0 0;
+  font-size: 1rem;
+}
+
+.book__step {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--hg-ink-soft);
+}

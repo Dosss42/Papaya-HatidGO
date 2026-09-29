@@ -209,3 +209,230 @@ ion-toolbar.hg-toolbar {
 .hg-nowrap {
   white-space: nowrap;
 }
+
+// =====================================================================================
+// App shell (design shell pass, Phase 7): tab bar, tab pages, empty states, account parts
+// =====================================================================================
+
+// ---------- Bottom tab bar ----------
+// Selected = orange label + icon AND a 4px orange bar on top (a mark, never color alone).
+ion-tab-bar.hg-tabs {
+  --background: var(--hg-ground);
+  --border: 0;
+  --color: var(--hg-ink-soft);
+  --color-selected: var(--hg-orange);
+  height: calc(68px + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: inset 0 2px 0 var(--hg-line); // hairline divider (decorative)
+
+  ion-tab-button {
+    --padding-top: 6px;
+    --padding-bottom: 6px;
+    position: relative;
+    min-height: 64px;
+    font-family: var(--hg-font);
+
+    ion-icon {
+      font-size: 28px;
+    }
+
+    ion-label {
+      margin-top: 4px;
+      font-size: 1rem; // 16px floor holds: 18px root
+      font-weight: 700;
+    }
+
+    &.tab-selected::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 20%;
+      right: 20%;
+      height: 4px;
+      border-radius: 0 0 4px 4px;
+      background: var(--hg-orange);
+    }
+  }
+}
+
+// ---------- Tab pages (no toolbar: the heading lives in the page) ----------
+ion-content.hg-tab-page {
+  --padding-top: calc(env(safe-area-inset-top) + 20px);
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-bottom: 24px;
+}
+
+// ---------- A small status tag: word first, icon optional (never color alone) ----------
+.hg-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--hg-surface);
+  box-shadow: inset 0 0 0 2px var(--hg-line);
+  color: var(--hg-ink-soft);
+  font-size: 1rem;
+  font-weight: 700;
+  white-space: nowrap;
+
+  ion-icon {
+    font-size: 18px;
+  }
+}
+
+// ---------- Empty state (a real screen for someone with no data yet) ----------
+.hg-empty {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  margin: 48px auto 0;
+  max-width: 22rem;
+  text-align: center;
+
+  &__icon {
+    display: grid;
+    place-items: center;
+    width: 96px;
+    height: 96px;
+    margin-bottom: 8px;
+    border-radius: 50%;
+    background: var(--hg-orange-tint);
+    color: var(--hg-orange);
+    font-size: 48px;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--hg-ink);
+  }
+
+  &__text {
+    margin: 0;
+    font-size: 1.05rem;
+    line-height: 1.45;
+    color: var(--hg-ink-soft);
+    text-wrap: balance;
+  }
+}
+
+// ---------- Profile card (Account) ----------
+.hg-profile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 18px 16px;
+  border-radius: var(--hg-radius);
+  background: var(--hg-surface);
+
+  &__avatar {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--hg-orange-tint);
+    color: var(--hg-orange);
+    font-size: 1.4rem;
+    font-weight: 800;
+  }
+
+  &__name {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--hg-ink);
+    overflow-wrap: anywhere;
+  }
+
+  &__meta {
+    margin: 2px 0 0;
+    font-size: 1rem;
+    line-height: 1.4;
+    color: var(--hg-ink-soft);
+    overflow-wrap: anywhere;
+  }
+}
+
+// ---------- Menu rows (Account): 64px, full width, divided by hairlines ----------
+.hg-menu {
+  margin: 0 0 24px;
+  padding: 0;
+  list-style: none;
+
+  &__title {
+    margin: 0 0 6px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--hg-ink-soft);
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    min-height: 64px;
+    padding: 8px 4px;
+    border: 0;
+    border-bottom: 2px solid var(--hg-line);
+    background: transparent;
+    color: var(--hg-ink);
+    font-family: var(--hg-font);
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-align: left;
+    text-decoration: none;
+
+    > ion-icon:first-child {
+      flex: none;
+      font-size: 26px;
+      color: var(--hg-ink-soft);
+    }
+
+    span.hg-menu__label {
+      flex: 1;
+    }
+
+    // A feature that isn't built yet: shown so the driver knows it's coming, but not tappable.
+    &--soon {
+      color: var(--hg-ink-soft);
+    }
+  }
+}
+
+// ---------- A map area that isn't a map yet (Book preview) ----------
+.hg-map-placeholder {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 26vh;
+  margin: 0 -16px 20px;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 47px, var(--hg-line) 47px 49px),
+    repeating-linear-gradient(90deg, transparent 0 47px, var(--hg-line) 47px 49px),
+    var(--hg-surface);
+  color: var(--hg-ink-soft);
+  text-align: center;
+
+  ion-icon {
+    font-size: 48px;
+    color: var(--hg-orange);
+  }
+}
+
+// ---------- Neutral information notice (e.g. "Preview pa lang ito.") ----------
+.hg-notice--info {
+  background: var(--hg-surface);
+  color: var(--hg-ink);
+  box-shadow: inset 0 0 0 2px var(--hg-field-line);
+
+  ion-icon {
+    color: var(--hg-ink-soft);
+  }
+}

@@ -1,13 +1,13 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>driver-rides</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="hg-tab-page">
+  <div class="hg-column">
+    <header class="hg-head">
+      <h1 class="hg-head__title">{{ 'rides.title' | t }}</h1>
+    </header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">driver-rides</ion-title>
-    </ion-toolbar>
-  </ion-header>
+    <app-empty-state
+      icon="receipt-outline"
+      [title]="'rides.emptyTitle' | t"
+      [text]="'rides.driverEmpty' | t"
+    />
+  </div>
 </ion-content>

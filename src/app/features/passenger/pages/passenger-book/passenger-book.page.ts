@@ -1,16 +1,22 @@
-import { Component, computed, inject } from '@angular/core';
-import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular';
-import { AuthService } from '../../../../core/services/auth.service';
+import { Component } from '@angular/core';
+import { IonContent, IonIcon, IonInput } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import { constructOutline, location } from 'ionicons/icons';
+import { TranslatePipe } from '../../../../core/i18n/t.pipe';
 import { OfflineNoticeComponent } from '../../../../shared/components/offline-notice/offline-notice.component';
 
-/** Placeholder home (the real screen comes later). Shows the saved name, also offline (Phase 6). */
+/**
+ * PREVIEW of booking step 1 (design-briefs/passenger-booking.md § 4), laid out in the DESIGN.md
+ * look. Nothing here works yet: the map and booking arrive in Phase 10.
+ */
 @Component({
   selector: 'app-passenger-book',
   templateUrl: './passenger-book.page.html',
   styleUrls: ['./passenger-book.page.scss'],
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, OfflineNoticeComponent],
+  imports: [IonContent, IonIcon, IonInput, OfflineNoticeComponent, TranslatePipe],
 })
 export class PassengerBookPage {
-  private readonly auth = inject(AuthService);
-  protected readonly firstName = computed(() => this.auth.currentUser()?.first_name ?? '');
+  constructor() {
+    addIcons({ location, constructOutline });
+  }
 }

@@ -1,16 +1,18 @@
 import { Component } from '@angular/core';
-import { IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel } from '@ionic/angular';
+import { IonIcon, IonLabel, IonTabBar, IonTabButton, IonTabs } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { homeOutline, timeOutline, walletOutline, personCircleOutline } from 'ionicons/icons';
+import { TranslatePipe } from '../../../../core/i18n/t.pipe';
+import { homeOutline, personCircleOutline, receiptOutline, walletOutline } from 'ionicons/icons';
 
+/** Driver area: Home · Biyahe · Kita · Account. */
 @Component({
   selector: 'app-driver-tabs',
   templateUrl: './driver-tabs.page.html',
   styleUrls: ['./driver-tabs.page.scss'],
-  imports: [IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel],
+  imports: [IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel, TranslatePipe],
 })
 export class DriverTabsPage {
   constructor() {
-    addIcons({ homeOutline, timeOutline, walletOutline, personCircleOutline });
+    addIcons({ homeOutline, receiptOutline, walletOutline, personCircleOutline });
   }
 }

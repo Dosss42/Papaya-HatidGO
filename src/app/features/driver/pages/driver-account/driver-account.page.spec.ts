@@ -1,4 +1,7 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { DriverAccountPage } from './driver-account.page';
 
 describe('DriverAccountPage', () => {
@@ -6,6 +9,10 @@ describe('DriverAccountPage', () => {
   let fixture: ComponentFixture<DriverAccountPage>;
 
   beforeEach(() => {
+    // The page uses links (router) and, through AuthService, HTTP: give it test versions.
+    TestBed.configureTestingModule({
+      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
+    });
     fixture = TestBed.createComponent(DriverAccountPage);
     component = fixture.componentInstance;
     fixture.detectChanges();

@@ -9,16 +9,38 @@
         <span class="welcome__papaya">Papaya</span>&ngsp;<span class="welcome__hatidgo">HatidGo</span>
       </h1>
 
-      <p class="welcome__line">Tricycle sa Papaya, isang tap lang.</p>
+      <p class="welcome__line">{{ 'welcome.tagline' | t }}</p>
     </header>
 
-    <nav class="welcome__actions" aria-label="Magsimula o mag-login">
-      <a class="hg-button hg-button--primary" routerLink="/auth/register">Magsimula</a>
-      <a class="hg-button hg-button--outline" routerLink="/auth/login">May account na ako</a>
+    @if (choosingLanguage()) {
+      <!-- New phone: the language comes first, asked in BOTH languages, so anyone can read it. -->
+      <section class="welcome__actions" aria-labelledby="lang-title">
+        <h2 id="lang-title" class="welcome__ask">Choose your language<br />Piliin ang wika</h2>
+        <div class="lang-cards">
+          <!-- Each language is named and described in ITSELF (standard for language pickers). -->
+          <button type="button" class="lang-card" lang="en" (click)="choose('en')">
+            <span class="lang-card__name">English</span>
+            <span class="lang-card__hint">All in English</span>
+          </button>
+          <button type="button" class="lang-card" lang="fil" (click)="choose('fil')">
+            <span class="lang-card__name">Taglish</span>
+            <span class="lang-card__hint">Tagalog na may English</span>
+          </button>
+        </div>
+      </section>
+    } @else {
+      <nav class="welcome__actions" [attr.aria-label]="'welcome.nav' | t">
+        <a class="hg-button hg-button--primary" routerLink="/auth/register">{{ 'welcome.start' | t }}</a>
+        <a class="hg-button hg-button--outline" routerLink="/auth/login">{{ 'welcome.haveAccount' | t }}</a>
+        <button type="button" class="welcome__lang" (click)="changeLanguage()">
+          <ion-icon name="language-outline" aria-hidden="true" />
+          {{ 'lang.setting' | t }}: {{ i18n.lang() === 'en' ? 'English' : 'Taglish' }}
+        </button>
 
-      @if (isDev) {
-        <a class="welcome__dev" routerLink="/dev/diagnostics">Diagnostics (dev)</a>
-      }
-    </nav>
+        @if (isDev) {
+          <a class="welcome__dev" routerLink="/dev/diagnostics">Diagnostics (dev)</a>
+        }
+      </nav>
+    }
   </div>
 </ion-content>

@@ -16,6 +16,8 @@ import { addIcons } from 'ionicons';
 import { alertCircle } from 'ionicons/icons';
 import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../core/services/auth.service';
+import { I18nService } from '../../../../core/i18n/i18n.service';
+import { TranslatePipe } from '../../../../core/i18n/t.pipe';
 import { ApiError } from '../../../../shared/utilities/api-error';
 import { clientError } from '../../../../shared/utilities/form-errors';
 
@@ -36,11 +38,13 @@ import { clientError } from '../../../../shared/utilities/form-errors';
     IonInputPasswordToggle,
     IonSpinner,
     IonToolbar,
+    TranslatePipe,
   ],
 })
 export class LoginPage {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly i18n = inject(I18nService);
 
   protected readonly form = inject(FormBuilder).nonNullable.group({
     login: ['', Validators.required], // email or mobile number
@@ -56,8 +60,9 @@ export class LoginPage {
   }
 
   protected fieldError(name: 'login' | 'password'): string | null {
-    const label = name === 'login' ? 'email o mobile number mo' : 'password mo';
-    return clientError(this.form.controls[name], label) ?? this.error()?.fieldErrors[name] ?? null;
+    const label = name === 'login' ? 'label.login' : 'label.password';
+    const t = this.i18n.t.bind(this.i18n);
+    return clientError(this.form.controls[name], label, t) ?? this.error()?.fieldErrors[name] ?? null;
   }
 
   async submit(): Promise<void> {

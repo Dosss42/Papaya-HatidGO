@@ -1,13 +1,40 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Account</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="hg-tab-page">
+  <div class="hg-column">
+    <header class="hg-head">
+      <h1 class="hg-head__title">{{ 'account.title' | t }}</h1>
+    </header>
 
-<ion-content class="ion-padding">
-  <p>Logged in as: {{ auth.currentUser()?.full_name }} ({{ auth.currentUser()?.phone }})</p>
-  <ion-button expand="block" color="medium" (click)="logout()">Logout</ion-button>
-  @if (isDev) {
-    <ion-button expand="block" fill="clear" routerLink="/dev/diagnostics">Diagnostics (dev)</ion-button>
-  }
+    <app-profile-card [user]="auth.currentUser()" />
+
+    <h2 class="hg-menu__title">{{ 'account.settings' | t }}</h2>
+    <ul class="hg-menu">
+      <li><app-language-row /></li>
+      <li class="hg-menu__row hg-menu__row--soon" aria-disabled="true">
+        <ion-icon name="tricycle" aria-hidden="true" />
+        <span class="hg-menu__label">{{ 'account.tricycle' | t }}</span>
+        <span class="hg-tag">{{ 'common.soon' | t }}</span>
+      </li>
+      <li class="hg-menu__row hg-menu__row--soon" aria-disabled="true">
+        <ion-icon name="document-text-outline" aria-hidden="true" />
+        <span class="hg-menu__label">{{ 'account.documents' | t }}</span>
+        <span class="hg-tag">{{ 'common.soon' | t }}</span>
+      </li>
+      <li class="hg-menu__row hg-menu__row--soon" aria-disabled="true">
+        <ion-icon name="card-outline" aria-hidden="true" />
+        <span class="hg-menu__label">{{ 'account.subscription' | t }}</span>
+        <span class="hg-tag">{{ 'common.soon' | t }}</span>
+      </li>
+      <li class="hg-menu__row hg-menu__row--soon" aria-disabled="true">
+        <ion-icon name="help-circle-outline" aria-hidden="true" />
+        <span class="hg-menu__label">{{ 'account.help' | t }}</span>
+        <span class="hg-tag">{{ 'common.soon' | t }}</span>
+      </li>
+    </ul>
+
+    <app-logout-button />
+
+    @if (isDev) {
+      <a class="hg-button hg-button--text" routerLink="/dev/diagnostics">Diagnostics (dev)</a>
+    }
+  </div>
 </ion-content>

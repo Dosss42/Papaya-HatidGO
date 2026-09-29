@@ -1,23 +1,28 @@
 import { Component, inject } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
-import { IonButton, IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular';
+import { RouterLink } from '@angular/router';
+import { IonContent, IonIcon } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import { cardOutline, documentTextOutline, helpCircleOutline } from 'ionicons/icons';
 import { AuthService } from '../../../../core/services/auth.service';
+import { TranslatePipe } from '../../../../core/i18n/t.pipe';
+import { LanguageRowComponent } from '../../../../shared/components/language-row/language-row.component';
+import { LogoutButtonComponent } from '../../../../shared/components/logout-button/logout-button.component';
+import { ProfileCardComponent } from '../../../../shared/components/profile-card/profile-card.component';
 import { environment } from '../../../../../environments/environment';
 
+/** Driver account: profile, settings rows (tricycle + documents become real in Phase 7, subscription in Phase 8), logout. */
 @Component({
   selector: 'app-driver-account',
   templateUrl: './driver-account.page.html',
   styleUrls: ['./driver-account.page.scss'],
-  imports: [IonButton, IonContent, IonHeader, IonTitle, IonToolbar, RouterLink],
+  imports: [IonContent, IonIcon, RouterLink, ProfileCardComponent, LogoutButtonComponent, LanguageRowComponent, TranslatePipe],
 })
 export class DriverAccountPage {
   protected readonly auth = inject(AuthService);
-  private readonly router = inject(Router);
   // Shows the dev-only diagnostics link; false in production builds.
   protected readonly isDev = !environment.production;
 
-  async logout(): Promise<void> {
-    await this.auth.logout(); // revokes the token on the server, then forgets it on the phone
-    await this.router.navigateByUrl(this.auth.guestStartUrl(), { replaceUrl: true }); // Login: this phone was used before
+  constructor() {
+    addIcons({ cardOutline, documentTextOutline, helpCircleOutline });
   }
 }

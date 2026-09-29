@@ -1,16 +1,31 @@
-<ion-header class="ion-no-border">
-  <ion-toolbar class="hg-toolbar">
-    <ion-title>Mag-book</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content class="ion-padding">
+<ion-content class="hg-tab-page">
   <div class="hg-column">
     <app-offline-notice />
 
+    <!-- The map (top of the screen in the booking brief). A plain area until the map arrives. -->
+    <div class="hg-map-placeholder" role="img" [attr.aria-label]="'book.mapHere' | t">
+      <div>
+        <ion-icon name="location" aria-hidden="true" />
+        <p>{{ 'book.mapHere' | t }}</p>
+      </div>
+    </div>
+
+    <p class="book__step">1 / 3</p>
     <header class="hg-head">
-      <h1 class="hg-head__title">Kumusta, {{ firstName() }}!</h1>
-      <p class="hg-head__lead">Dito ka magbu-book ng tricycle. (Darating sa Phase 10.)</p>
+      <h1 class="hg-head__title">{{ 'book.title' | t }}</h1>
+      <p class="hg-head__lead">{{ 'book.lead' | t }}</p>
     </header>
+
+    <label class="hg-field">
+      <span class="hg-field__label">{{ 'book.landmark' | t }}</span>
+      <ion-input fill="outline" [placeholder]="'book.landmarkPlaceholder' | t" [disabled]="true" />
+    </label>
+
+    <p class="hg-notice hg-notice--info" role="note">
+      <ion-icon name="construct-outline" aria-hidden="true" />
+      <span>{{ 'book.preview' | t }}</span>
+    </p>
+
+    <button class="hg-button hg-button--primary" type="button" disabled>{{ 'book.next' | t }}</button>
   </div>
 </ion-content>

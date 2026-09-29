@@ -3,29 +3,30 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { IonIcon, IonSpinner } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { cloudOfflineOutline } from 'ionicons/icons';
+import { TranslatePipe } from '../../../core/i18n/t.pipe';
 import { AuthService } from '../../../core/services/auth.service';
 
 /**
  * Shown while the app runs on the saved copy of the user (the API could not be reached at startup):
- * "Walang internet · huling update 2:15 PM" + "Subukan ulit". Hidden the rest of the time.
+ * "No internet · Last updated 2:15 PM" + "Try again". Hidden the rest of the time.
  */
 @Component({
   selector: 'app-offline-notice',
-  imports: [DatePipe, IonIcon, IonSpinner],
+  imports: [DatePipe, IonIcon, IonSpinner, TranslatePipe],
   template: `
     @if (auth.isOffline()) {
       <div class="hg-notice hg-notice--offline" role="status">
         <ion-icon name="cloud-offline-outline" aria-hidden="true" />
         <div class="offline__body">
-          <strong>Walang internet</strong>
+          <strong>{{ 'offline.title' | t }}</strong>
           @if (auth.lastSynced(); as at) {
-            <span>Huling update {{ at | date: (isToday() ? 'h:mm a' : 'MMM d, h:mm a') }}</span>
+            <span>{{ 'offline.lastUpdate' | t: { time: (at | date: (isToday() ? 'h:mm a' : 'MMM d, h:mm a')) ?? '' } }}</span>
           }
           <button class="hg-button hg-button--outline offline__retry" type="button" [disabled]="retrying()" (click)="retry()">
             @if (retrying()) {
-              <ion-spinner name="crescent" aria-hidden="true" /> Sinusubukan…
+              <ion-spinner name="crescent" aria-hidden="true" /> {{ 'common.trying' | t }}
             } @else {
-              Subukan ulit
+              {{ 'common.tryAgain' | t }}
             }
           </button>
         </div>

@@ -15,6 +15,8 @@ import {
 import { addIcons } from 'ionicons';
 import { alertCircle, checkmarkCircle, mailOutline } from 'ionicons/icons';
 import { AuthService } from '../../../../core/services/auth.service';
+import { I18nService } from '../../../../core/i18n/i18n.service';
+import { TranslatePipe } from '../../../../core/i18n/t.pipe';
 import { ApiError } from '../../../../shared/utilities/api-error';
 import { PASSWORD_RULE, clientError, passwordsMatch } from '../../../../shared/utilities/form-errors';
 
@@ -40,11 +42,13 @@ type Step = 'email' | 'code' | 'done';
     IonInputPasswordToggle,
     IonSpinner,
     IonToolbar,
+    TranslatePipe,
   ],
 })
 export class ForgotPasswordPage {
   private readonly auth = inject(AuthService);
   private readonly fb = inject(FormBuilder).nonNullable;
+  private readonly i18n = inject(I18nService);
 
   protected readonly step = signal<Step>('email');
   protected readonly submitting = signal(false);
@@ -69,19 +73,21 @@ export class ForgotPasswordPage {
   }
 
   protected emailError(): string | null {
-    return clientError(this.emailForm.controls.email, 'email mo') ?? this.error()?.fieldErrors['email'] ?? null;
+    const t = this.i18n.t.bind(this.i18n);
+    return clientError(this.emailForm.controls.email, 'label.email', t) ?? this.error()?.fieldErrors['email'] ?? null;
   }
 
   protected resetError(name: 'code' | 'password' | 'password_confirmation'): string | null {
     const control = this.resetForm.controls[name];
     if (name === 'password_confirmation' && control.touched && this.resetForm.errors?.['mismatch']) {
-      return 'Hindi magkapareho ang password.';
+      return this.i18n.t('error.mismatch');
     }
     if (name === 'code' && control.touched && control.errors?.['pattern']) {
-      return 'Ang code ay 6 na numero.';
+      return this.i18n.t('error.code');
     }
-    const label = name === 'code' ? '6-digit code' : name === 'password' ? 'password' : 'password ulit';
-    return clientError(control, label) ?? this.error()?.fieldErrors[name] ?? null;
+    const label = name === 'code' ? 'label.code' : name === 'password' ? 'label.password' : 'label.passwordAgain';
+    const t = this.i18n.t.bind(this.i18n);
+    return clientError(control, label, t, name === 'password') ?? this.error()?.fieldErrors[name] ?? null;
   }
 
   async sendCode(): Promise<void> {

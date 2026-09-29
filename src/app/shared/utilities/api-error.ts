@@ -1,4 +1,8 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { MessageKey } from '../../core/i18n/messages.en';
+
+/** I18nService.t, passed in so this stays a plain function. */
+type Translate = (key: MessageKey) => string;
 
 /**
  * Every API failure in ONE shape, matching the API's error format (phase-5 § 3):
@@ -8,17 +12,17 @@ import { HttpErrorResponse } from '@angular/common/http';
 export interface ApiError {
   status: number; // 0 = no response (no internet, server down, blocked)
   code: string; // e.g. INVALID_CREDENTIALS, VALIDATION_FAILED, NETWORK
-  message: string; // Taglish, safe to show to the user
+  message: string; // in the app's language (the API answers in it too), safe to show
   fieldErrors: Record<string, string>; // first message per field
 }
 
-export function toApiError(err: unknown): ApiError {
+export function toApiError(err: unknown, t: Translate): ApiError {
   if (err instanceof HttpErrorResponse) {
     if (err.status === 0) {
       return {
         status: 0,
         code: 'NETWORK',
-        message: 'Walang internet o hindi maabot ang server. Subukan ulit.',
+        message: t('error.network'),
         fieldErrors: {},
       };
     }
@@ -32,14 +36,14 @@ export function toApiError(err: unknown): ApiError {
     return {
       status: err.status,
       code: body.code ?? 'HTTP_ERROR',
-      message: body.message ?? 'May problema. Subukan ulit.',
+      message: body.message ?? t('error.unknown'),
       fieldErrors,
     };
   }
 
   if (err instanceof Error && err.name === 'TimeoutError') {
-    return { status: 0, code: 'TIMEOUT', message: 'Masyadong matagal sumagot ang server. Subukan ulit.', fieldErrors: {} };
+    return { status: 0, code: 'TIMEOUT', message: t('error.timeout'), fieldErrors: {} };
   }
 
-  return { status: 0, code: 'UNKNOWN', message: 'May problema. Subukan ulit.', fieldErrors: {} };
+  return { status: 0, code: 'UNKNOWN', message: t('error.unknown'), fieldErrors: {} };
 }

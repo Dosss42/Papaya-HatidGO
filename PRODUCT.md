@@ -45,7 +45,7 @@ A local, tricycle-specific hatid service for one real town (Papaya), not a gener
 - **Cash payment:** ride fares are paid in cash directly to the driver.
 - **Accountable drivers:** only drivers whose documents and vehicles are verified can operate.
 - **Maintenance subscriptions:** both drivers and passengers hold an active subscription that funds system maintenance, paid online in the app.
-- **Language:** the app speaks Filipino/Taglish.
+- **Language:** English or Taglish, chosen by the user (asked on first open, changeable in Account). Taglish is the default until someone chooses (decision 2026-09-29, Phase 7).
 
 ## Operating Context
 
@@ -166,7 +166,7 @@ A local, tricycle-specific hatid service for one real town (Papaya), not a gener
 ## Brand Commitments
 
 - **Name:** Papaya HatidGo ("hatid" means to bring or drop someone off).
-- **UI language:** Filipino/Taglish, written for local passengers and drivers.
+- **UI language:** English or Taglish (user setting; Taglish default), written for local passengers and drivers. Pure Tagalog was considered and left out: tech words have no natural Tagalog form and it would be a third copy of every text.
 - **Visual identity:** none exists yet (no logo or palette). The only asset is the default Ionic favicon.
 
 ## Evidence on Hand

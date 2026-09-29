@@ -1,16 +1,38 @@
-<ion-header class="ion-no-border">
-  <ion-toolbar class="hg-toolbar">
-    <ion-title>Home</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content class="ion-padding">
+<ion-content class="hg-tab-page">
   <div class="hg-column">
     <app-offline-notice />
 
     <header class="hg-head">
-      <h1 class="hg-head__title">Kumusta, {{ firstName() }}!</h1>
-      <p class="hg-head__lead">Dito mo makikita ang mga booking. (Darating sa Phase 11.)</p>
+      <p class="home__hello">{{ 'home.hello' | t: { name: firstName() } }}</p>
+      <h1 class="hg-head__title">
+        @for (word of headlineWords(); track $index) {<span class="hg-nowrap">{{ word }}</span>{{ ' ' }}}
+      </h1>
     </header>
+
+    <ol class="checklist" [attr.aria-label]="'home.checklistAria' | t">
+      @for (item of checklist; track item.title; let i = $index) {
+        <li class="checklist__row">
+          <span class="checklist__num" aria-hidden="true">{{ i + 1 }}</span>
+          <span class="checklist__text">
+            <strong>{{ item.title | t }}</strong>
+            <span>{{ item.detail | t }}</span>
+          </span>
+          @if (item.locked) {
+            <span class="hg-tag"><ion-icon name="lock-closed-outline" aria-hidden="true" />{{ 'common.locked' | t }}</span>
+          } @else {
+            <span class="hg-tag">{{ 'common.soon' | t }}</span>
+          }
+        </li>
+      }
+    </ol>
+
+    <p class="hg-notice hg-notice--info" role="note">
+      <ion-icon name="construct-outline" aria-hidden="true" />
+      <span>{{ 'home.preview' | t }}</span>
+    </p>
+
+    @if (nextStep(); as step) {
+      <button class="hg-button hg-button--primary" type="button" disabled>{{ step | t }}</button>
+    }
   </div>
 </ion-content>

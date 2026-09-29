@@ -7,6 +7,7 @@ import { SQLiteService } from './sqlite.service';
  */
 export type SettingKey =
   | 'onboarding_seen' // '1' once this phone has seen Get Started and logged in → guests start at Login
+  | 'language' // 'en' | 'fil': the app's language, chosen on Get Started or in Account (I18nService)
   | 'diag_test'; // dev Diagnostics CRUD test only: created and removed again by the test
 
 /**

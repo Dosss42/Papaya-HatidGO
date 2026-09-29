@@ -9,8 +9,8 @@
 <ion-content class="ion-padding">
   <form class="hg-column auth-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
     <header class="hg-head">
-      <h1 class="hg-head__title">Mag-login</h1>
-      <p class="hg-head__lead">Gamitin ang email o mobile number ng account mo.</p>
+      <h1 class="hg-head__title">{{ 'login.title' | t }}</h1>
+      <p class="hg-head__lead">{{ 'login.lead' | t }}</p>
     </header>
 
     @if (error(); as e) {
@@ -23,13 +23,13 @@
     }
 
     <label class="hg-field">
-      <span class="hg-field__label">Email o mobile number</span>
+      <span class="hg-field__label">{{ 'login.loginLabel' | t }}</span>
       <ion-input
         formControlName="login"
         fill="outline"
         type="text"
         autocomplete="username"
-        placeholder="hal. 0917 123 4567 o email"
+        [placeholder]="'login.loginPlaceholder' | t"
         [clearInput]="true"
       />
       @if (fieldError('login'); as msg) {
@@ -38,9 +38,14 @@
     </label>
 
     <label class="hg-field">
-      <span class="hg-field__label">Password</span>
+      <span class="hg-field__label">{{ 'login.password' | t }}</span>
       <ion-input formControlName="password" fill="outline" type="password" autocomplete="current-password">
-        <ion-input-password-toggle slot="end" color="medium" showLabel="Ipakita ang password" hideLabel="Itago ang password" />
+        <ion-input-password-toggle
+          slot="end"
+          color="medium"
+          [attr.show-label]="'common.showPassword' | t"
+          [attr.hide-label]="'common.hidePassword' | t"
+        />
       </ion-input>
       @if (fieldError('password'); as msg) {
         <span class="hg-field__error"><ion-icon name="alert-circle" aria-hidden="true" />{{ msg }}</span>
@@ -49,17 +54,17 @@
 
     <button class="hg-button hg-button--primary" type="submit" [disabled]="submitting()">
       @if (submitting()) {
-        <ion-spinner name="crescent" aria-hidden="true" /> Nagla-login…
+        <ion-spinner name="crescent" aria-hidden="true" /> {{ 'login.submitting' | t }}
       } @else {
-        Mag-login
+        {{ 'login.submit' | t }}
       }
     </button>
 
-    <a class="hg-button hg-button--text" routerLink="/auth/forgot-password">Nakalimutan ang password?</a>
+    <a class="hg-button hg-button--text" routerLink="/auth/forgot-password">{{ 'login.forgot' | t }}</a>
 
     <div class="auth-form__divider" aria-hidden="true"></div>
 
-    <a class="hg-button hg-button--outline" routerLink="/auth/register">Wala pang account? Gumawa</a>
+    <a class="hg-button hg-button--outline" routerLink="/auth/register">{{ 'login.noAccount' | t }}</a>
 
     @if (isDev) {
       <div class="auth-form__dev">

@@ -60,6 +60,72 @@
   padding-top: 24px;
 }
 
+// Language picker (new phone): same size and shape as the role cards, one tap each.
+.welcome__ask {
+  margin: 0 0 4px;
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--hg-ink);
+}
+
+.lang-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.lang-card {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 4px;
+  min-height: 104px;
+  padding: 16px 8px;
+  border: 2px solid var(--hg-field-line);
+  border-radius: var(--hg-radius);
+  background: var(--hg-surface);
+  color: var(--hg-ink);
+  font-family: var(--hg-font);
+  cursor: pointer;
+
+  &:active {
+    border-color: var(--hg-orange);
+    background: var(--hg-orange-tint);
+  }
+
+  &__name {
+    font-size: 1.25rem;
+    font-weight: 800;
+  }
+
+  &__hint {
+    font-size: 1rem;
+    line-height: 1.3;
+    color: var(--hg-ink-soft);
+  }
+}
+
+// "Language: English" under the two buttons: a quiet way back to the picker.
+.welcome__lang {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 56px;
+  border: 0;
+  background: transparent;
+  color: var(--hg-ink-soft);
+  font-family: var(--hg-font);
+  font-size: 1rem;
+  font-weight: 700;
+
+  ion-icon {
+    font-size: 22px;
+  }
+}
+
 .welcome__dev {
   display: block;
   padding: 8px;

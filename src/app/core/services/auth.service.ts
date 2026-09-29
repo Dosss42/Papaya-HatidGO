@@ -8,6 +8,7 @@ import { Role, User } from '../../shared/models/user.model';
 import { ApiError, toApiError } from '../../shared/utilities/api-error';
 import { AppSettingsRepository } from '../database/app-settings.repository';
 import { LocalUserRepository } from '../database/local-user.repository';
+import { I18nService } from '../i18n/i18n.service';
 import { TokenStorageService } from './token-storage.service';
 
 /**
@@ -22,6 +23,7 @@ export class AuthService {
   private readonly tokens = inject(TokenStorageService);
   private readonly localUser = inject(LocalUserRepository);
   private readonly settings = inject(AppSettingsRepository);
+  private readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
   private readonly base = `${environment.apiUrl}/auth`;
   private static readonly DEVICE_NAME = 'papaya-mobile';
@@ -209,7 +211,7 @@ export class AuthService {
       throw {
         status: 403,
         code: 'ADMIN_NOT_ALLOWED',
-        message: 'Para sa pasahero at driver ang app na ito. Gamitin ang admin dashboard.',
+        message: this.i18n.t('error.adminNotAllowed'),
         fieldErrors: {},
       } satisfies ApiError;
     }
@@ -284,7 +286,7 @@ export class AuthService {
     try {
       return await firstValueFrom(call.pipe(timeout(AuthService.TIMEOUT_MS)));
     } catch (err) {
-      throw toApiError(err);
+      throw toApiError(err, (key) => this.i18n.t(key));
     }
   }
 }

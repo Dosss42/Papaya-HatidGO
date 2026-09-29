@@ -1,18 +1,18 @@
 <ion-tabs>
-  <ion-tab-bar slot="bottom">
+  <ion-tab-bar slot="bottom" class="hg-tabs">
     <ion-tab-button tab="book">
-      <ion-icon name="car-outline" aria-hidden="true"></ion-icon>
-      <ion-label>Book</ion-label>
+      <ion-icon name="tricycle" aria-hidden="true" />
+      <ion-label>{{ 'tabs.book' | t }}</ion-label>
     </ion-tab-button>
 
     <ion-tab-button tab="rides">
-      <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
-      <ion-label>Rides</ion-label>
+      <ion-icon name="receipt-outline" aria-hidden="true" />
+      <ion-label>{{ 'tabs.rides' | t }}</ion-label>
     </ion-tab-button>
 
     <ion-tab-button tab="account">
-      <ion-icon name="person-circle-outline" aria-hidden="true"></ion-icon>
-      <ion-label>Account</ion-label>
+      <ion-icon name="person-circle-outline" aria-hidden="true" />
+      <ion-label>{{ 'tabs.account' | t }}</ion-label>
     </ion-tab-button>
   </ion-tab-bar>
 </ion-tabs>

@@ -15,7 +15,10 @@ import {
 import { addIcons } from 'ionicons';
 import { alertCircle, checkmarkCircle, personOutline } from 'ionicons/icons';
 import { AuthService } from '../../../../core/services/auth.service';
+import { MessageKey } from '../../../../core/i18n/messages.en';
 import { RegisterPayload } from '../../../../shared/models/auth.model';
+import { I18nService } from '../../../../core/i18n/i18n.service';
+import { TranslatePipe } from '../../../../core/i18n/t.pipe';
 import { ApiError } from '../../../../shared/utilities/api-error';
 import { PASSWORD_RULE, clientError, passwordsMatch } from '../../../../shared/utilities/form-errors';
 
@@ -39,11 +42,13 @@ type FieldName = 'first_name' | 'last_name' | 'phone' | 'email' | 'password' | '
     IonInputPasswordToggle,
     IonSpinner,
     IonToolbar,
+    TranslatePipe,
   ],
 })
 export class RegisterPage implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly i18n = inject(I18nService);
 
   /** From the Welcome pila row: /auth/register?role=passenger|driver (router input binding). */
   readonly roleParam = input<string | undefined>(undefined, { alias: 'role' });
@@ -64,13 +69,13 @@ export class RegisterPage implements OnInit {
   protected readonly submitting = signal(false);
   protected readonly error = signal<ApiError | null>(null);
 
-  private readonly labels: Record<FieldName, string> = {
-    first_name: 'pangalan mo',
-    last_name: 'apelyido mo',
-    phone: 'mobile number mo',
-    email: 'email mo',
-    password: 'password',
-    password_confirmation: 'password ulit',
+  private readonly labels: Record<FieldName, MessageKey> = {
+    first_name: 'label.firstName',
+    last_name: 'label.lastName',
+    phone: 'label.phone',
+    email: 'label.email',
+    password: 'label.password',
+    password_confirmation: 'label.passwordAgain',
   };
 
   constructor() {
@@ -95,9 +100,10 @@ export class RegisterPage implements OnInit {
   protected fieldError(name: FieldName): string | null {
     const control = this.form.controls[name];
     if (name === 'password_confirmation' && control.touched && this.form.errors?.['mismatch']) {
-      return 'Hindi magkapareho ang password.';
+      return this.i18n.t('error.mismatch');
     }
-    return clientError(control, this.labels[name]) ?? this.error()?.fieldErrors[name] ?? null;
+    const t = this.i18n.t.bind(this.i18n);
+    return clientError(control, this.labels[name], t, name === 'password') ?? this.error()?.fieldErrors[name] ?? null;
   }
 
   async submit(): Promise<void> {

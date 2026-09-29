@@ -130,7 +130,7 @@ components:
 
 A calm, bright, white ride app that an older tricycle driver can read outdoors, one-handed, on a low-end Android phone. The look is the user's own mockup, pinned as canon: clean white screens, deep papaya orange for the one next action, papaya-leaf green for the brand and for success, and the tricycle + papaya-leaf logo. Everything else is white space and big near-black text.
 
-Density is low on purpose. One family (Atkinson Hyperlegible Next, built for low-vision readers) sits on an 18px root, so the smallest text is 18px and nothing is ever below 16px. Controls are full-width, soft-cornered and tall (56px minimum, 60px for buttons and fields). Labels stay above their fields, examples are written in Taglish as "hal. ...", and every state carries a mark as well as a color.
+Density is low on purpose. One family (Atkinson Hyperlegible Next, built for low-vision readers) sits on an 18px root, so the smallest text is 18px and nothing is ever below 16px. Controls are full-width, soft-cornered and tall (56px minimum, 60px for buttons and fields). Labels stay above their fields, examples are written as "hal. ..." (Taglish) or "e.g. ..." (English), and every state carries a mark as well as a color.
 
 The app is always white. There is no dark scheme: the status bar always uses dark icons (Capacitor StatusBar `Style.Light`), and a phone in dark theme still shows the white app. A night mode may return later only as an explicit in-app user setting, never by following the system.
 
@@ -139,7 +139,7 @@ The app is always white. There is no dark scheme: the status bar always uses dar
 - One orange primary action per screen; green only for brand and success.
 - Atkinson Hyperlegible Next 400/700/800, 18px root, never below 16px.
 - Tall, full-width, 16px-radius controls; flat, no shadows.
-- States shown by mark plus color; Taglish copy with "hal." examples.
+- States shown by mark plus color; English or Taglish copy (user setting) with "hal." / "e.g." examples.
 
 ## Colors
 
@@ -186,7 +186,7 @@ A white, sun-proof palette: one deep papaya orange that carries white text, one 
 ### Named Rules
 **The 16px Floor Rule.** No text anywhere is below 16px. The 18px root makes 1rem the working minimum.
 
-**The Labels Stay Rule.** Every field has a visible label above it; placeholders are only Taglish examples ("hal. 0917 123 4567", "hal. juan@gmail.com", "hal. 0917 123 4567 o email"), never the label.
+**The Labels Stay Rule.** Every field has a visible label above it; placeholders are only examples ("hal. 0917 123 4567" / "e.g. 0917 123 4567", "hal. juan@gmail.com", "hal. 0917 123 4567 o email"), never the label.
 
 ## Layout
 
@@ -239,7 +239,7 @@ Authored SVG: a side-view Philippine tricycle with one roof over sidecar and dri
 - **Do** keep all text at 16px or larger (1rem = 18px root).
 - **Do** put a visible label above every field and use placeholders only for Taglish "hal." examples.
 - **Do** show every state by a mark plus color: error icon plus red, check mark plus orange border, success icon plus green border.
-- **Do** write copy in plain Taglish.
+- **Do** write copy in plain English and plain Taglish: every text lives in `src/app/core/i18n/messages.en.ts` and `messages.fil.ts` (same keys, enforced by the build), never typed straight into a template.
 - **Do** honor prefers-reduced-motion: transitions and the logo rise turn off.
 - **Do** keep the app white and the status bar icons dark, whatever the phone theme.
 
