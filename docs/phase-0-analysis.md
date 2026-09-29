@@ -757,14 +757,14 @@ Android (GPS + network location · FINE/COARSE permission)
 | 2 | Subscriptions required: passengers to book, drivers to go online | ✅ Confirmed |
 | 3 | Online subscription payment in MVP, **test mode** | ✅ Confirmed |
 | 4 | Gateway: **PayMongo** (test mode), behind `PaymentService` | ✅ Confirmed |
-| 5 | Map: Leaflet + OpenStreetMap | ⏳ Recommended |
-| 6 | Live updates by polling (v1) + FCM | ⏳ Recommended |
-| 7 | Matching: broadcast to the nearest N eligible drivers, first accept wins | ⏳ Recommended |
-| 8 | Two-way as one ride with `current_leg` (no extra statuses) | ⏳ Recommended |
+| 5 | Map: Leaflet + OpenStreetMap | ✅ Confirmed |
+| 6 | Live updates by polling (v1) + FCM | ✅ Confirmed |
+| 7 | Matching: broadcast to the nearest N eligible drivers, first accept wins | ✅ Confirmed |
+| 8 | Two-way as one ride with `current_leg` (no extra statuses) | ✅ Confirmed |
 | 9 | Waiting fee rule (default ₱0 until decided) | ⏳ Open |
 | 10 | Return fare multiplier default | ⏳ Open |
 | 11 | Cancellation rules + "end at destination" for two-way no-shows | ⏳ Proposed (E.3) |
-| 12 | Login with email or phone; email required for password reset | ⏳ Recommended |
+| 12 | Login with email or phone; email required for password reset | ✅ Confirmed |
 | 13 | Grace period after subscription expiry | ⏳ Open (default 0 days) |
 | 14 | Exact driver requirements list (e.g. license, OR/CR, franchise/permit, insurance) | ⏳ Open (admin-configurable anyway) |
 | 15 | Exact service area | ⏳ Open (circle setting for now) |

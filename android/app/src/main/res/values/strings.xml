@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Papaya HatidGo</string>
+    <string name="title_activity_main">Papaya HatidGo</string>
+    <string name="package_name">com.papayahatidgo.app</string>
+    <string name="custom_url_scheme">com.papayahatidgo.app</string>
+</resources>

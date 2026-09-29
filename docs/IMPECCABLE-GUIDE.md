@@ -22,15 +22,37 @@ If `PRODUCT.md` is out of date, every later suggestion will be based on the wron
 
 ## 2. Commands by project phase
 
-### Now: refresh the product brief
+### Impeccable checkpoints by phase
+
+Phase numbers match `docs/phase-0-analysis.md`, section M.
+
+| Phase | Impeccable? | What to run |
+|---|---|---|
+| 0 Analysis | ✅ Done | `/impeccable init` wrote `PRODUCT.md` |
+| 1 Capacitor + Android | ❌ No | Tooling only, no screens |
+| 2 Mobile architecture | ✅ **At the end** | `shape` the key flows (below). The routes now exist, so the plans match real pages. |
+| 3 Native proof (GPS test page) | ❌ No | Throwaway test screen; don't polish it |
+| 4 Laravel + MySQL | ❌ No | Backend only |
+| 5 Auth screens | ✅ **Big one** | **First real build.** It sets the app's look and writes `DESIGN.md` (see below). |
+| 6 SQLite | ❌ No | No UI |
+| 7 Driver requirements screens | ✅ | Build it, then run the refinement loop |
+| 8 Subscription screens | ✅ | Build it, then run the refinement loop plus `harden` (payment failed, expired) |
+| 9 Ride backend | ❌ No | Backend only |
+| 10–11 Passenger + driver ride screens | ✅ | Build it, then run the refinement loop. These are the most important screens. |
+| 12 Maps | ✅ | `critique` + `adapt` (map vs bottom sheet on small phones) |
+| 13 Notifications | ✅ light | `clarify` on the notification text |
+| 14 Admin web | ✅ | Separate `/impeccable init` inside the admin project |
+| 15 Final testing | ✅ | `audit` + `polish` on every main screen before the defense |
+
+### Refresh the product brief when scope changes
 
 ```
 /impeccable init
 ```
 
-Re-runs the product interview and rewrites `PRODUCT.md`. Do this **before anything else**.
+Re-runs the product interview and updates `PRODUCT.md`. Run it whenever a scope decision changes.
 
-### Phases 0–2: planning (no code yet)
+### End of Phase 2: planning (no code yet)
 
 ```
 /impeccable shape <flow name>
@@ -47,15 +69,17 @@ Suggested order of flows to shape:
 
 Tip: add *"and explain why each screen is structured this way"* so the output teaches you instead of just handing you answers.
 
-### Phase 7: the first real screen
+### Phase 5: the first real screens set the app's look
 
-Ask normally, no command needed:
+Login and register are the first real screens, so this build **decides the app's look** (colors, fonts, spacing, components) and saves it to `DESIGN.md`. Every later screen follows it. Since `PRODUCT.md` says **android**, it follows Android/Material conventions.
+
+Because login screens are simple, tell impeccable to design for the whole app, not just the form:
 
 ```
-build the passenger home and booking screen
+/impeccable build the welcome, login and register screens, and establish the
+visual system for the whole app (keep the booking and active-ride flows from
+the shape plans in mind). Explain each design choice.
 ```
-
-This first build **decides the app's look** (colors, fonts, spacing, components) and saves it to `DESIGN.md`. Every later screen follows it. Since `PRODUCT.md` says **android**, it follows Android/Material conventions.
 
 ### After each screen exists: the refinement loop
 
@@ -81,7 +105,7 @@ You don't have to run all seven every time. At minimum, use **critique → layou
 
 Run `ionic serve`, click an element in the browser, and impeccable generates layout alternatives for you to pick from. This helps when you're unsure how a section should look.
 
-### Phase 12: admin dashboard
+### Phase 14: admin dashboard
 
 ```
 /impeccable init     (run inside the admin project folder)
@@ -138,17 +162,10 @@ When running `harden`, make sure these states exist where they apply:
 
 ## 6. Current next steps
 
-1. **Update `PRODUCT.md`** (`/impeccable init`). Add:
-   - Two-way rides
-   - Driver compliance module
-   - Passenger/driver subscriptions with `PaymentService`
-   - Safety features, complaints, audit logs
-   - MVP priority list
-   - Open questions:
-     - The brief says basic account access shouldn't be blocked by subscriptions. **Should passenger subscriptions exist in the MVP at all?**
-     - **Is the two-way waiting fee used or not?**
-2. **Rework the Phase 0 analysis** into the new A–L structure (requirements workflow, ride types, subscriptions, notifications, security, testing). The ERD grows to about 20 tables.
-3. **Start shaping flows** (Section 2, Phases 0–2).
+1. ~~Update `PRODUCT.md`~~ ✅ Done (two-way rides, compliance, required subscriptions, PayMongo test mode).
+2. ~~Rework the Phase 0 analysis~~ ✅ Done, in `docs/phase-0-analysis.md`.
+3. **Phase 1 (now):** Capacitor + Android. No impeccable.
+4. **End of Phase 2:** run the four `shape` commands in section 2.
 
 ---
 
