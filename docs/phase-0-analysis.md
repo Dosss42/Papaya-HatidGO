@@ -163,6 +163,7 @@ erDiagram
     DRIVERS ||--o{ DRIVER_DOCUMENTS : submits
     VEHICLES ||--o{ DRIVER_DOCUMENTS : "has (vehicle docs)"
     DRIVER_DOCUMENTS ||--o{ DRIVER_REQUIREMENT_REVIEWS : receives
+    DRIVER_DOCUMENTS ||--|{ DRIVER_DOCUMENT_FILES : "has (1-2 files)"
     USERS ||--o{ DRIVER_REQUIREMENT_REVIEWS : "reviews (admin)"
 
     PASSENGERS ||--o{ RIDE_REQUESTS : creates
@@ -204,7 +205,8 @@ Notation:
 | Table | Columns | Notes |
 |---|---|---|
 | `driver_requirements` | id PK, name, description, applies_to enum(driver, vehicle), accepted_file_types, is_required, is_critical, requires_expiry, is_active, sort_order, timestamps | **Configured by the admin**, e.g. "Driver's License", "OR/CR", "Franchise/Permit" |
-| `driver_documents` | id PK, driver_id FK, driver_requirement_id FK, vehicle_id FK null, file_path (private disk), original_filename, mime_type, file_size, document_number, issued_at, expires_at null, status enum(pending, approved, rejected, expired, resubmission_required), is_current bool, submitted_at, reviewed_at, reviewed_by FK→users null, timestamps | A resubmission creates a **new row**; the old row gets is_current = false, so history is preserved |
+| `driver_documents` | id PK, driver_id FK, driver_requirement_id FK, vehicle_id FK null, document_number, issued_at, expires_at null, status enum(pending, approved, rejected, expired, resubmission_required), is_current bool, submitted_at, reviewed_at, reviewed_by FK→users null, timestamps | A resubmission creates a **new row**, so history is preserved. `is_current` flips **on approval** when replacing an approved, unexpired document (renewal without going offline); otherwise on upload. (driver-requirements brief) |
+| `driver_document_files` | id PK, driver_document_id FK, file_path (private disk), original_filename, mime_type, file_size, side enum(front, back, page) null, sort_order, created_at | 1–2 files per document (e.g. license front + back). Split out of `driver_documents` (one document, many files). |
 | `driver_requirement_reviews` | id PK, driver_document_id FK, admin_id FK→users, action enum(approved, rejected, resubmission_requested, expired_by_system), reason, created_at | Permanent review history |
 
 **Rides** (details in section E)
@@ -271,7 +273,7 @@ These are designed now but migrated later:
                         └─request fix─► resubmission_required                 │
                                         │    │                                │
                                         └────┴─── driver uploads new file ◄───┘
-                                               (new row: pending; old row is_current = false)
+                                               (new row: pending; old row stays current until the new one is approved if it was approved + unexpired)
 ```
 
 ### D.2 Driver compliance status
@@ -401,7 +403,7 @@ timestamps
    - pickup and destination are inside the service area.
 2. The server calculates the fare and creates the ride with `status = requested` and `expires_at = now + request_timeout` (e.g. 120 s).
 3. `DriverMatchingService` selects up to *N* eligible drivers (e.g. 5), nearest first by Haversine distance, within `matching.radius_km`. Eligible means:
-   - online;
+   - online **and** `location_updated_at` within the last 3 minutes (the scheduler sets stale drivers offline, so a driver whose phone died or lost signal never receives requests they will miss);
    - compliance status `verified`;
    - primary vehicle verified;
    - subscription active;
@@ -520,7 +522,7 @@ Broadcasting to a few nearby drivers is simpler and faster than offering to one 
 | POST | /drivers/me/location | driver (online) | `{lat, lng, accuracy}` (throttled) |
 | GET | /driver-requirements | driver | Active requirement definitions |
 | GET | /drivers/me/requirements | driver | Each requirement with its current document status |
-| POST | /drivers/me/documents | driver | Multipart upload `{requirement_id, vehicle_id?, file, document_number?, expires_at?}` |
+| POST | /drivers/me/documents | driver | Multipart upload `{requirement_id, vehicle_id?, files[] (1–2, each with side), document_number?, expires_at?}` |
 | GET | /drivers/me/documents/{id} | driver (owner) | Status + review history |
 | GET / POST | /vehicles | driver | List / register own vehicles |
 | PATCH | /vehicles/{id} | driver (owner) | Update. Changing the plate resets status to pending. |
@@ -544,6 +546,7 @@ Broadcasting to a few nearby drivers is simpler and faster than offering to one 
 | POST | /rides/{id}/cancel | participant | `{reason}` |
 | POST | /rides/{id}/locations | assigned driver | Route trail |
 | POST | /rides/{id}/rating | passenger (owner, completed) | `{score, comment}`, once |
+| POST | /rides/{id}/passenger-returning | passenger (owner), Balikan in the waiting leg | Notifies the driver "Pabalik na ang pasahero". **Changes no status.** Max once per 5 min. (active-ride brief) |
 
 ### Subscriptions and payments
 | Method | Endpoint | Role | Purpose |
@@ -604,6 +607,8 @@ Each endpoint gets a full contract (validation, responses, errors, security) in 
 
 **Plugin:** `@capacitor-community/sqlite`. The app accesses it only through `SQLiteService`, and the local schema is versioned from the start.
 
+**Other plugin added by the driver-home brief:** `@capacitor-community/keep-awake`, active only while a driver is online (Phase 11), so the screen stays on and requests keep arriving until push notifications exist.
+
 ---
 
 ## I. GPS and location
@@ -653,13 +658,14 @@ Android (GPS + network location · FINE/COARSE permission)
 | 6 | Ride cancelled | The other party | ✓ | cancel |
 | 7 | No driver found | Passenger | ✓ | system expiry |
 | 8 | Document approved / rejected / resubmission requested | Driver | ✓ | admin review |
-| 9 | Document expiring in 7 days · expired | Driver | ✓ | daily scheduler |
+| 9 | Document expiring in 30 days · 7 days · expired | Driver | ✓ | daily scheduler |
 | 10 | Forced offline (became ineligible) | Driver | ✓ | scheduler |
 | 11 | Subscription activated | User | ✓ | webhook |
 | 12 | Subscription expiring in 3 days · expired | User | ✓ | daily scheduler |
 | 13 | Payment failed / checkout expired | User | – | webhook / scheduler |
 | 14 | New driver registration · new document submitted | Admin | – (dashboard badge) | upload |
 | 15 | Payment or webhook error | Admin | – | PaymentService |
+| 16 | Passenger coming back (Balikan waiting leg) | Driver | ✓ | passenger-returning endpoint (active-ride brief) |
 
 **Android 13+ note:** push notifications need the `POST_NOTIFICATIONS` runtime permission, requested with an explanation.
 
@@ -766,8 +772,11 @@ Android (GPS + network location · FINE/COARSE permission)
 | 11 | Cancellation rules + "end at destination" for two-way no-shows | ⏳ Proposed (E.3) |
 | 12 | Login with email or phone; email required for password reset | ✅ Confirmed |
 | 13 | Grace period after subscription expiry | ⏳ Open (default 0 days) |
-| 14 | Exact driver requirements list (e.g. license, OR/CR, franchise/permit, insurance) | ⏳ Open (admin-configurable anyway) |
+| 14 | Seeded driver requirements: driver's license (front+back), OR/CR, franchise/MTOP permit, barangay/police/NBI clearance. All required, expiring, critical. Admin-configurable. | ✅ Confirmed |
 | 15 | Exact service area | ⏳ Open (circle setting for now) |
 | 16 | Admin UI framework: Bootstrap or Tailwind | ⏳ Open (Phase 14) |
 | 17 | Subscription plan lengths: 1, 6, 12 months (`duration_months`, replacing the `billing_cycle` enum); longer plans priced as "months free" | ✅ Confirmed |
 | 18 | Location used only while booking and during a ride (no background tracking of passengers) | ✅ Confirmed |
+| 19 | Active ride: distance shown instead of an ETA in minutes (no road routing in the MVP); tap-to-call opens the phone dialer (number not printed, only during the active ride); optional cancel reasons | ✅ Confirmed |
+| 20 | Driver requirements: checklist on Driver Home (no onboarding wizard); `driver_document_files` table for front/back; renewal keeps the old approved document current until the new one is approved; no promised review time; expiry reminders at 30 + 7 days | ✅ Confirmed |
+| 21 | Driver Home: large Mag-online button (not a switch); full-screen request alert with sound + real expiry countdown; full request details before accepting (no passenger name/phone); keep-awake while online (`@capacitor-community/keep-awake`); compact low-cost map while online (marker moves only with each location send); stale-online rule (3 min) | ✅ Confirmed |

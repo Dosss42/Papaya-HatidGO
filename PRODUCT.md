@@ -160,7 +160,7 @@ A local, tricycle-specific hatid service for one real town (Papaya), not a gener
 - **Subscription plan prices and trial/grace period:** whether new users get a free first period or a grace period after expiry before booking or going online is blocked.
 - **Two-way waiting fee (still undecided):** whether it applies at all, and if so whether it is a free-wait-then-per-minute rule or a flat fee. Keep the fare model able to hold a waiting fee of zero.
 - **Cancellation rules:** when each party may cancel, including during a two-way ride.
-- **Driver requirements:** the exact list, such as license, OR/CR, franchise or permit, and insurance.
+- ~~Driver requirements list~~ **Decided:** driver's license (front + back), OR/CR, franchise/MTOP permit, and barangay/police/NBI clearance, all required and critical (admin can change them). Still open: whether a selfie/face match is ever required.
 - **Map provider.**
 
 ## Brand Commitments

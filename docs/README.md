@@ -13,6 +13,9 @@ Index of the project's design and development documents. Each phase leaves a rec
 | [phase-2-mobile-architecture.md](phase-2-mobile-architecture.md) | Phase 2 plan + report: folders, routing, guards, AuthService, interceptor |
 | [IMPECCABLE-GUIDE.md](IMPECCABLE-GUIDE.md) | When and how to use the impeccable design skill |
 | [design-briefs/passenger-booking.md](design-briefs/passenger-booking.md) | ✅ Confirmed UX brief: passenger booking flow (pickup → destination → choose ride + Mag-book) |
+| [design-briefs/active-ride.md](design-briefs/active-ride.md) | ✅ Confirmed UX brief: passenger active ride screen (searching → arriving → trip/Balikan legs → pay + rate) |
+| [design-briefs/driver-requirements.md](design-briefs/driver-requirements.md) | ✅ Confirmed UX brief: driver requirements + verification (Home checklist, upload, review, renewal) |
+| [design-briefs/driver-home.md](design-briefs/driver-home.md) | ✅ Confirmed UX brief: driver Home (online/offline, compact map, full-screen request alert) |
 
 ## Progress
 
