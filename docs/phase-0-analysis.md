@@ -221,7 +221,7 @@ Notation:
 
 | Table | Columns | Notes |
 |---|---|---|
-| `subscription_plans` | id PK, code UQ, name, user_type enum(passenger, driver), price, currency default 'PHP', billing_cycle enum(monthly, quarterly, yearly), duration_days, benefits (text, display only), is_active, sort_order, timestamps | Configured by the admin. Sample prices only. |
+| `subscription_plans` | id PK, code UQ, name, user_type enum(passenger, driver), price, currency default 'PHP', duration_months (int: 1, 6, 12 to start), benefits (text, display only), is_active, sort_order, timestamps | Configured by the admin. Sample prices only. |
 | `subscriptions` | id PK, user_id FK, subscription_plan_id FK, status enum(pending, active, past_due, expired, cancelled, suspended), amount (price snapshot), starts_at null, ends_at null, cancelled_at, timestamps | **One row per paid period.** A renewal creates a new row. |
 | `subscription_transactions` | id PK, subscription_id FK, user_id FK, amount, currency, status enum(pending, paid, failed, expired, refunded), provider ('paymongo'), provider_checkout_id UQ, provider_payment_id null, payment_method null, paid_at null, failure_reason null, timestamps | One row per checkout attempt |
 | `payment_events` | id PK, provider, provider_event_id **UQ**, event_type, payload JSON, processed_at null, created_at | Webhook log. The unique column is what makes webhook processing **idempotent**. |
@@ -430,7 +430,7 @@ Broadcasting to a few nearby drivers is simpler and faster than offering to one 
 | Required for | **Booking a ride** | **Going online** |
 | Without a subscription, can still | Register, log in, edit profile, view history, subscribe | Register, log in, upload requirements, view history, subscribe |
 | Plans | `user_type = passenger` | `user_type = driver` |
-| Billing cycles | Monthly / quarterly / yearly (admin-enabled) | Same |
+| Plan lengths | 1 / 6 / 12 months (admin can add others via `duration_months`) | Same |
 | Renewal | Manual. There is no stored card and no auto-charge. | Same |
 
 **Status meanings:**
@@ -769,3 +769,5 @@ Android (GPS + network location · FINE/COARSE permission)
 | 14 | Exact driver requirements list (e.g. license, OR/CR, franchise/permit, insurance) | ⏳ Open (admin-configurable anyway) |
 | 15 | Exact service area | ⏳ Open (circle setting for now) |
 | 16 | Admin UI framework: Bootstrap or Tailwind | ⏳ Open (Phase 14) |
+| 17 | Subscription plan lengths: 1, 6, 12 months (`duration_months`, replacing the `billing_cycle` enum); longer plans priced as "months free" | ✅ Confirmed |
+| 18 | Location used only while booking and during a ride (no background tracking of passengers) | ✅ Confirmed |

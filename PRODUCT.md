@@ -77,7 +77,7 @@ A local, tricycle-specific hatid service for one real town (Papaya), not a gener
   - When a critical requirement expires, the driver can be blocked from going online automatically.
 - **Subscriptions:**
   - Drivers and passengers share one architecture: a user has a subscription, which links to a plan and to transactions.
-  - Plans are configured by the admin: name, user type, price, billing cycle (monthly, quarterly, or yearly), benefits, and status.
+  - Plans are configured by the admin: name, user type, price, duration in months, benefits, and status. **Confirmed starting plans: 1, 6, and 12 months** for both passengers and drivers. Monthly is the low-cost default, since users earn and spend in daily cash. The longer plans are priced as "months free" (about 5× and 10× the monthly price), with real amounts set by the admin. Renewal is manual (no stored cards).
   - Statuses: `active`, `pending`, `expired`, `cancelled`, `suspended`, `past_due`.
   - The rules are centralized in a `SubscriptionService` and are configurable.
   - **Confirmed:** subscriptions are **required for both roles in the MVP**.
