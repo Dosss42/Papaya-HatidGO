@@ -7,4 +7,8 @@
 <ion-content class="ion-padding">
   <p>Papaya HatidGo (Phase 2 skeleton)</p>
   <ion-button expand="block" routerLink="/auth/login">Go to Login</ion-button>
+
+  @if (isDev) {
+    <ion-button expand="block" fill="clear" routerLink="/dev/diagnostics">Diagnostics (dev)</ion-button>
+  }
 </ion-content>
