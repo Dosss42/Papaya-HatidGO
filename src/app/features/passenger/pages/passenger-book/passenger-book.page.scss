@@ -11,3 +11,14 @@
   font-weight: 700;
   color: var(--hg-ink-soft);
 }
+
+.book__loading {
+  display: grid;
+  place-items: center;
+  min-height: 80px;
+}
+
+// "Your subscription ends on …" is a link to the Subscription page.
+.book__ending {
+  text-decoration: none;
+}

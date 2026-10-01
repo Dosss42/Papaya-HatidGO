@@ -23,6 +23,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- Back from the payment page (Phase 8): the API's /payments/return page links to
+                 com.papayahatidgo.app://payment, which reopens THIS app (singleTask = the running
+                 one). The app then closes the Custom Tab and asks the API whether the payment
+                 arrived; the link itself proves nothing. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="com.papayahatidgo.app" android:host="payment" />
+            </intent-filter>
+
         </activity>
 
         <provider

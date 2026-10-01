@@ -24,6 +24,12 @@
       </p>
     }
 
+    @if (subscriptionEnding(); as text) {
+      <a class="hg-notice hg-notice--warn home__expiring" routerLink="/driver/subscription">
+        <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ text }}</span>
+      </a>
+    }
+
     @if (expiring(); as soon) {
       <a class="hg-notice hg-notice--warn home__expiring" [routerLink]="soon.link">
         <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ soon.text }}</span>
@@ -71,7 +77,7 @@
 </ion-content>
 
 <!-- The ONE next step, always in the thumb zone above the tab bar (brief § 3). -->
-@if (!loading() && (nextLabel() || suspended())) {
+@if (!loading() && (nextLabel() || suspended() || ready())) {
   <ion-footer class="ion-no-border home__footer">
     <div class="hg-column">
       @if (suspended()) {
@@ -80,9 +86,10 @@
             <ion-icon name="call-outline" aria-hidden="true" />{{ 'home.contactAdmin' | t }}
           </a>
         }
-      } @else if (next()?.kind === 'subscribe') {
-        <button class="hg-button hg-button--primary" type="button" disabled>{{ nextLabel() }}</button>
-        <p class="home__hint">{{ 'home.subscribeSoon' | t }}</p>
+      } @else if (ready()) {
+        <!-- Everything done: going online itself arrives with the ride screens (Phase 11). -->
+        <button class="hg-button hg-button--primary" type="button" disabled>{{ 'home.goOnline' | t }}</button>
+        <p class="home__hint">{{ 'home.goOnlineSoon' | t }}</p>
       } @else if (nextLabel(); as label) {
         <button class="hg-button hg-button--primary" type="button" (click)="goNext()">{{ label }}</button>
       }

@@ -10,6 +10,7 @@ import { AppSettingsRepository } from '../database/app-settings.repository';
 import { LocalUserRepository } from '../database/local-user.repository';
 import { I18nService } from '../i18n/i18n.service';
 import { DriverDocumentsService } from './driver-documents.service';
+import { SubscriptionService } from './subscription.service';
 import { TokenStorageService } from './token-storage.service';
 import { VehicleService } from './vehicle.service';
 
@@ -29,6 +30,7 @@ export class AuthService {
   private readonly router = inject(Router);
   private readonly vehicles = inject(VehicleService);
   private readonly documents = inject(DriverDocumentsService);
+  private readonly subscriptions = inject(SubscriptionService);
   private readonly base = `${environment.apiUrl}/auth`;
   private static readonly DEVICE_NAME = 'papaya-mobile';
   private static readonly TIMEOUT_MS = 15_000;
@@ -179,9 +181,10 @@ export class AuthService {
     this.me.set(null);
     this.syncedAt.set(null);
     this.state.set('guest');
-    // The next person on this phone must never see the previous driver's tricycle or papers.
+    // The next person on this phone must never see the previous driver's tricycle, papers or payments.
     this.vehicles.clear();
     this.documents.clear();
+    this.subscriptions.clear();
     await this.tokens.clear();
     try {
       await this.localUser.clear();

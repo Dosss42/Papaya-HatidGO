@@ -3,6 +3,11 @@ import { Routes } from '@angular/router';
 // The tabs page is the parent; each tab is a child route shown inside it.
 // The child path must match the tab="" attribute in passenger-tabs.page.html.
 export const PASSENGER_ROUTES: Routes = [
+  // Full-screen (no tab bar) task page, Phase 8: the same page as /driver/subscription.
+  {
+    path: 'subscription',
+    loadComponent: () => import('../subscription/subscription.page').then((m) => m.SubscriptionPage),
+  },
   {
     path: '',
     loadComponent: () =>

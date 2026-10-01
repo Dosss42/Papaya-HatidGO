@@ -12,7 +12,9 @@ import { TranslatePipe } from '../../../../core/i18n/t.pipe';
 import { AppLifecycleService } from '../../../../core/services/app-lifecycle.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { DriverDocumentsService } from '../../../../core/services/driver-documents.service';
+import { SubscriptionService } from '../../../../core/services/subscription.service';
 import { VehicleService } from '../../../../core/services/vehicle.service';
+import { endingSoon, phDate, subscriptionChip } from '../../../../shared/utilities/subscription-view';
 import { OfflineNoticeComponent } from '../../../../shared/components/offline-notice/offline-notice.component';
 import { StatusChipComponent } from '../../../../shared/components/status-chip/status-chip.component';
 import { RequirementState } from '../../../../shared/models/driver.model';
@@ -30,7 +32,8 @@ interface ChecklistItem {
  * Driver Home (design-briefs/driver-requirements.md § 3 + § 6): the headline turns the server's
  * compliance status into plain words, the checklist ① tricycle ② documents ③ subscription
  * ④ go online mirrors the server's go-online checks, and ONE primary button always points to
- * the most useful next action. Going online itself arrives in Phase 11, subscriptions in Phase 8.
+ * the most useful next action. ③ is the real subscription (Phase 8); going online itself
+ * arrives in Phase 11.
  */
 @Component({
   selector: 'app-driver-home',
@@ -47,6 +50,7 @@ export class DriverHomePage implements ViewWillEnter {
   private readonly router = inject(Router);
   private readonly docs = inject(DriverDocumentsService);
   private readonly vehicles = inject(VehicleService);
+  private readonly subs = inject(SubscriptionService);
   private readonly lifecycle = inject(AppLifecycleService);
   private inFlight: Promise<void> | null = null;
 
@@ -69,9 +73,22 @@ export class DriverHomePage implements ViewWillEnter {
     return list && !this.suspended() ? nextStep(list, this.tricycle()) : null;
   });
 
+  /** Papers + tricycle verified AND subscribed: nothing left but going online (Phase 11). */
+  protected readonly ready = computed(
+    () => !this.suspended() && this.checklist()?.compliance_status === 'verified' && this.subs.isActive(),
+  );
+
+  /** "Your subscription ends on …": active, ending within 3 days, no renewal bought yet. */
+  protected readonly subscriptionEnding = computed(() => {
+    const summary = this.subs.summary();
+    return endingSoon(summary) && summary?.active_until
+      ? this.i18n.t('sub.endingSoon', { date: phDate(summary.active_until) })
+      : null;
+  });
+
   protected readonly nextLabel = computed(() => {
     const step = this.next();
-    if (!step) return null;
+    if (!step || this.ready()) return null;
     switch (step.kind) {
       case 'fix': return this.i18n.t('home.next.fix', { doc: step.name });
       case 'renew': return this.i18n.t('home.next.renew', { doc: step.name });
@@ -125,10 +142,18 @@ export class DriverHomePage implements ViewWillEnter {
         icon: docsIcon,
         link: '/driver/requirements',
       },
-      { title: 'home.check.subscription', status: this.i18n.t('common.soon'), kind: 'locked', icon: 'time-outline', link: null },
-      { title: 'home.check.online', status: this.i18n.t('common.locked'), kind: 'locked', icon: 'lock-closed-outline', link: null },
+      this.subscriptionItem(),
+      this.ready()
+        ? { title: 'home.check.online', status: this.i18n.t('common.soon'), kind: 'locked', icon: 'time-outline', link: null }
+        : { title: 'home.check.online', status: this.i18n.t('common.locked'), kind: 'locked', icon: 'lock-closed-outline', link: null },
     ];
   });
+
+  /** ③ from GET /subscriptions/current: Active / Waiting for payment / Ended / Not subscribed. */
+  private subscriptionItem(): ChecklistItem {
+    const chip = subscriptionChip(this.subs.summary());
+    return { title: 'home.check.subscription', status: this.i18n.t(chip.key), kind: chip.kind, icon: chip.icon, link: '/driver/subscription' };
+  }
 
   /** The four documents as small chips under ② (brief § 3 wireframe). */
   protected readonly docChips = computed(() =>
@@ -170,7 +195,7 @@ export class DriverHomePage implements ViewWillEnter {
     this.loadFailed.set(false);
     try {
       // The session too: suspension lives on the user account (/auth/me), not on the checklist.
-      await Promise.all([this.docs.loadChecklist(), this.vehicles.load(), this.auth.refreshSession()]);
+      await Promise.all([this.docs.loadChecklist(), this.vehicles.load(), this.subs.loadCurrent(), this.auth.refreshSession()]);
     } catch {
       this.loadFailed.set(true);
     } finally {
@@ -180,7 +205,11 @@ export class DriverHomePage implements ViewWillEnter {
 
   protected goNext(): void {
     const step = this.next();
-    if (!step || step.kind === 'subscribe') return; // subscriptions: Phase 8
+    if (!step) return;
+    if (step.kind === 'subscribe') {
+      void this.router.navigateByUrl('/driver/subscription');
+      return;
+    }
     void this.router.navigateByUrl(step.kind === 'addTricycle' ? '/driver/vehicle' : `/driver/requirements/${step.code}`);
   }
 
@@ -202,7 +231,7 @@ export class DriverHomePage implements ViewWillEnter {
       case 'expired':
         return this.i18n.t('home.head.expired_doc', { doc: first((r) => r.status === 'expired') });
       case 'verified':
-        return this.i18n.t('home.head.verified');
+        return this.i18n.t(this.subs.isActive() ? 'home.head.ready' : 'home.head.verified');
     }
   }
 }

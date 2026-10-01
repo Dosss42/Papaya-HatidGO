@@ -10,22 +10,43 @@
       </div>
     </div>
 
-    <p class="book__step">1 / 3</p>
+    <!-- Step and instruction only when booking is open: behind the gate they'd ask the impossible. -->
+    @if (subscribed()) {
+      <p class="book__step">1 / 3</p>
+    }
     <header class="hg-head">
       <h1 class="hg-head__title">{{ 'book.title' | t }}</h1>
-      <p class="hg-head__lead">{{ 'book.lead' | t }}</p>
+      @if (subscribed()) {
+        <p class="hg-head__lead">{{ 'book.lead' | t }}</p>
+      }
     </header>
 
-    <label class="hg-field">
-      <span class="hg-field__label">{{ 'book.landmark' | t }}</span>
-      <ion-input fill="outline" [placeholder]="'book.landmarkPlaceholder' | t" [disabled]="true" />
-    </label>
+    @if (!checked()) {
+      <div class="book__loading"><ion-spinner name="crescent" /></div>
+    } @else if (!subscribed()) {
+      <!-- The gate (Phase 8): say why, and the one way forward. -->
+      <p class="hg-notice hg-notice--warn" role="note">
+        <ion-icon name="card-outline" aria-hidden="true" /><span>{{ gateText() }}</span>
+      </p>
+      <a class="hg-button hg-button--primary" routerLink="/passenger/subscription">{{ 'book.subscribe' | t }}</a>
+    } @else {
+      @if (endingText(); as text) {
+        <a class="hg-notice hg-notice--warn book__ending" routerLink="/passenger/subscription">
+          <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ text }}</span>
+        </a>
+      }
 
-    <p class="hg-notice hg-notice--info" role="note">
-      <ion-icon name="construct-outline" aria-hidden="true" />
-      <span>{{ 'book.preview' | t }}</span>
-    </p>
+      <label class="hg-field">
+        <span class="hg-field__label">{{ 'book.landmark' | t }}</span>
+        <ion-input fill="outline" [placeholder]="'book.landmarkPlaceholder' | t" [disabled]="true" />
+      </label>
 
-    <button class="hg-button hg-button--primary" type="button" disabled>{{ 'book.next' | t }}</button>
+      <p class="hg-notice hg-notice--info" role="note">
+        <ion-icon name="construct-outline" aria-hidden="true" />
+        <span>{{ 'book.preview' | t }}</span>
+      </p>
+
+      <button class="hg-button hg-button--primary" type="button" disabled>{{ 'book.next' | t }}</button>
+    }
   </div>
 </ion-content>

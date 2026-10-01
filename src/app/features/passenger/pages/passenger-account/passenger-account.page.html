@@ -9,11 +9,7 @@
     <h2 class="hg-menu__title">{{ 'account.settings' | t }}</h2>
     <ul class="hg-menu">
       <li><app-language-row /></li>
-      <li class="hg-menu__row hg-menu__row--soon" aria-disabled="true">
-        <ion-icon name="card-outline" aria-hidden="true" />
-        <span class="hg-menu__label">{{ 'account.subscription' | t }}</span>
-        <span class="hg-tag">{{ 'common.soon' | t }}</span>
-      </li>
+      <li><app-subscription-row link="/passenger/subscription" /></li>
       <li class="hg-menu__row hg-menu__row--soon" aria-disabled="true">
         <ion-icon name="help-circle-outline" aria-hidden="true" />
         <span class="hg-menu__label">{{ 'account.help' | t }}</span>

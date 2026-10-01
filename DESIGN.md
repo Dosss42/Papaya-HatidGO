@@ -225,6 +225,14 @@ Two equal cards side by side ("Pasahero", "Driver"), Warm Field ground, 2px Fiel
 ### Notices
 Full-width marked messages: 16px radius, 14px 16px padding, 24px leading icon, 2px inset border. Alert: Alert Ground, Alert text and border, alert-circle icon, `role="alert"`. OK: Leaf Tint ground, Ink text, green border and icon (checkmark-circle or mail-outline). Warn (Phase 7): Papaya Tint ground, Ink text, Deep Papaya border and icon. Use it for a consequence before an action ("a new plate sends your OR/CR and MTOP back to review"), or for "expiring soon".
 
+**Info** (Phase 7–8): Warm Field ground, Ink text, Field Line border, Soft Ink icon. For neutral facts ("this is only a preview", "checking your payment…", "payment cancelled").
+
+### Tags
+A small Soft Ink word in a Hairline pill on Warm Field (1rem/700). Labels a fact that isn't a status: "Coming soon" on a menu row, "Test mode: no real money" under Pay. Never tappable.
+
+### Plan Cards (Phase 8)
+The Subscription page's plans are radio cards in the Role Card style, full width, 76px minimum. The months (1.15rem/800) sit over a Soft Ink note ("1 month free", "Pay month by month"), with the price on the right (1.3rem/800). The chosen card gets a 3px Deep Papaya border, Papaya Tint and a green check-circle. The others get a Soft Ink empty ring, so every card reads as a choice. One orange "Pay ₱…" follows, with the reassurance line (lock icon) under it. While a payment may still arrive, the plans and Pay are hidden and **Check again** becomes the orange button, so nobody pays twice.
+
 ### Status Chips (Phase 7)
 A word plus an icon in a small pill (1rem/700, 18px icon, 2px inset border). One kind per meaning, and color is never the only signal:
 - **ok:** Leaf Tint, green border and check (Approved / Done).

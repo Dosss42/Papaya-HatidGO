@@ -19,6 +19,10 @@ export const DRIVER_ROUTES: Routes = [
       import('./pages/driver-requirement/driver-requirement.page').then((m) => m.DriverRequirementPage),
   },
   {
+    path: 'subscription', // Phase 8: the same page as /passenger/subscription
+    loadComponent: () => import('../subscription/subscription.page').then((m) => m.SubscriptionPage),
+  },
+  {
     path: '',
     loadComponent: () =>
       import('./pages/driver-tabs/driver-tabs.page').then((m) => m.DriverTabsPage),

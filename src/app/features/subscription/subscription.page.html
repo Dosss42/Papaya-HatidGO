@@ -1,0 +1,170 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="hg-toolbar">
+    <ion-buttons slot="start">
+      <ion-back-button [defaultHref]="backUrl()" text="" />
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="hg-column sub-page">
+    <app-offline-notice />
+
+    <header class="hg-head">
+      <h1 class="hg-head__title">{{ 'sub.title' | t }}</h1>
+      <p class="hg-head__lead">{{ leadKey() | t }}</p>
+    </header>
+
+    @if (loadFailed()) {
+      <p class="hg-notice hg-notice--alert" role="alert">
+        <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ 'common.loadError' | t }}</span>
+      </p>
+    }
+
+    <!-- The payment flow's own messages (role=status: read out when they change). -->
+    <div role="status">
+      @switch (phase()) {
+        @case ('checking') {
+          <p class="hg-notice hg-notice--info">
+            <ion-spinner name="crescent" aria-hidden="true" /><span>{{ 'sub.checking' | t }}</span>
+          </p>
+        }
+        @case ('paid') {
+          @if (result(); as s) {
+            <p class="hg-notice hg-notice--ok">
+              <ion-icon name="checkmark-circle" aria-hidden="true" /><span>{{ paidText(s) }}</span>
+            </p>
+          }
+        }
+        @case ('notYet') {
+          <div class="hg-notice hg-notice--info sub-wait">
+            <ion-icon name="time-outline" aria-hidden="true" />
+            <div>
+              <p>{{ 'sub.notYet' | t }}</p>
+              <div class="sub-wait__actions">
+                <button class="hg-button hg-button--primary" type="button" (click)="check()">{{ 'sub.checkAgain' | t }}</button>
+                <button class="hg-button hg-button--text" type="button" (click)="cancelPayment()">{{ 'sub.cancelPay' | t }}</button>
+              </div>
+            </div>
+          </div>
+        }
+        @case ('cancelled') {
+          <p class="hg-notice hg-notice--info">
+            <ion-icon name="information-circle-outline" aria-hidden="true" /><span>{{ 'sub.cancelled' | t }}</span>
+          </p>
+        }
+      }
+    </div>
+
+    @if (error(); as e) {
+      <p class="hg-notice hg-notice--alert" role="alert">
+        <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ e.message }}</span>
+      </p>
+    }
+
+    @if (loading()) {
+      <div class="sub-loading"><ion-spinner name="crescent" /></div>
+    } @else if (summary(); as s) {
+      <!-- Where I stand -->
+      @if (active() && s.current?.ends_at && phase() !== 'paid') {
+        <div class="hg-notice hg-notice--ok sub-status">
+          <ion-icon name="checkmark-circle" aria-hidden="true" />
+          <div>
+            <p><strong>{{ 'sub.activeUntil' | t: { date: date(s.current!.ends_at!) } }}</strong> · {{ daysLeft(s.remaining_days) }}</p>
+            @if (s.renewal?.ends_at) {
+              <p>{{ 'sub.renewedUntil' | t: { date: date(s.renewal!.ends_at!) } }}</p>
+            }
+          </div>
+        </div>
+      } @else if (ended() && s.current?.ends_at) {
+        <p class="hg-notice hg-notice--alert sub-status">
+          <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ 'sub.ended' | t: { date: date(s.current!.ends_at!) } }}</span>
+        </p>
+      }
+
+      @if (waiting(); as pending) {
+        <div class="hg-notice hg-notice--info sub-wait">
+          <ion-icon name="time-outline" aria-hidden="true" />
+          <div>
+            <p>{{ 'sub.waiting' | t: { price: peso(pending.amount) } }}</p>
+            <div class="sub-wait__actions">
+              <button class="hg-button hg-button--primary" type="button" (click)="check()">{{ 'sub.checkAgain' | t }}</button>
+              <button class="hg-button hg-button--text" type="button" (click)="cancelPayment()">{{ 'sub.cancelPay' | t }}</button>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- The plans, then ONE orange button -->
+      @if (showPlans()) {
+        <section class="sub-section" [attr.aria-labelledby]="'plans-title'">
+          <h2 class="sub-section__title" id="plans-title">{{ (active() ? 'sub.renewTitle' : 'sub.choose') | t }}</h2>
+          @if (active()) {
+            <p class="sub-section__hint">{{ 'sub.renewHint' | t }}</p>
+          }
+          <div class="plans" role="radiogroup" aria-labelledby="plans-title">
+            @for (plan of plans(); track plan.id) {
+              <button
+                type="button"
+                class="plan"
+                role="radio"
+                [class.plan--on]="plan.id === selectedId()"
+                [attr.aria-checked]="plan.id === selectedId()"
+                [disabled]="busy()"
+                (click)="select(plan)"
+              >
+                <span class="plan__text">
+                  <span class="plan__months">{{ monthsLabel(plan) }}</span>
+                  <span class="plan__note">{{ planNote(plan) }}</span>
+                </span>
+                <span class="plan__price">{{ peso(plan.price) }}</span>
+                <ion-icon
+                  class="plan__check"
+                  [class.plan__check--off]="plan.id !== selectedId()"
+                  [name]="plan.id === selectedId() ? 'checkmark-circle' : 'ellipse-outline'"
+                  aria-hidden="true"
+                />
+              </button>
+            }
+          </div>
+        </section>
+
+        <button class="hg-button hg-button--primary" type="button" (click)="pay()" [disabled]="busy() || !selected() || !network.online()">
+          @if (phase() === 'opening') {
+            <ion-spinner name="crescent" aria-hidden="true" /> {{ 'sub.opening' | t }}
+          } @else if (selected(); as plan) {
+            {{ 'sub.pay' | t: { price: peso(plan.price) } }}
+          }
+        </button>
+
+        <p class="sub-secure">
+          <ion-icon name="lock-closed-outline" aria-hidden="true" /><span>{{ 'sub.secure' | t }}</span>
+        </p>
+        @if (testMode()) {
+          <p class="sub-test"><span class="hg-tag">{{ 'sub.testMode' | t }}</span></p>
+        }
+      } @else if (s.renewal && s.current?.ends_at && phase() !== 'paid') {
+        <p class="sub-section__hint">{{ 'sub.alreadyRenewed' | t: { date: date(s.current!.ends_at!) } }}</p>
+      }
+
+      @if (phase() === 'paid') {
+        <a class="hg-button hg-button--primary" [routerLink]="homeUrl()">{{ homeKey() | t }}</a>
+      }
+
+      <!-- Payment history -->
+      @if (payments().length > 0) {
+        <button type="button" class="history-toggle" [attr.aria-expanded]="historyOpen()" (click)="toggleHistory()">
+          {{ 'sub.history' | t }}
+          <ion-icon [name]="historyOpen() ? 'chevron-up' : 'chevron-down'" aria-hidden="true" />
+        </button>
+        @if (historyOpen()) {
+          <ul class="history">
+            @for (p of payments(); track p.id) {
+              <li><strong>{{ txKey(p.status) | t }}</strong> · {{ paymentLine(p) }}</li>
+            }
+          </ul>
+        }
+      }
+    }
+  </div>
+</ion-content>

@@ -18,6 +18,7 @@ Index of the project's design and development documents. Each phase leaves a rec
 | [../DESIGN.md](../DESIGN.md) | The design system (colors, type, buttons, fields, rules every screen follows), recorded from the Phase 5 build, extended in Phase 7 (status chips, photo slot, checklist, action sheets) |
 | [phase-6-sqlite.md](phase-6-sqlite.md) | Phase 6 plan + report: local SQLite (local user, settings), offline start, versioned schema, token-in-log fix |
 | [phase-7-driver-requirements.md](phase-7-driver-requirements.md) | Phase 7 plan + report: tricycle + document uploads, compliance rules, admin review (Postman), driver checklist screens, English/Taglish |
+| [phase-8-subscriptions.md](phase-8-subscriptions.md) | Phase 8 plan + report: plans, PayMongo checkout (test mode) + local test gateway, signed webhook, reconciliation, go-online and booking gates, Subscription screen |
 | [IMPECCABLE-GUIDE.md](IMPECCABLE-GUIDE.md) | When and how to use the impeccable design skill |
 | [design-briefs/passenger-booking.md](design-briefs/passenger-booking.md) | ✅ Confirmed UX brief: passenger booking flow (pickup → destination → choose ride + Mag-book) |
 | [design-briefs/active-ride.md](design-briefs/active-ride.md) | ✅ Confirmed UX brief: passenger active ride screen (searching → arriving → trip/Balikan legs → pay + rate) |
@@ -38,7 +39,7 @@ Phase numbers follow [phase-0-analysis.md § M](phase-0-analysis.md#m-developmen
 | 5 | Authentication (+ first impeccable build → DESIGN.md) | ✅ Done (Sanctum auth, secure token, Get Started + auth screens, DESIGN.md, 41 API tests) |
 | 6 | SQLite (`local_user`, `app_settings`, offline start) | ✅ Done (versioned schema, offline start, returning users → Login, CRUD tested on the Redmi, 33 unit tests) |
 | 7 | Driver requirements + vehicles | ✅ Done (tricycle + 4 documents from the camera, admin review via Postman, automatic tricycle verification, daily expiry, English/Taglish; API 108 tests, mobile 55 tests; Redmi run pending) |
-| 8 | Subscriptions + PayMongo (test mode) | ⏳ |
+| 8 | Subscriptions + PayMongo (test mode) | ✅ Done (pay → server-confirmed active; signed + idempotent webhook; reconciliation; go-online and booking gates; Subscription screen for both roles; API 149 tests, mobile 65 tests; real PayMongo keys pending) |
 | 9 | Ride state machine + matching (backend) | ⏳ |
 | 10 | Passenger ride screens (includes a basic map: tiles, center pin, markers; see booking brief) | ⏳ |
 | 11 | Driver ride screens + earnings | ⏳ |
