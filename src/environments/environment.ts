@@ -8,4 +8,7 @@ export const environment = {
   // 127.0.0.1 rather than "localhost": on Windows, localhost may resolve to IPv6 (::1),
   // where `php artisan serve` is not listening.
   apiUrl: 'http://127.0.0.1:8000/api/v1',
+  // The admin's phone number, shown to suspended drivers as "Tawagan ang admin" (Phase 7).
+  // Empty = not decided yet: the button stays hidden. Set the real number before release.
+  supportPhone: '',
 };

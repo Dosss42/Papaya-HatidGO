@@ -9,15 +9,19 @@
     <h2 class="hg-menu__title">{{ 'account.settings' | t }}</h2>
     <ul class="hg-menu">
       <li><app-language-row /></li>
-      <li class="hg-menu__row hg-menu__row--soon" aria-disabled="true">
-        <ion-icon name="tricycle" aria-hidden="true" />
-        <span class="hg-menu__label">{{ 'account.tricycle' | t }}</span>
-        <span class="hg-tag">{{ 'common.soon' | t }}</span>
+      <li>
+        <a class="hg-menu__row" routerLink="/driver/vehicle">
+          <ion-icon name="tricycle" aria-hidden="true" />
+          <span class="hg-menu__label">{{ 'account.tricycle' | t }}</span>
+          <ion-icon class="hg-menu__go" name="chevron-forward" aria-hidden="true" />
+        </a>
       </li>
-      <li class="hg-menu__row hg-menu__row--soon" aria-disabled="true">
-        <ion-icon name="document-text-outline" aria-hidden="true" />
-        <span class="hg-menu__label">{{ 'account.documents' | t }}</span>
-        <span class="hg-tag">{{ 'common.soon' | t }}</span>
+      <li>
+        <a class="hg-menu__row" routerLink="/driver/requirements">
+          <ion-icon name="document-text-outline" aria-hidden="true" />
+          <span class="hg-menu__label">{{ 'account.documents' | t }}</span>
+          <ion-icon class="hg-menu__go" name="chevron-forward" aria-hidden="true" />
+        </a>
       </li>
       <li class="hg-menu__row hg-menu__row--soon" aria-disabled="true">
         <ion-icon name="card-outline" aria-hidden="true" />

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Papaya HatidGo colors for NATIVE Android surfaces (Phase 7 step 7.9): the date picker dialog
+     and other system pickers the WebView opens. Same values as DESIGN.md / theme/variables.scss. -->
+<resources>
+    <color name="papaya_deep">#C2410C</color>
+    <color name="papaya_deep_pressed">#9A3412</color>
+    <color name="ink">#1C1714</color>
+    <color name="white_ground">#FFFFFF</color>
+</resources>

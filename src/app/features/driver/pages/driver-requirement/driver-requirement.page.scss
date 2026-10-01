@@ -1,0 +1,174 @@
+// Requirement detail + upload (brief § 4.2), in the DESIGN.md rhythm: sections 24px apart,
+// labels above fields, 60px controls, one orange button (Isumite).
+
+.req-page {
+  padding: 0 4px calc(env(safe-area-inset-bottom) + 32px);
+}
+
+.req-loading {
+  display: grid;
+  place-items: center;
+  min-height: 120px;
+}
+
+.req-section {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  margin-bottom: 24px;
+
+  &__title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--hg-ink);
+  }
+
+  &__text {
+    margin: 0;
+    font-size: 1.05rem;
+    line-height: 1.45;
+    color: var(--hg-ink-soft);
+  }
+}
+
+.req-reason {
+  width: 100%;
+  margin: 4px 0 0;
+
+  p {
+    margin: 6px 0 0;
+  }
+}
+
+.guide {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.05rem;
+    color: var(--hg-ink);
+  }
+
+  ion-icon {
+    flex: none;
+    font-size: 26px;
+    color: var(--hg-ink); // tips, not results: green is reserved for "done" (DESIGN.md)
+  }
+}
+
+.slots {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+// Native inputs styled like the app's fields (60px, 2px Field Line, 16px radius).
+.date-input,
+.text-input {
+  width: 100%;
+  min-height: 60px;
+  padding: 0 16px;
+  border: 2px solid var(--hg-field-line);
+  border-radius: var(--hg-radius);
+  background: var(--hg-surface);
+  color: var(--hg-ink);
+  font-family: var(--hg-font);
+  font-size: 1.1rem;
+
+  &:focus {
+    outline: none;
+    border-color: var(--hg-orange);
+  }
+}
+
+// An empty native date input shows nothing on Android: our own prompt sits inside it.
+.date-wrap {
+  position: relative;
+}
+
+.date-prompt {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  pointer-events: none; // taps go through to the real input underneath
+  font-size: 1.1rem;
+  color: var(--hg-ink-soft);
+
+  ion-icon {
+    font-size: 24px;
+  }
+}
+
+.date-input--empty {
+  color: transparent; // hide the WebView's own empty-state text behind our prompt
+}
+
+.privacy {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 4px 0 20px;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--hg-ink-soft);
+
+  ion-icon {
+    flex: none;
+    margin-top: 2px;
+    font-size: 20px;
+  }
+}
+
+.submit-hint {
+  margin: 8px 0 0;
+  text-align: center;
+  font-size: 1rem;
+  color: var(--hg-ink-soft);
+}
+
+.history-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 56px;
+  margin-top: 28px;
+  padding: 0 4px;
+  border: 0;
+  border-top: 2px solid var(--hg-line);
+  background: transparent;
+  color: var(--hg-ink);
+  font-family: var(--hg-font);
+  font-size: 1.05rem;
+  font-weight: 700;
+
+  ion-icon {
+    font-size: 22px;
+  }
+}
+
+.history {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0 4px;
+  list-style: none;
+  font-size: 1rem;
+  color: var(--hg-ink);
+
+  &__reason {
+    display: block;
+    margin-top: 2px;
+    color: var(--hg-ink-soft);
+  }
+}

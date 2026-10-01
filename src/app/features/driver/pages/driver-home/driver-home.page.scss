@@ -1,24 +1,42 @@
-// Driver Home preview: headline + the go-online checklist (design-briefs/driver-requirements.md § 3).
+// Driver Home: headline + the go-online checklist + one next-step button
+// (design-briefs/driver-requirements.md § 3).
 
-.home__hello {
-  margin: 0 0 4px;
-  font-size: 1.05rem;
-  font-weight: 700;
+
+.home__loading {
+  display: grid;
+  place-items: center;
+  min-height: 160px;
+}
+
+.home__expiring {
+  text-decoration: none;
+}
+
+.home__hint {
+  margin: 8px 0 0;
+  text-align: center;
+  font-size: 1rem;
   color: var(--hg-ink-soft);
 }
 
 .checklist {
-  margin: 0 0 20px;
+  margin: 0 0 24px;
   padding: 0;
   list-style: none;
 
   &__row {
     display: flex;
     align-items: center;
-    gap: 14px;
-    min-height: 72px;
-    padding: 10px 0;
+    gap: 12px;
+    min-height: 76px;
+    padding: 12px 0;
     border-bottom: 2px solid var(--hg-line);
+    color: var(--hg-ink);
+    text-decoration: none;
+
+    &--link:active {
+      background: var(--hg-surface);
+    }
   }
 
   &__num {
@@ -32,23 +50,76 @@
     box-shadow: inset 0 0 0 2px var(--hg-field-line);
     font-size: 1.1rem;
     font-weight: 800;
-    color: var(--hg-ink);
   }
 
   &__text {
     display: grid;
     flex: 1;
-    gap: 2px;
-    font-size: 1rem;
-    line-height: 1.35;
+    gap: 6px;
+    justify-items: start; // the chip sits under the title, at its natural width
+    min-width: 0;
 
     strong {
       font-size: 1.1rem;
-      color: var(--hg-ink);
     }
+  }
 
-    span {
-      color: var(--hg-ink-soft);
+  // The four documents in a 2 × 2 grid (brief § 3 wireframe), one column on narrow phones.
+  &__docs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 12px;
+    margin-top: 2px;
+
+    @media (max-width: 359px) {
+      grid-template-columns: 1fr;
     }
+  }
+
+  &__go {
+    flex: none;
+    font-size: 22px;
+    color: var(--hg-ink-soft);
+  }
+}
+
+// The four documents under ②: icon + name (the icon carries the state, the name stays readable).
+.mini {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 1rem;
+  color: var(--hg-ink-soft);
+
+  ion-icon {
+    font-size: 18px;
+    flex: none;
+  }
+
+  &--ok ion-icon {
+    color: var(--hg-green);
+  }
+
+  &--fix ion-icon {
+    color: var(--hg-alert);
+  }
+
+  &--warn ion-icon {
+    color: var(--hg-orange);
+  }
+}
+
+// The next step lives in a white footer above the tab bar: always visible, always in the thumb zone.
+.home__footer {
+  background: var(--hg-ground);
+  padding: 10px 16px 12px;
+  box-shadow: inset 0 2px 0 var(--hg-line);
+
+  .home__hint {
+    margin: 6px 0 0;
+  }
+
+  .hg-button ion-icon {
+    font-size: 22px;
   }
 }

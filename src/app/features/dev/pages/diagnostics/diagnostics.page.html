@@ -143,6 +143,39 @@
 
   <ion-list>
     <ion-list-header>
+      <ion-label>Camera (Phase 7)</ion-label>
+    </ion-list-header>
+    @if (photo(); as p) {
+      @if (p.previewUrl) {
+        <img class="camera-preview" [src]="p.previewUrl" alt="Test photo" />
+      }
+      <ion-item>
+        <ion-label class="ion-text-wrap">Result</ion-label>
+        <ion-note slot="end" class="ion-text-wrap">{{ photoInfo() }}</ion-note>
+      </ion-item>
+    } @else {
+      <ion-item>
+        <ion-label class="ion-text-wrap">No photo yet (kept in memory only, never saved)</ion-label>
+      </ion-item>
+    }
+    @if (photoError(); as e) {
+      <ion-item color="danger">
+        <ion-label class="ion-text-wrap">{{ e }}</ion-label>
+      </ion-item>
+    }
+  </ion-list>
+
+  @if (photos.canUseCamera) {
+    <ion-button expand="block" fill="outline" (click)="takePhoto('camera')">Take photo</ion-button>
+    <ion-button expand="block" fill="outline" (click)="takePhoto('gallery')">Choose from gallery</ion-button>
+  }
+  <label class="camera-file">
+    Pick a file (image or PDF)
+    <input type="file" accept="image/*,application/pdf" (change)="pickFile($event)" />
+  </label>
+
+  <ion-list>
+    <ion-list-header>
       <ion-label>Network</ion-label>
     </ion-list-header>
     <ion-item>

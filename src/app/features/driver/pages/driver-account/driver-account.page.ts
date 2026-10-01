@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IonContent, IonIcon } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { cardOutline, documentTextOutline, helpCircleOutline } from 'ionicons/icons';
+import { cardOutline, chevronForward, documentTextOutline, helpCircleOutline } from 'ionicons/icons';
 import { AuthService } from '../../../../core/services/auth.service';
 import { TranslatePipe } from '../../../../core/i18n/t.pipe';
 import { LanguageRowComponent } from '../../../../shared/components/language-row/language-row.component';
@@ -23,6 +23,6 @@ export class DriverAccountPage {
   protected readonly isDev = !environment.production;
 
   constructor() {
-    addIcons({ cardOutline, documentTextOutline, helpCircleOutline });
+    addIcons({ cardOutline, chevronForward, documentTextOutline, helpCircleOutline });
   }
 }

@@ -1,0 +1,52 @@
+// Requirements list: big tappable rows, chip under the name, detail line under the chip.
+
+.list-loading {
+  display: grid;
+  place-items: center;
+  min-height: 120px;
+}
+
+.req-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.req-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 96px;
+  padding: 14px 4px;
+  border-bottom: 2px solid var(--hg-line);
+  color: var(--hg-ink);
+  text-decoration: none;
+
+  &__text {
+    display: grid;
+    flex: 1;
+    gap: 6px;
+    justify-items: start;
+  }
+
+  &__name {
+    font-size: 1.15rem;
+    font-weight: 800;
+  }
+
+  &__detail {
+    font-size: 1rem;
+    line-height: 1.35;
+    color: var(--hg-ink-soft);
+  }
+
+  &__go {
+    flex: none;
+    font-size: 24px;
+    color: var(--hg-ink-soft);
+  }
+
+  &:active {
+    background: var(--hg-surface);
+  }
+}

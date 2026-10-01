@@ -99,12 +99,31 @@ Home checklist shows the result ◄────── compliance: verified (or r
 | 7.3 | ✅ Requirements + documents API: `GET /driver-requirements` · `GET /drivers/me/requirements` (the checklist) · `POST /drivers/me/documents` (multipart, private disk, real content check, renewal rule, replace unreviewed) · `GET /drivers/me/documents/{id}` · private disk `serve` off · `uploads` rate limit · requirement names in both languages · **API 90 / 90 tests, 317 assertions** (14 new) |
 | 7.4 | ✅ Admin review API (`role:admin`): review queue · document detail · **file streaming (the only door to a file, logged)** · approve (optional expiry correction) / reject / request resubmission (reason required) · suspend / reactivate · every action = review row + **audit log** + recalculate · Postman collection `papaya-hatidgo-api/postman/` · **API 103 / 103 tests, 441 assertions** (13 new) |
 | 7.5 | ✅ Daily expiry job `php artisan documents:expire` (00:05 **Philippine** time) · **business timezone** (`Asia/Manila`) + `BusinessDate` for every date rule (timestamps stay UTC) · **API 108 / 108 tests, 469 assertions** (5 new). **Part A (API) complete** |
+| 7.6 | ✅ Folded into each step: every API step shipped with its feature tests (Phase 7 added 67 API tests) |
+| 7.7 | ✅ `@capacitor/camera` 8.2.4 (no Android permission needed) · `PhotoService` (camera / gallery, native resize ≤ 1600 px JPEG 80%, never saved to the gallery, memory only) · `image-compress.ts` (safety net + file picker) · `VehicleService`, `DriverDocumentsService` (multipart upload), `api-call.ts` · logout clears their caches · Diagnostics "Camera" card · **mobile 47 / 47 unit tests** · **Emulator:** take photo → 1200 × 1600 px, 21 KB JPEG ✅ |
+| 7.8 | ✅ The driver screens: **Home checklist** (real data, one next step) · **Tricycle** form (plate-change warning first) · **Requirements list** (sorted: fix first) · **Requirement detail + upload** (guide, Front/Back photo slots, expiry date, privacy line, Submit, history, renewal) · shared `status-chip` and `photo-slot` · `requirement-view.ts` (one place that turns API states into words, chips and the next step) · about 100 messages in both languages · Home refreshes on Back and on resume · **mobile 55 / 55 unit tests** · **full flow on the emulator, including the real multipart upload** (R1, R2, R6–R8, R11 + suspension) ✅ |
+| 7.9 | ✅ Finish review (impeccable): 8 fixes, all applied and checked on the emulator. Next-step button pinned above the tabs · documents in a 2 × 2 grid · "3 documents expire" banner · suspended → call-the-admin button · chip colors match their meaning · native date picker in papaya (Android theme) + our own "Choose a date" prompt · disabled Submit says what's missing · language sheet styled like radio buttons · DESIGN.md updated · **mobile 55 / 55 · API 108 / 108** |
+| 7.10 | ✅ Device checks on the emulator (screenshots `.impeccable/review/e2e-*`, `v79-*`) · this report · local commit. **The student's own run on the Redmi (§ 7.10 checklist) is the last step** |
 
 ### Problems found
 
 | # | Problem | Cause | Fix |
 |---|---|---|---|
 | 1 | phase-0 § D.2 lists `suspended` as a compliance status, but `drivers.compliance_status` has no such value | Phase 4 put suspension on `users.account_status` (one place for all roles) | `recalculate()` writes only the 5 document states; `eligibility()` reports suspension as its own `account_active` check |
+| 2 | After an upload, Back to Home still showed the old checklist | Ionic tabs don't fire a tab page's `ionViewWillEnter` when you come back from a page *outside* the tabs | Home reloads on the router's `NavigationEnd` and when the app resumes (details in § 7.8) |
+| 3 | The plate-change review row was refused by the database | The `chk_review_actor` rule allowed no system action for "voided by a new plate" | New review action `invalidated_by_system` (migration `2026_10_01_100000`, step 7.2) |
+| 4 | Uploads over 2 MB failed before reaching Laravel | PHP's own `upload_max_filesize` is 2M by default | `php.ini`: `upload_max_filesize = 6M`, `post_max_size = 16M` (step 7.3) |
+| 5 | The date picker opened dark and teal on the emulator | The Android theme was `DayNight` with the template's teal colors; the WebView's native picker uses it | Android theme always Light, papaya colors (`styles.xml` + `colors.xml`, step 7.9) |
+
+### Deviations from the plan (recorded)
+
+| Plan said | What was built | Why |
+|---|---|---|
+| Upload with a **percentage** (brief: "Ina-upload… 45%") | A spinner with "Uploading…" | CapacitorHttp (Phase 5's fix for CORS / mixed content) gives no upload progress. Photos are compressed to about 20–600 KB, so the wait is short |
+| Requirement screens under `/driver/account/...` | Full-screen routes `/driver/vehicle`, `/driver/requirements`, `/driver/requirements/:code` (no tab bar) | An upload is a focused task. Home, the Account menu and the list all link to the same screens |
+| Suspended driver: "contact the admin" | A **Call the admin** button that shows only when `environment.supportPhone` is set; it's empty for now | The town's real support number isn't decided yet. **Set it before release** |
+| The admin can reject a tricycle by hand (decision 1) | Not in the API yet | It belongs on the admin web dashboard (Phase 14). Automatic verification works now |
+| Push reminders at 30 / 7 days | Not built; the app shows "Expiring" and the Home banner on its own | Phase 13 (notifications), as planned |
 
 ---
 
@@ -447,3 +466,160 @@ Then **once per affected driver**: `recalculate()` → compliance `expired`, **s
 **Not in this step:** the reminders 30 and 7 days before expiry (push notifications) come with Phase 13; the app already shows "Mag-e-expire sa {n} araw" from `days_until_expiry`.
 
 **Part A (API) is complete:** role guard + compliance rules (7.1), tricycles (7.2), uploads (7.3), admin review (7.4), expiry (7.5). Part B (the mobile screens) starts with 7.7.
+
+### 7.7 Camera, compression and the driver services (mobile)
+
+**What was added:**
+
+| Piece | Role |
+|---|---|
+| `@capacitor/camera` 8.2.4 | Android's own camera screen and photo picker. **Needs no Android permission** (only `saveToGallery` would, and the app never saves ID photos to the gallery) |
+| `core/services/photo.service.ts` | `take('camera' \| 'gallery')`: the camera plugin resizes **natively** to ≤ 1600 px, JPEG 80%, with the right orientation (faster than JavaScript on a low-end phone). `fromFile(file)`: a picked PDF passes through, a picked image is compressed. `release()` frees the preview's memory. Backing out of the camera returns `null`, not an error |
+| `shared/utilities/image-compress.ts` | `fitWithin()` (keep proportions, never enlarge), `compressImage()` (canvas → JPEG, honouring the photo's EXIF orientation): the **safety net** for anything still over 4.5 MB and for file-picker images |
+| `shared/models/driver.model.ts` | TypeScript shapes of the Phase 7 API (requirement, checklist row, tricycle, document) |
+| `core/services/vehicle.service.ts` | `load`, `create`, `update`; `active` = the tricycle that counts |
+| `core/services/driver-documents.service.ts` | `loadChecklist()` (cached as a signal for Home and the list), `upload()` (multipart: `files[]` + `sides[]` in the same order; empty fields aren't sent; 90 s timeout; reloads the checklist afterwards), `document(id)` |
+| `core/services/api-call.ts` | One helper for every API call: timeout + any failure → the app's `ApiError` in the app's language |
+| `auth.service.ts` | Logout also clears the cached tricycle and checklist, so the next person on the phone never sees the previous driver's papers |
+| Diagnostics "Camera (Phase 7)" | Take photo / Choose from gallery / Pick a file → preview + pixels + size: the camera and compression can be checked on a phone before the real screens exist |
+
+**Privacy rule kept (phase-0 § H):** photos exist only in memory (a `Blob` + a temporary preview URL), are never written to SQLite or app storage, and the preview memory is freed when the photo is replaced, removed or the page closes. If Android closes the app while the camera is open (it can on low-memory phones), that photo is lost and the driver takes it again; the brief accepts this.
+
+**A deviation from the brief (recorded):** the brief asks for an upload **percentage** ("Ina-upload… 45%"). Requests go through **CapacitorHttp** (Phase 5's fix for CORS and mixed content), which doesn't report upload progress. The upload screen will show a spinner with "Ina-upload…". Compressed photos are small (typically 200–600 KB), so the wait is short.
+
+**Open risk, checked first in 7.8:** that CapacitorHttp sends the multipart form (with the photo files) correctly from the phone. The unit tests prove what the app *builds*; only a real upload from a device proves what arrives.
+
+**Tests** (mobile, now **47 / 47**): `image-compress.spec.ts` (1600 px landscape/portrait, never enlarge, readable sizes) · `driver-documents.service.spec.ts` (`files[]` and `sides[]` in the same order, empty fields not sent, checklist reloaded after an upload, an API refusal becomes `ApiError` with its code, the active tricycle after create/update, `clear()`).
+
+**Problems found**
+
+| # | Problem | Cause | Fix |
+|---|---|---|---|
+| 1 | 4 unit tests failed at once, including the unrelated Welcome test | The service needs a few async "ticks" before it sends the checklist reload; the test waited only one, so a request stayed open and the failure cascaded | Wait with `setTimeout` (all pending async work finishes) before checking |
+| 2 | On the emulator, login said "Walang internet o hindi maabot ang server" | `php artisan serve` had stopped (its terminal was closed) | Start it again. Checklist when the phone can't reach the API: WAMP green · `php artisan serve` running · `npm run adb:reverse` |
+
+**Checked on the emulator:** Diagnostics → Camera → Take photo → Android camera → ✓ → **1200 × 1600 px · 21 KB · image/jpeg** (the emulator's scene is flat colours; a real license photo is a few hundred KB). Screenshots: `.impeccable/review/p77-*.png`.
+
+### 7.8 The driver screens (mobile)
+
+**What was added:**
+
+| Piece | Role |
+|---|---|
+| `features/driver/requirement-view.ts` | **One place** that turns an API requirement state into what the driver sees: the chip (kind + word + icon), the detail line ("Expires in 29 days", the admin's reason), the list order (fix first, then missing, waiting, done) and **the one next step** for Home. Home, the list and the detail screen all use it, so they can never disagree. Expiring = approved and ending within 30 days (`EXPIRING_WITHIN_DAYS`) |
+| `shared/components/status-chip` | The status as a **word plus an icon** (DESIGN.md: never color alone). Kinds: ok · wait · fix · warn · missing · locked |
+| `shared/components/photo-slot` | One side of a document (Front / Back): "Take a photo" (camera), "Choose from gallery", "Upload a PDF instead", then the preview with "Retake". Two-way bound (`model()`), so the page simply reads the chosen file |
+| `pages/driver-home` | The **checklist** from the brief: a headline that says where you are ("4 left before you can go online", "The admin is reviewing…", "You're verified!"), ① tricycle ② documents (each paper with its own mark) ③ subscription (Phase 8) ④ go online (Phase 11), and **one** orange button for the next step |
+| `pages/driver-vehicle` | Add / edit the tricycle. A plate typed any way ("abc 5678") is stored as `ABC5678` by the API. Editing the plate of an approved tricycle shows the **consequence first**: "Your OR/CR and MTOP will be checked again" |
+| `pages/driver-requirements` | The 4 papers, sorted so the one that needs fixing is on top, each with its chip and a one-line reason |
+| `pages/driver-requirement` (`requirements/:code`) | What's needed + photo tips · the status and the admin's reason · the upload (Front/Back slots or one slot, expiry date when the paper has one, optional document number) · "Only the admin can see this" · Submit · earlier submissions (history). An approved paper shows "Upload a new copy (renewal)": the old one keeps counting until the new one is approved |
+| `driver.routes.ts` | Full-screen routes `vehicle`, `requirements`, `requirements/:code`, declared **before** the tabs so they open without the tab bar |
+| Account | "My tricycle" and "Documents" now open the real screens |
+| i18n | About 100 new messages (`req.*`, `veh.*`, `photo.*`, `home.*`, `review.*`) in English and Taglish. Requirement **names** come from the API, already in the chosen language |
+
+**Why Home needed a special refresh.** Home is a tab. The upload screens are outside the tabs. When you press Back from an upload, Ionic shows the cached Home tab **without** calling its `ionViewWillEnter`, so the checklist stayed old. The fix:
+
+- Home listens to the router's `NavigationEnd`: every time the URL becomes `/driver/home`, it reloads.
+- It also listens to the app coming back from the background (`AppLifecycleService`), for when the admin approves something while the driver is in another app.
+- An `inFlight` guard stops two reloads from running at once.
+- The reload also refreshes the session (`auth.refreshSession()`), so a **suspension** shows up without logging out.
+
+**The upload, end to end.** The page builds a `FormData` (`files[]` + `sides[]` in the same order, `expires_at`, `document_number`). It goes through CapacitorHttp to `POST /drivers/me/documents`, then reloads the checklist. Errors come back in the driver's language: a refused file type, a missing side, a date in the past, or no connection.
+
+**Checked on the emulator** (driver2 "Pedro", screenshots `.impeccable/review/e2e-*.png`):
+
+| # | Test (§ 5) | Result |
+|---|---|---|
+| R1 | New driver opens Home | "5 left…" (tricycle + 4 papers), next step shown ✅ |
+| R2 | OR/CR before a tricycle | Locked: "Add your tricycle first" ✅ |
+| — | **Real multipart upload from the phone** (the open risk from 7.7) | License Front + Back taken with the camera → on the server: 2 JPEGs of about 23 KB on the **private** disk ✅ |
+| R6 | All 4 uploaded | "The admin is reviewing your 4 documents" ✅ |
+| R7 | Admin (curl, same API as Postman) rejects the clearance with a reason | Home: "Something needs fixing in Clearance"; the reason shows in the detail ✅ |
+| R8 | Re-upload → admin approves all | "You're verified!", 4 / 4, tricycle **automatically** approved ✅ |
+| R11 | Edit the plate | The warning shows **before** saving ✅ |
+| — | Admin suspends the driver while the app is open | After Back: "Your account is suspended…" ✅ (reactivated afterwards) |
+| — | English | Chips "Expiring" / "Approved", requirement names in English ✅ |
+
+R3–R5, R9 and R10 are covered by the API feature tests (7.3–7.5).
+
+**Tests** (mobile, now **55 / 55**): `requirement-view.spec.ts` (8 tests: every chip kind, expiring at 30 days, sort order, next step for each case, steps left).
+
+**Problems found**
+
+| # | Problem | Cause | Fix |
+|---|---|---|---|
+| 1 | Home didn't update after Back | Ionic tab lifecycle (above) | `NavigationEnd` + resume refresh |
+| 2 | The `driver-home` unit test failed | The page now injects the documents and vehicle services | Test providers added |
+| 3 | Build warning NG8102 (`??` on a value that can't be null) | The template guarded an error message twice | Moved into an `uploadErrorText()` method |
+| 4 | Row ② on Home was cramped in Taglish | The chip sat beside a long title | Chips go **under** the titles |
+
+### 7.9 Finish review (impeccable)
+
+The `impeccable-finish-reviewer` agent compared the built screens with the brief, DESIGN.md and the screenshots. It returned **8 material fixes**, all applied:
+
+| # | Finding | Fix |
+|---|---|---|
+| 1 | On a small phone the next-step button scrolled out of sight; the 4 papers made a long list | The button is pinned in a **footer above the tabs** (`ion-footer`); the papers are a **2 × 2 grid** (1 column under 360 px) |
+| 2 | A suspended driver was told to "contact the admin" with no way to do it | A **Call the admin** button (`tel:`), shown only when `environment.supportPhone` is set |
+| 3 | When several papers expire together, the banner named only one | "3 of your documents expire within 29 days…", linking to the list |
+| 4 | Some marks didn't match their meaning: the documents chip looked "done" while papers were missing; photo tips used green (green means *done*); "waiting for review" showed even after approval | Documents chip = **missing** kind while papers are missing; tips in Ink; the hint shows only while `pending` |
+| 5 | The native date picker opened **dark and teal**; an empty date field looked blank | Android theme always Light with papaya colors (`styles.xml`, new `colors.xml`); our own prompt (calendar icon + "Choose a date") inside the empty field |
+| 6 | A disabled Submit didn't say why | "Still missing: photo of the Front, photo of the Back, expiry date" under the button |
+| 7 | The language sheet used a "✓" text character and Ionic's gray default look | A real check icon (and an empty ring for the other choice, like radio buttons), app font, Ink title, 60 px rows, Papaya Tint behind the current one |
+| 8 | The small "Kumusta, Pedro!" line above the headline competed with it | The greeting moved under the headline ("Hi, Pedro.") |
+
+Also fixed while checking: the WebView's page title was still the template's "Ionic App" → **"Papaya HatidGo"** (`src/index.html`; screen readers can announce it).
+
+**DESIGN.md** now records the Phase 7 parts: Warn notice, Status Chips (the one pill shape), Photo Slot, Checklist + pinned footer, Action Sheets, native Android pickers.
+
+**Checked on the emulator** (screenshots `v79-launch.png`, `v79-upload-empty.png`, `v79-datepicker.png`, `v79-lang-sheet.png`). **Mobile 55 / 55 · API 108 / 108.**
+
+### 7.10 Device tests + report
+
+**Done here:** the whole flow on the emulator (7.8 table), the fixes rechecked (7.9), the report (§ 6 and § 8), DESIGN.md, and a local commit.
+
+**The student's run on the Redmi.** The real camera with a real license is the one thing an emulator can't prove.
+
+```powershell
+# 1. API reachable: WAMP green, then in papaya-hatidgo-api:
+php artisan serve
+# 2. Phone plugged in (USB debugging on), in papaya-hatid-go:
+npm run adb:reverse
+adb -s a014e6ac install -r android\app\build\outputs\apk\debug\app-debug.apk
+```
+
+| # | On the Redmi | Expect |
+|---|---|---|
+| D1 | Log in as a driver → Home | Checklist, one next step at the bottom |
+| D2 | Add the tricycle | Saved; plate in capitals |
+| D3 | License → Take a photo (Front, Back) → date → Submit | "Submitted"; Home says the admin is reviewing |
+| D4 | A big gallery photo | Accepted (compressed on the phone) |
+| D5 | Postman: approve / reject (see "How to use the Postman collection") | Home changes after Back or after reopening the app |
+| D6 | Phone in dark mode → open the date picker | Still white with papaya |
+
+**Before testing uploads on any PC:** `C:\php 8.5.6\php.ini` → `upload_max_filesize = 6M`, `post_max_size = 16M`, then restart `php artisan serve`.
+
+---
+
+## 8. Phase 7 report (summary)
+
+**Result:** ✅ The **done when** condition (phase-0 § M) is met: upload → review → verified works from the phone, and every status rule is tested.
+
+| | Phase 7 added | Totals now |
+|---|---|---|
+| API (`papaya-hatidgo-api`) | role guard, compliance service, tricycles, requirements + uploads, admin review + audit log, daily expiry job, business timezone, English/Taglish messages, Postman collection · 1 migration | **108 tests, 469 assertions** |
+| Mobile (`papaya-hatid-go`) | design shell for every tab, English/Taglish setting, camera + compression, driver services, Home checklist, tricycle form, requirements list, detail + upload | **55 unit tests** |
+
+**Commits:**
+
+- API: "Phase 7 Part A" (7.1–7.5).
+- Mobile: "Phase 7: design shell…" (7.1b/7.1c), then "Phase 7 Part B" (7.7–7.10).
+
+**Still open (carried forward):**
+
+- Set `environment.supportPhone` (both environment files) to the town's support number before release.
+- GPS error messages in `location.model.ts` are still Taglish only → Phase 10, when the passenger map uses them.
+- Admin: reject a tricycle by hand → Phase 14.
+- Expiry push reminders → Phase 13.
+
+**Next:** Phase 8: subscriptions + PayMongo (test mode). It unlocks step ③ on the driver's checklist.

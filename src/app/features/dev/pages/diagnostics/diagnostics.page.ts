@@ -18,6 +18,8 @@ import { AppSettingsRepository } from '../../../../core/database/app-settings.re
 import { LocalUser, LocalUserRepository } from '../../../../core/database/local-user.repository';
 import { SQLiteService } from '../../../../core/database/sqlite.service';
 import { ApiHealthResult, ApiHealthService } from '../../../../core/services/api-health.service';
+import { CapturedFile, PhotoService } from '../../../../core/services/photo.service';
+import { formatBytes } from '../../../../shared/utilities/image-compress';
 import { AppLifecycleService } from '../../../../core/services/app-lifecycle.service';
 import { environment } from '../../../../../environments/environment';
 import { LocationService } from '../../../../core/services/location.service';
@@ -68,6 +70,7 @@ export class DiagnosticsPage implements OnDestroy {
   private readonly sqlite = inject(SQLiteService);
   private readonly settings = inject(AppSettingsRepository);
   private readonly localUser = inject(LocalUserRepository);
+  protected readonly photos = inject(PhotoService);
 
   protected readonly apiUrl = environment.apiUrl;
   protected readonly apiResult = signal<ApiHealthResult | null>(null);
@@ -82,6 +85,10 @@ export class DiagnosticsPage implements OnDestroy {
   protected readonly dbError = signal<string | null>(null);
   protected readonly crudSteps = signal<CrudStep[] | null>(null);
   protected readonly dbBusy = signal(false);
+
+  protected readonly photo = signal<CapturedFile | null>(null);
+  protected readonly photoInfo = signal<string | null>(null);
+  protected readonly photoError = signal<string | null>(null);
 
   constructor() {
     // Each effect re-runs when the signals it reads change, so every pause/resume
@@ -166,13 +173,52 @@ export class DiagnosticsPage implements OnDestroy {
     this.addLog(`API: ${result.reachable ? 'OK' : 'FAILED'} (HTTP ${result.status}, ${result.latencyMs} ms)`);
   }
 
+  /** Camera test: take/pick → (native) resize + compress → show the result's size and pixels. */
+  async takePhoto(source: 'camera' | 'gallery'): Promise<void> {
+    this.photoError.set(null);
+    try {
+      this.showPhoto(await this.photos.take(source));
+    } catch (err) {
+      this.photoError.set(err instanceof Error ? err.message : String(err));
+    }
+  }
+
+  async pickFile(event: Event): Promise<void> {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+      this.addLog(`File picked: ${file.name} (${formatBytes(file.size)})`);
+      this.showPhoto(await this.photos.fromFile(file));
+    }
+  }
+
+  private showPhoto(file: CapturedFile | null): void {
+    if (!file) {
+      this.addLog('Camera: cancelled');
+      return;
+    }
+    this.photos.release(this.photo());
+    this.photo.set(file);
+    const size = formatBytes(file.blob.size);
+    if (file.isPdf || !file.previewUrl) {
+      this.photoInfo.set(`PDF · ${size}`);
+      return;
+    }
+    const img = new Image();
+    img.onload = () => {
+      this.photoInfo.set(`${img.naturalWidth} × ${img.naturalHeight} px · ${size} · ${file.blob.type}`);
+      this.addLog(`Photo ready: ${img.naturalWidth}×${img.naturalHeight}, ${size}`);
+    };
+    img.src = file.previewUrl;
+  }
+
   async stopWatch(): Promise<void> {
     await this.location.stopWatch();
   }
 
   ngOnDestroy(): void {
-    // Leaving the page must not leave the GPS running.
+    // Leaving the page must not leave the GPS running, nor a photo in memory.
     void this.location.stopWatch();
+    this.photos.release(this.photo());
   }
 
   private addLog(line: string): void {

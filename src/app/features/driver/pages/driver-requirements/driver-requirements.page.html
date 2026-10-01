@@ -1,0 +1,46 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="hg-toolbar">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/driver/account" text="" />
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-refresher slot="fixed" (ionRefresh)="load($event)">
+    <ion-refresher-content />
+  </ion-refresher>
+
+  <div class="hg-column">
+    <header class="hg-head">
+      <h1 class="hg-head__title">{{ 'req.listTitle' | t }}</h1>
+      <p class="hg-head__lead">{{ 'req.listLead' | t }}</p>
+    </header>
+
+    @if (error(); as e) {
+      <p class="hg-notice hg-notice--alert" role="alert">
+        <ion-icon name="alert-circle" aria-hidden="true" />
+        <span>{{ e.code === 'NETWORK' ? e.message : ('common.loadError' | t) }}</span>
+      </p>
+    }
+
+    @if (loading()) {
+      <div class="list-loading"><ion-spinner name="crescent" /></div>
+    }
+
+    <ul class="req-list">
+      @for (item of rows(); track item.state.requirement.id) {
+        <li>
+          <a class="req-row" [routerLink]="item.state.locked ? '/driver/vehicle' : ['/driver/requirements', item.state.requirement.code]">
+            <span class="req-row__text">
+              <strong class="req-row__name">{{ item.state.requirement.name }}</strong>
+              <app-status-chip [kind]="item.view.kind" [label]="item.view.chipKey | t" [icon]="item.view.icon" />
+              <span class="req-row__detail">{{ item.view.reason ?? (item.view.detailKey | t: item.view.detailParams) }}</span>
+            </span>
+            <ion-icon class="req-row__go" name="chevron-forward" aria-hidden="true" />
+          </a>
+        </li>
+      }
+    </ul>
+  </div>
+</ion-content>

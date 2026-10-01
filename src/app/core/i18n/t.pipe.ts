@@ -3,7 +3,7 @@ import { I18nService } from './i18n.service';
 import { MessageKey } from './messages.en';
 
 /**
- * In templates: {{ 'login.title' | t }} or {{ 'home.hello' | t: { name: firstName() } }}.
+ * In templates: {{ 'login.title' | t }} or {{ 'home.helloLead' | t: { name: firstName() } }}.
  * Not pure: the same key gives a different text after the language changes. The language is a
  * signal read inside t(), so the template re-renders by itself when it changes.
  */

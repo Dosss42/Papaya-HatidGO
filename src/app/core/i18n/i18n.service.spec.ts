@@ -37,7 +37,7 @@ describe('I18nService', () => {
 
   it('fills placeholders', async () => {
     await i18n.setLang('fil');
-    expect(i18n.t('home.hello', { name: 'Juan' })).toBe('Kumusta, Juan!');
+    expect(i18n.t('home.helloLead', { name: 'Juan' })).toBe('Kumusta, Juan.');
     expect(i18n.t('forgot.step', { n: 2 })).toBe('Hakbang 2 sa 2');
   });
 

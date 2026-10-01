@@ -436,3 +436,58 @@ ion-content.hg-tab-page {
     color: var(--hg-ink-soft);
   }
 }
+
+// ---------- Warning notice: something will happen soon / a consequence before an action ----------
+// (expiring documents, "changing the plate means a new review"). Papaya tint + orange border + icon.
+.hg-notice--warn {
+  background: var(--hg-orange-tint);
+  color: var(--hg-ink);
+  box-shadow: inset 0 0 0 2px var(--hg-orange);
+
+  ion-icon {
+    color: var(--hg-orange);
+  }
+}
+
+// A chevron at the end of a tappable menu row (Account).
+.hg-menu__go {
+  flex: none;
+  font-size: 22px;
+  color: var(--hg-ink-soft);
+}
+
+// ---------- Action sheets (e.g. Account › Language) in the app's world, not Ionic's defaults ----------
+// Global on purpose: Ionic renders sheets outside the page, at the end of <body>.
+ion-action-sheet.hg-sheet {
+  --background: var(--hg-ground);
+  --color: var(--hg-ink);
+  --button-color: var(--hg-ink);
+  --button-background-selected: var(--hg-orange-tint);
+  font-family: var(--hg-font);
+
+  .action-sheet-title {
+    padding-top: 20px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--hg-ink);
+  }
+
+  .action-sheet-button {
+    min-height: 60px;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+
+  .action-sheet-icon {
+    margin-inline-end: 16px;
+    color: var(--hg-ink-soft); // the empty ring of a choice not picked
+  }
+
+  .hg-sheet__current {
+    background: var(--hg-orange-tint);
+
+    .action-sheet-icon {
+      color: var(--hg-green);
+    }
+  }
+}

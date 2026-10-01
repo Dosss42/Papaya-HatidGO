@@ -1,0 +1,178 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="hg-toolbar">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/driver/requirements" text="" />
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="hg-column req-page">
+    @if (loading()) {
+      <div class="req-loading"><ion-spinner name="crescent" /></div>
+    }
+
+    @if (loadFailed() && !row()) {
+      <p class="hg-notice hg-notice--alert" role="alert">
+        <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ 'common.loadError' | t }}</span>
+      </p>
+    }
+
+    @if (!loading() && !loadFailed() && !row()) {
+      <p class="hg-notice hg-notice--alert" role="alert">
+        <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ 'req.notFound' | t }}</span>
+      </p>
+    }
+
+    @if (row(); as r) {
+      <header class="hg-head">
+        <h1 class="hg-head__title">{{ r.requirement.name }}</h1>
+      </header>
+
+      <!-- What's needed -->
+      <section class="req-section">
+        <h2 class="req-section__title">{{ 'req.whatNeeded' | t }}</h2>
+        <p class="req-section__text">{{ r.requirement.description }}</p>
+      </section>
+
+      <!-- Current status: chip + detail; when it must be fixed, the reason comes first -->
+      @if (view(); as v) {
+        <section class="req-section">
+          <app-status-chip [kind]="v.kind" [label]="v.chipKey | t" [icon]="v.icon" />
+          @if (v.reason) {
+            <div class="hg-notice hg-notice--alert req-reason" role="alert">
+              <ion-icon name="alert-circle" aria-hidden="true" />
+              <div>
+                <strong>{{ 'req.reasonTitle' | t }}</strong>
+                <p>{{ r.document?.reason }}</p>
+                <p>{{ 'req.howToFix' | t }}</p>
+              </div>
+            </div>
+          } @else {
+            <p class="req-section__text">{{ v.detailKey | t: v.detailParams }}</p>
+          }
+        </section>
+      }
+
+      @if (submitted()) {
+        <p class="hg-notice hg-notice--ok" role="status">
+          <ion-icon name="checkmark-circle" aria-hidden="true" /><span>{{ 'req.submitted' | t }}</span>
+        </p>
+        <a class="hg-button hg-button--primary" routerLink="/driver/requirements" [replaceUrl]="true">{{ 'req.backToList' | t }}</a>
+      }
+
+      @if (r.locked) {
+        <p class="hg-notice hg-notice--info" role="note">
+          <ion-icon name="lock-closed-outline" aria-hidden="true" /><span>{{ 'req.detail.locked' | t }}</span>
+        </p>
+        <a class="hg-button hg-button--primary" routerLink="/driver/vehicle">{{ 'home.next.addTricycle' | t }}</a>
+      }
+
+      @if (r.status === 'approved' && !renewing() && !submitted()) {
+        <button type="button" class="hg-button hg-button--outline" (click)="renewing.set(true)">{{ 'req.renew' | t }}</button>
+      }
+
+      @if (canUpload()) {
+        @if (renewing()) {
+          <p class="hg-notice hg-notice--info" role="note">
+            <ion-icon name="checkmark-circle" aria-hidden="true" /><span>{{ 'req.renewNote' | t }}</span>
+          </p>
+        } @else if (replacesPending()) {
+          <p class="hg-notice hg-notice--info" role="note">
+            <ion-icon name="eye-outline" aria-hidden="true" /><span>{{ 'req.replaceNote' | t }}</span>
+          </p>
+        }
+
+        <!-- Photo guide: most rejections are unreadable photos (brief § 4.2) -->
+        <section class="req-section">
+          <h2 class="req-section__title">{{ 'req.guideTitle' | t }}</h2>
+          <ul class="guide">
+            <li><ion-icon name="crop-outline" aria-hidden="true" />{{ 'req.guide.corners' | t }}</li>
+            <li><ion-icon name="text-outline" aria-hidden="true" />{{ 'req.guide.clear' | t }}</li>
+            <li><ion-icon name="sunny-outline" aria-hidden="true" />{{ 'req.guide.glare' | t }}</li>
+          </ul>
+        </section>
+
+        <div class="slots">
+          @for (side of sides(); track side) {
+            <app-photo-slot [label]="sideLabel(side) | t" [file]="files()[side]" (fileChange)="setFile(side, $event)" />
+          }
+        </div>
+
+        @if (error(); as e) {
+          <p class="hg-notice hg-notice--alert" role="alert">
+            <ion-icon name="alert-circle" aria-hidden="true" />
+            <span>{{ uploadErrorText(e) }}</span>
+          </p>
+        }
+
+        @if (r.requirement.requires_expiry) {
+          <label class="hg-field">
+            <span class="hg-field__label">{{ 'req.expiry' | t }}</span>
+            <span class="hg-field__hint">{{ 'req.expiryHint' | t }}</span>
+            <!-- The phone's own date picker: no typing a date (brief § 4.2). -->
+            <span class="date-wrap">
+              <input class="date-input" [class.date-input--empty]="!expiresAt" type="date" [min]="minDate" [(ngModel)]="expiresAt" name="expires_at" />
+              @if (!expiresAt) {
+                <span class="date-prompt" aria-hidden="true"><ion-icon name="calendar-outline" />{{ 'req.datePrompt' | t }}</span>
+              }
+            </span>
+            @if (error()?.fieldErrors?.['expires_at']; as msg) {
+              <span class="hg-field__error"><ion-icon name="alert-circle" aria-hidden="true" />{{ msg }}</span>
+            }
+          </label>
+        }
+
+        <label class="hg-field">
+          <span class="hg-field__label">{{ 'req.docNumber' | t }}</span>
+          <input class="text-input" type="text" [(ngModel)]="documentNumber" name="document_number" maxlength="50" autocapitalize="characters" />
+        </label>
+
+        <p class="privacy"><ion-icon name="lock-closed-outline" aria-hidden="true" />{{ 'req.privacy' | t }}</p>
+
+        <button
+          type="button"
+          class="hg-button hg-button--primary"
+          [disabled]="!ready() || (r.requirement.requires_expiry && !expiresAt) || submitting()"
+          (click)="submit()"
+        >
+          @if (submitting()) {
+            <ion-spinner name="crescent" aria-hidden="true" /> {{ 'req.submitting' | t }}
+          } @else {
+            {{ 'req.submit' | t }}
+          }
+        </button>
+        @if (stillMissing(); as missing) {
+          <!-- A disabled button must say why (brief § 1: always know what's missing). -->
+          <p class="submit-hint">{{ 'req.stillMissing' | t: { items: missing } }}</p>
+        }
+      }
+
+      <!-- Earlier submissions (collapsed) -->
+      @if (r.document) {
+        <button type="button" class="history-toggle" [attr.aria-expanded]="historyOpen()" (click)="toggleHistory()">
+          {{ 'req.history' | t }}
+          <ion-icon [name]="historyOpen() ? 'chevron-up' : 'chevron-down'" aria-hidden="true" />
+        </button>
+        @if (historyOpen()) {
+          @if (history(); as reviews) {
+            <ul class="history">
+              @for (review of reviews; track $index) {
+                <li>
+                  <strong>{{ reviewKey(review.action) | t }}</strong> · {{ formatDate(review.created_at) }}
+                  @if (review.reason) {
+                    <span class="history__reason">{{ review.reason }}</span>
+                  }
+                </li>
+              } @empty {
+                <li>{{ 'req.historyEmpty' | t }}</li>
+              }
+            </ul>
+          } @else {
+            <div class="req-loading"><ion-spinner name="crescent" /></div>
+          }
+        }
+      }
+    }
+  </div>
+</ion-content>

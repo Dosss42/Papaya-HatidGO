@@ -9,7 +9,9 @@ import { ApiError, toApiError } from '../../shared/utilities/api-error';
 import { AppSettingsRepository } from '../database/app-settings.repository';
 import { LocalUserRepository } from '../database/local-user.repository';
 import { I18nService } from '../i18n/i18n.service';
+import { DriverDocumentsService } from './driver-documents.service';
 import { TokenStorageService } from './token-storage.service';
+import { VehicleService } from './vehicle.service';
 
 /**
  * The single source of truth for "who is logged in" on the phone.
@@ -25,6 +27,8 @@ export class AuthService {
   private readonly settings = inject(AppSettingsRepository);
   private readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
+  private readonly vehicles = inject(VehicleService);
+  private readonly documents = inject(DriverDocumentsService);
   private readonly base = `${environment.apiUrl}/auth`;
   private static readonly DEVICE_NAME = 'papaya-mobile';
   private static readonly TIMEOUT_MS = 15_000;
@@ -175,6 +179,9 @@ export class AuthService {
     this.me.set(null);
     this.syncedAt.set(null);
     this.state.set('guest');
+    // The next person on this phone must never see the previous driver's tricycle or papers.
+    this.vehicles.clear();
+    this.documents.clear();
     await this.tokens.clear();
     try {
       await this.localUser.clear();

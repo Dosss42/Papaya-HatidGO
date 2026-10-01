@@ -1,38 +1,91 @@
 <ion-content class="hg-tab-page">
+  <ion-refresher slot="fixed" (ionRefresh)="load($event)">
+    <ion-refresher-content />
+  </ion-refresher>
+
   <div class="hg-column">
     <app-offline-notice />
 
     <header class="hg-head">
-      <p class="home__hello">{{ 'home.hello' | t: { name: firstName() } }}</p>
       <h1 class="hg-head__title">
         @for (word of headlineWords(); track $index) {<span class="hg-nowrap">{{ word }}</span>{{ ' ' }}}
       </h1>
+      <p class="hg-head__lead">
+        {{ 'home.helloLead' | t: { name: firstName() } }}
+        @if (waiting()) {
+          {{ 'home.waitNotice' | t }}
+        }
+      </p>
     </header>
 
-    <ol class="checklist" [attr.aria-label]="'home.checklistAria' | t">
-      @for (item of checklist; track item.title; let i = $index) {
-        <li class="checklist__row">
-          <span class="checklist__num" aria-hidden="true">{{ i + 1 }}</span>
-          <span class="checklist__text">
-            <strong>{{ item.title | t }}</strong>
-            <span>{{ item.detail | t }}</span>
-          </span>
-          @if (item.locked) {
-            <span class="hg-tag"><ion-icon name="lock-closed-outline" aria-hidden="true" />{{ 'common.locked' | t }}</span>
-          } @else {
-            <span class="hg-tag">{{ 'common.soon' | t }}</span>
-          }
-        </li>
-      }
-    </ol>
+    @if (loadFailed()) {
+      <p class="hg-notice hg-notice--alert" role="alert">
+        <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ 'common.loadError' | t }}</span>
+      </p>
+    }
 
-    <p class="hg-notice hg-notice--info" role="note">
-      <ion-icon name="construct-outline" aria-hidden="true" />
-      <span>{{ 'home.preview' | t }}</span>
-    </p>
+    @if (expiring(); as soon) {
+      <a class="hg-notice hg-notice--warn home__expiring" [routerLink]="soon.link">
+        <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ soon.text }}</span>
+      </a>
+    }
 
-    @if (nextStep(); as step) {
-      <button class="hg-button hg-button--primary" type="button" disabled>{{ step | t }}</button>
+    @if (loading()) {
+      <div class="home__loading"><ion-spinner name="crescent" /></div>
+    } @else {
+      <ol class="checklist" [attr.aria-label]="'home.checklistAria' | t">
+        @for (item of items(); track item.title; let i = $index) {
+          <li>
+            @if (item.link) {
+              <a class="checklist__row checklist__row--link" [routerLink]="item.link">
+                <span class="checklist__num" aria-hidden="true">{{ i + 1 }}</span>
+                <span class="checklist__text">
+                  <strong>{{ item.title | t }}</strong>
+                  <app-status-chip [kind]="item.kind" [label]="item.status" [icon]="item.icon" />
+                  @if (i === 1) {
+                    <span class="checklist__docs">
+                      @for (doc of docChips(); track doc.name) {
+                        <span class="mini" [class]="'mini mini--' + doc.view.kind">
+                          <ion-icon [name]="doc.view.icon" aria-hidden="true" />{{ doc.name }}
+                        </span>
+                      }
+                    </span>
+                  }
+                </span>
+                <ion-icon class="checklist__go" name="chevron-forward" aria-hidden="true" />
+              </a>
+            } @else {
+              <span class="checklist__row">
+                <span class="checklist__num" aria-hidden="true">{{ i + 1 }}</span>
+                <span class="checklist__text">
+                  <strong>{{ item.title | t }}</strong>
+                  <app-status-chip [kind]="item.kind" [label]="item.status" [icon]="item.icon" />
+                </span>
+              </span>
+            }
+          </li>
+        }
+      </ol>
     }
   </div>
 </ion-content>
+
+<!-- The ONE next step, always in the thumb zone above the tab bar (brief § 3). -->
+@if (!loading() && (nextLabel() || suspended())) {
+  <ion-footer class="ion-no-border home__footer">
+    <div class="hg-column">
+      @if (suspended()) {
+        @if (supportPhone) {
+          <a class="hg-button hg-button--outline" [href]="'tel:' + supportPhone">
+            <ion-icon name="call-outline" aria-hidden="true" />{{ 'home.contactAdmin' | t }}
+          </a>
+        }
+      } @else if (next()?.kind === 'subscribe') {
+        <button class="hg-button hg-button--primary" type="button" disabled>{{ nextLabel() }}</button>
+        <p class="home__hint">{{ 'home.subscribeSoon' | t }}</p>
+      } @else if (nextLabel(); as label) {
+        <button class="hg-button hg-button--primary" type="button" (click)="goNext()">{{ label }}</button>
+      }
+    </div>
+  </ion-footer>
+}

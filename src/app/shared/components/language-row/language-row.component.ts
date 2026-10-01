@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { ActionSheetController, IonIcon } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { chevronForward, languageOutline } from 'ionicons/icons';
+import { checkmarkCircle, chevronForward, ellipseOutline, languageOutline } from 'ionicons/icons';
 import { I18nService, Lang } from '../../../core/i18n/i18n.service';
 import { TranslatePipe } from '../../../core/i18n/t.pipe';
 
@@ -31,7 +31,7 @@ export class LanguageRowComponent {
   private readonly sheets = inject(ActionSheetController);
 
   constructor() {
-    addIcons({ languageOutline, chevronForward });
+    addIcons({ checkmarkCircle, ellipseOutline, languageOutline, chevronForward });
   }
 
   /** Each language is always named in itself, so it's findable whatever is showing now. */
@@ -41,12 +41,17 @@ export class LanguageRowComponent {
 
   protected async pick(): Promise<void> {
     const current = this.i18n.lang();
+    // Like radio buttons: the current language gets a check AND a tinted row (a mark plus color,
+    // DESIGN.md); the other gets an empty ring, so both labels line up.
     const option = (lang: Lang) => ({
-      text: `${this.name(lang)}${lang === current ? ' ✓' : ''}`,
+      text: this.name(lang),
+      icon: lang === current ? 'checkmark-circle' : 'ellipse-outline',
+      cssClass: lang === current ? 'hg-sheet__current' : undefined,
       handler: () => void this.i18n.setLang(lang),
     });
     const sheet = await this.sheets.create({
       header: this.i18n.t('lang.setting'),
+      cssClass: 'hg-sheet', // styled in theme/world.scss
       buttons: [option('en'), option('fil'), { text: this.i18n.t('common.cancel'), role: 'cancel' }],
     });
     await sheet.present();

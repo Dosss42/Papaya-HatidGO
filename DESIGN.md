@@ -200,7 +200,7 @@ Flat. No drop shadows anywhere. Depth comes from tonal grounds (white screen, wa
 
 ## Shapes
 
-One soft radius (16px) on every button, field, card and notice. The only other shape is the full circle of the logo disc. Control borders are 2px Field Line; selected is 3px Deep Papaya. Nothing is sharp-cornered, nothing is pill-shaped.
+One soft radius (16px) on every button, field, card and notice. The only other shape is the full circle of the logo disc. Control borders are 2px Field Line; selected is 3px Deep Papaya. Nothing is sharp-cornered, and nothing you can tap is pill-shaped. The one exception is the small status chip (Phase 7). It is a fully rounded pill on purpose, so a status never looks like a button.
 
 ## Components
 
@@ -223,7 +223,29 @@ Big, calm and full-width.
 Two equal cards side by side ("Pasahero", "Driver"), Warm Field ground, 2px Field Line border, 104px tall, 36px icon over a 1.1rem/700 name. Selected: 3px Deep Papaya border, Papaya Tint ground, orange icon, and a green check-circle in the top-right corner. The driver icon is the authored tricycle (Ionicons-style 32px round strokes, currentColor, viewBox cropped to "40 56 464 464" so it matches person-outline in size).
 
 ### Notices
-Full-width marked messages: 16px radius, 14px 16px padding, 24px leading icon, 2px inset border. Alert: Alert Ground, Alert text and border, alert-circle icon, `role="alert"`. OK: Leaf Tint ground, Ink text, green border and icon (checkmark-circle or mail-outline).
+Full-width marked messages: 16px radius, 14px 16px padding, 24px leading icon, 2px inset border. Alert: Alert Ground, Alert text and border, alert-circle icon, `role="alert"`. OK: Leaf Tint ground, Ink text, green border and icon (checkmark-circle or mail-outline). Warn (Phase 7): Papaya Tint ground, Ink text, Deep Papaya border and icon. Use it for a consequence before an action ("a new plate sends your OR/CR and MTOP back to review"), or for "expiring soon".
+
+### Status Chips (Phase 7)
+A word plus an icon in a small pill (1rem/700, 18px icon, 2px inset border). One kind per meaning, and color is never the only signal:
+- **ok:** Leaf Tint, green border and check (Approved / Done).
+- **wait:** Warm Field, Field Line border, clock (Under review).
+- **fix:** Alert Ground, Alert text and border (Needs fixing / Expired).
+- **warn:** Papaya Tint, Deep Papaya (Expiring).
+- **missing / locked:** white ground, Hairline border, Soft Ink, with an empty ring or a lock.
+
+The mapping lives in `features/driver/requirement-view.ts`, so Home, the list and the detail screen always agree.
+
+### Photo Slot (Phase 7)
+One Warm Field card per side (Front / Back), with a 2px Field Line border and a 16px radius. The side's name sits on top. Below it come one outline "Take a photo" button (camera icon) and two text buttons, "Choose from gallery" and "Upload a PDF instead". Once a photo is taken, the card shows the preview instead, with a "Retake" button. A photo lives only in memory and is never saved to the phone.
+
+### Checklist (Driver Home, Phase 7)
+Numbered steps (① tricycle ② documents ③ subscription ④ go online). Each step is a 2px ring with its number, then a title (1.1rem/800), then its status chip *under* the title, so long Taglish never squeezes the row. The documents step lists the 4 papers in a 2-column grid (1 column under 360px), each with its own icon. Rows are split by 2px Hairline. **The one next-step button is pinned in a white footer above the tabs** (`ion-footer`, 2px Hairline top). The driver always sees what to do next without scrolling. When the button is disabled, one Soft Ink line under it says why.
+
+### Action Sheets
+Ionic sheets get the class `hg-sheet` (`theme/world.scss`). They use Atkinson, a 1.1rem/800 Ink title, 60px rows and Ink labels. A choice works like a radio button: a green check-circle on a Papaya Tint row for the current choice, and a Soft Ink empty ring for the others, so the labels line up.
+
+### Native Android pickers
+The WebView's date picker uses the Android theme (`android/app/src/main/res/values/styles.xml`), which is always Light with Deep Papaya as primary and accent (`colors.xml`). That keeps it white with papaya, never dark or teal. An empty date field shows the app's own prompt, a calendar icon plus "Choose a date", because Android's empty date input shows nothing.
 
 ### Navigation
 White toolbar, no border, 60px; back button in Ink, 52px target, 28px arrow. No title in the toolbar.

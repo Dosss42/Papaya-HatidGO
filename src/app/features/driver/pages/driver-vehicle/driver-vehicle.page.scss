@@ -1,0 +1,26 @@
+// Tricycle form: the auth-form rhythm (labels above, 60px fields, one orange button).
+
+.vehicle-form {
+  padding: 0 4px calc(env(safe-area-inset-bottom) + 24px);
+}
+
+.vehicle-status {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+  margin: -8px 0 24px;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--hg-ink-soft);
+}
+
+// Brand and model side by side when there's room.
+.pair {
+  display: grid;
+  grid-template-columns: 1fr;
+  column-gap: 12px;
+
+  @media (min-width: 400px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}

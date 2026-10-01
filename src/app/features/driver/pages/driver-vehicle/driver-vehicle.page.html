@@ -1,0 +1,100 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="hg-toolbar">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/driver/home" text="" />
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form class="hg-column vehicle-form" [formGroup]="form" (ngSubmit)="save()" novalidate>
+    <header class="hg-head">
+      <h1 class="hg-head__title">{{ 'veh.title' | t }}</h1>
+      <p class="hg-head__lead">{{ 'veh.lead' | t }}</p>
+    </header>
+
+    @if (statusChip(); as chip) {
+      <div class="vehicle-status">
+        <app-status-chip [kind]="chip.kind" [label]="chip.key | t" [icon]="chip.icon" />
+        @if (tricycle()?.status === 'pending') {
+          <span>{{ 'veh.statusHint' | t }}</span>
+        }
+      </div>
+    }
+
+    @if (loadFailed()) {
+      <p class="hg-notice hg-notice--alert" role="alert">
+        <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ 'common.loadError' | t }}</span>
+      </p>
+    }
+
+    @if (error(); as e) {
+      @if (!e.fieldErrors['plate_number'] && !e.fieldErrors['color'] && !e.fieldErrors['body_number']) {
+        <p class="hg-notice hg-notice--alert" role="alert">
+          <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ e.message }}</span>
+        </p>
+      }
+    }
+
+    @if (done(); as d) {
+      <p class="hg-notice hg-notice--ok" role="status">
+        <ion-icon name="checkmark-circle" aria-hidden="true" />
+        <span>{{ (d === 'added' ? 'veh.added' : 'veh.saved') | t }}</span>
+      </p>
+    }
+
+    <label class="hg-field">
+      <span class="hg-field__label">{{ 'veh.plate' | t }}</span>
+      <ion-input formControlName="plate_number" fill="outline" autocapitalize="characters" [placeholder]="'veh.platePlaceholder' | t" />
+      @if (fieldError('plate_number'); as msg) {
+        <span class="hg-field__error"><ion-icon name="alert-circle" aria-hidden="true" />{{ msg }}</span>
+      }
+    </label>
+
+    @if (plateChanged()) {
+      <!-- The consequence comes BEFORE the action (brief § 4.3). -->
+      <p class="hg-notice hg-notice--warn" role="note">
+        <ion-icon name="information-circle-outline" aria-hidden="true" /><span>{{ 'veh.plateWarning' | t }}</span>
+      </p>
+    }
+
+    <label class="hg-field">
+      <span class="hg-field__label">{{ 'veh.color' | t }}</span>
+      <ion-input formControlName="color" fill="outline" autocapitalize="words" [placeholder]="'veh.colorPlaceholder' | t" />
+      @if (fieldError('color'); as msg) {
+        <span class="hg-field__error"><ion-icon name="alert-circle" aria-hidden="true" />{{ msg }}</span>
+      }
+    </label>
+
+    <label class="hg-field">
+      <span class="hg-field__label">{{ 'veh.body' | t }}</span>
+      <ion-input formControlName="body_number" fill="outline" autocapitalize="characters" [placeholder]="'veh.bodyPlaceholder' | t" />
+      @if (fieldError('body_number'); as msg) {
+        <span class="hg-field__error"><ion-icon name="alert-circle" aria-hidden="true" />{{ msg }}</span>
+      }
+    </label>
+
+    <div class="pair">
+      <label class="hg-field">
+        <span class="hg-field__label">{{ 'veh.make' | t }}</span>
+        <ion-input formControlName="make" fill="outline" autocapitalize="words" [placeholder]="'veh.makePlaceholder' | t" />
+      </label>
+      <label class="hg-field">
+        <span class="hg-field__label">{{ 'veh.model' | t }}</span>
+        <ion-input formControlName="model" fill="outline" [placeholder]="'veh.modelPlaceholder' | t" />
+      </label>
+    </div>
+
+    @if (done() === 'added') {
+      <a class="hg-button hg-button--primary" routerLink="/driver/requirements">{{ 'veh.toDocuments' | t }}</a>
+    } @else {
+      <button class="hg-button hg-button--primary" type="submit" [disabled]="saving()">
+        @if (saving()) {
+          <ion-spinner name="crescent" aria-hidden="true" /> {{ 'veh.saving' | t }}
+        } @else {
+          {{ (tricycle() ? 'veh.save' : 'veh.add') | t }}
+        }
+      </button>
+    }
+  </form>
+</ion-content>
