@@ -1,0 +1,77 @@
+<!-- Back can't close it while "Tinatanggap…": the answer decides what comes next. -->
+<ion-modal [isOpen]="open()" [backdropDismiss]="false" [canDismiss]="!shift.accepting()" (didDismiss)="onDismiss()" class="offer-modal">
+  <ng-template>
+    @if (offer(); as o) {
+      <div class="offer" role="alertdialog" aria-labelledby="offer-title" aria-describedby="offer-fare">
+        <div class="offer__body">
+          <!-- 1: the urgency, stated honestly (the request's real expiry). -->
+          <header class="offer__top">
+            <h2 id="offer-title" class="offer__title">{{ 'offer.title' | t }}</h2>
+            @if (!shift.outcome()) {
+              <span class="offer__time" role="timer" [attr.aria-label]="'offer.timeAria' | t: { time: timeLeft() }">{{ timeLeft() }}</span>
+            }
+          </header>
+          @if (shift.queued() > 0) {
+            <p class="offer__more">{{ 'offer.more' | t: { n: shift.queued() } }}</p>
+          }
+
+          @if (shift.outcome(); as outcome) {
+            <!-- Taken / gone: no blame, no dialog; closes by itself after 3 s. -->
+            <p class="offer__outcome" role="status">
+              <ion-icon name="close-circle" aria-hidden="true" />
+              {{ (outcome === 'taken' ? 'offer.taken' : 'offer.gone') | t }}
+            </p>
+          } @else {
+            <!-- 2: Balikan commits the driver to waiting: a key reason to accept or skip. -->
+            <p class="offer__type" [class.offer__type--two]="o.ride_type === 'two_way'">{{ typeText(o) }}</p>
+
+            <!-- 3: the fare, the largest number on the screen. -->
+            <p id="offer-fare" class="offer__fare">{{ peso(o.estimated_total) }} <span>{{ 'offer.estimate' | t }}</span></p>
+
+            <!-- 4–5: where to go with no fare yet, then where the paid trip goes. -->
+            <dl class="offer__places">
+              <div class="offer__place">
+                <dt><ion-icon name="navigate-circle-outline" aria-hidden="true" />{{ 'offer.pickupKm' | t: { km: km(o.pickup.distance_from_you_km) } }}</dt>
+                <dd>{{ o.pickup.landmark || ('book.pinOnly' | t) }}</dd>
+              </div>
+              <div class="offer__place">
+                <dt><ion-icon name="flag-outline" aria-hidden="true" />{{ 'offer.destKm' | t: { km: km(o.distance_km) } }}</dt>
+                <dd>{{ o.destination.landmark || ('book.pinOnly' | t) }}</dd>
+              </div>
+            </dl>
+
+            <!-- 6: a note can change the decision (luggage, space). -->
+            @if (o.passenger_note) {
+              <p class="offer__note">
+                <ion-icon name="chatbubble-ellipses-outline" aria-hidden="true" />
+                <span><strong>{{ 'offer.note' | t }}:</strong> "{{ o.passenger_note }}"</span>
+              </p>
+            }
+
+            @if (shift.acceptError(); as message) {
+              <p class="hg-notice hg-notice--alert" role="alert">
+                <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ message }}</span>
+              </p>
+            }
+          }
+        </div>
+
+        <!-- 7: far apart; Accept where the right thumb rests, larger. -->
+        @if (!shift.outcome()) {
+          <div class="offer__actions">
+            <button type="button" class="hg-button hg-button--outline offer__skip" (click)="shift.skip()" [disabled]="shift.accepting()">
+              {{ 'offer.skip' | t }}
+            </button>
+            <button type="button" class="hg-button hg-button--primary offer__accept" (click)="shift.accept()" [disabled]="shift.accepting()">
+              @if (shift.accepting()) {
+                <ion-spinner name="crescent" aria-hidden="true" />{{ 'offer.accepting' | t }}
+              } @else {
+                {{ 'offer.accept' | t }}
+              }
+            </button>
+          </div>
+        }
+      </div>
+    }
+  </ng-template>
+</ion-modal>

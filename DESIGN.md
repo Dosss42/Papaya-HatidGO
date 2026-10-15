@@ -275,8 +275,22 @@ The One-way / Balikan cards follow the **Plan Card** rules: full width, 84px min
 - **Stage track:** dots joined by a 3px line. Done = filled Deep Papaya. Current = papaya ring with the label in Ink 800. To do = Hairline ring. Labels are 1rem and wrap at word breaks. A 6-stage Balikan track shows only the current label (the others stay readable to screen readers).
 - **Driver card:** Warm Field, a 2px Hairline ring. A papaya-tint initials avatar (no photos), name, "{color} tricycle", ★ average only from 5 ratings. The **call** button is a 56px **outline** disc (Deep Papaya ring and icon), never green: green means done.
 - **Pay line (completed):** the most prominent thing, before the rating: Papaya Tint, a 2px Deep Papaya border, 1.35rem/800.
-- **Cancel:** a quiet Soft Ink text button at the very bottom, never next to the call button. It opens the flow's one modal sheet, which holds the only **danger button** in the app (`.hg-button--danger`: Alert fill, white text).
+- **Cancel:** a quiet Soft Ink text button at the very bottom, never next to the call button. It opens the flow's one modal sheet, which holds the **danger button** (`.hg-button--danger`: Alert fill, white text), used only to confirm what can't be undone: cancelling a ride (both roles) and the driver's "End the ride here" (Phase 11).
 - **Weak connection:** a slim Alert banner directly above the status line, "Weak connection. Last update: 40 sec ago." The last known status stays on screen.
+
+### Driver at work (Phase 11)
+- **Work state as the headline:** "You're offline." / "● You're online" at 2.1rem/800, the largest text on Home. Online carries a Leaf Green dot with a Leaf Tint halo **and** the words (never color alone). A Soft Ink lead says what's happening ("Waiting for passengers…") or why ("You were taken offline." + the reason, with an outline button to the fix).
+- **Go online / Go offline:** Go online is the screen's orange button, extra-large (68px, 1.3rem). Online, it becomes an **outline** "Go offline" of the normal size: going offline is rarer, and a mistap costs requests. No confirmation either way.
+- **Compact map (online only):** edge to edge, ~32vh, under the status-bar scrim. The sheet overlaps its bottom by 16px with a 16px top radius. The marker moves only with each sent position. "Where am I?" is a 52px white pill with a 2px Field Line ring, bottom-right. No map while offline or with GPS lost.
+- **Today card:** Warm Field, 2px Hairline, 64px, "Today: ₱… · n rides" in 1.2rem/800 with a chevron (→ Earnings). It shows "Today: —" until the server answers, never a made-up ₱0.
+- **Tips:** Soft Ink lines with a 22px outline icon (battery, volume), no card.
+- **Request takeover:** a full-screen white modal, nothing else on screen.
+  - The order: title + countdown pill (Papaya Tint, 2px Deep Papaya, tabular numbers) → type tag (Balikan = 3px Ink ring) → **fare 3.5rem/800**, the largest number → Pickup / Drop-off rows (orange outline icons, the landmark in Soft Ink) → note card → actions.
+  - Skip (outline) left, Accept (orange, 1.8× wider, 72px) right, 20px apart.
+  - "Taken" / "gone" replace the content with a centered Soft Ink mark + the sentence, then close after 3 s.
+- **Driver ride screen:** the passenger's ride screen, mirrored. The map is 30vh in every phase. Then the status line, then **where to go** (Sundo / Hatid label with an orange icon, the landmark 1.2rem/800, a 56px outline "Directions" button to Google Maps), then the passenger card (initial, first name, call disc). The footer holds one 68px next-step button. "Collect ₱… (cash)" uses the pay-line style. Back floats on the map only once the ride is over.
+- **Period switch (Earnings):** three equal 56px choice chips (Today / This week / This month), chosen = 3px Deep Papaya + Papaya Tint + 800 weight. The total is in a Warm Field card at 3rem/800, the rides below it as the Rides list rows.
+- **Sound:** the request tone is the app's only sound (a generated two-note chime). It repeats with a 700ms vibration every 5 s until the driver acts.
 
 ### Logo
 Authored SVG: a side-view Philippine tricycle with one roof over sidecar and driver, a papaya leaf growing from the roof. Deep Papaya roof and motorcycle, Bright Papaya sidecar and hubs, leaf greens, Ink wheels and frame, white window. Decorative (`aria-hidden`); the name is always written beside it. On Get Started it sits on a 232px Papaya Tint disc and settles in once (500ms rise and fade, ease-out); under reduced motion it appears instantly.

@@ -1,13 +1,48 @@
 <ion-content class="hg-tab-page">
+  <ion-refresher slot="fixed" (ionRefresh)="load($event)">
+    <ion-refresher-content />
+  </ion-refresher>
+
   <div class="hg-column">
     <header class="hg-head">
       <h1 class="hg-head__title">{{ 'rides.title' | t }}</h1>
     </header>
 
-    <app-empty-state
-      icon="receipt-outline"
-      [title]="'rides.emptyTitle' | t"
-      [text]="'rides.driverEmpty' | t"
-    />
+    @if (failed()) {
+      <p class="hg-notice hg-notice--alert" role="alert">
+        <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ 'rides.loadError' | t }}</span>
+      </p>
+    }
+
+    @if (list(); as rides) {
+      @if (rides.length === 0) {
+        <app-empty-state icon="receipt-outline" [title]="'rides.emptyTitle' | t" [text]="'rides.driverEmpty' | t" />
+      } @else {
+        <ul class="trips">
+          @for (ride of rides; track ride.id) {
+            <li>
+              <a class="trip" [routerLink]="['/driver/ride', ride.id]">
+                <span class="trip__main">
+                  <span class="trip__top">
+                    <span class="trip__date">{{ dateTime(ride.times.accepted_at ?? ride.times.requested_at ?? '') }}</span>
+                    <span class="trip__fare">{{ peso(ride.fare.total) }}</span>
+                  </span>
+                  <span class="trip__route">
+                    {{ ride.pickup.landmark || ('book.pinOnly' | t) }} → {{ ride.destination.landmark || ('book.pinOnly' | t) }}
+                  </span>
+                  <span class="trip__chips">
+                    <app-status-chip [kind]="chip(ride).kind" [label]="chip(ride).key | t" [icon]="chip(ride).icon" />
+                    <span class="trip__type">{{ (ride.ride_type === 'one_way' ? 'book.oneWay' : 'book.twoWay') | t }}</span>
+                  </span>
+                </span>
+                <ion-icon class="trip__go" name="chevron-forward" aria-hidden="true" />
+              </a>
+            </li>
+          }
+        </ul>
+      }
+    } @else if (!failed()) {
+      <div class="trips__loading"><ion-spinner name="crescent" /></div>
+    }
   </div>
 </ion-content>

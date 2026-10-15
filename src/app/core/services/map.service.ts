@@ -20,13 +20,30 @@ export interface AppMap {
   setView(point: LatLng, zoom?: number): void;
   /** Show, move or (null) remove one of the three markers. */
   setMarker(kind: MarkerKind, point: LatLng | null): void;
-  /** Zoom and pan so every point is visible. */
-  fit(points: LatLng[]): void;
+  /**
+   * Zoom and pan so every point is visible. `inset` keeps points clear of what floats over the
+   * map's edges (the status bar + back button on top, the sheet at the bottom), in CSS pixels.
+   */
+  fit(points: LatLng[], inset?: { top: number; bottom: number }): void;
+  /** Is this point inside the visible area? (The driver's map re-centers only when it isn't.) */
+  contains(point: LatLng): boolean;
   /** Called after each pan / zoom with the new center. Returns a function that stops listening. */
   onMoveEnd(listener: (center: LatLng) => void): () => void;
   /** Tell the map its box changed size (Leaflet measures it once). */
   resize(): void;
   destroy(): void;
+}
+
+/**
+ * How much of a ride map is covered: on top, the status bar and the floating back button (the
+ * first `.ride__back` next to the map); at the bottom, the sheet's rounded overlap (16 px).
+ * Measured, so it holds on every phone's status-bar height (Phase 11 fix).
+ */
+export function rideMapInset(mapEl: HTMLElement): { top: number; bottom: number } {
+  const wrap = mapEl.parentElement;
+  const back = wrap?.querySelector('.ride__back')?.getBoundingClientRect();
+  const top = back && wrap ? back.bottom - wrap.getBoundingClientRect().top + 16 : 60; // else: the status bar only
+  return { top, bottom: 36 };
 }
 
 /**
@@ -71,13 +88,19 @@ export class MapService {
         }
         markers.set(kind, L.marker([point.lat, point.lng], { icon: MapService.icon(kind), keyboard: false, interactive: false }).addTo(map));
       },
-      fit: (points) => {
+      fit: (points, inset) => {
         if (points.length === 1) {
           map.setView([points[0].lat, points[0].lng], 16, { animate });
         } else if (points.length > 1) {
-          map.fitBounds(L.latLngBounds(points.map((p) => [p.lat, p.lng] as L.LatLngTuple)), { padding: [48, 48], maxZoom: 17, animate });
+          map.fitBounds(L.latLngBounds(points.map((p) => [p.lat, p.lng] as L.LatLngTuple)), {
+            paddingTopLeft: [40, Math.max(40, inset?.top ?? 0)],
+            paddingBottomRight: [40, Math.max(40, inset?.bottom ?? 0)],
+            maxZoom: 17,
+            animate,
+          });
         }
       },
+      contains: (point) => map.getBounds().pad(-0.1).contains([point.lat, point.lng]),
       onMoveEnd: (listener) => {
         const handler = () => {
           const c = map.getCenter();

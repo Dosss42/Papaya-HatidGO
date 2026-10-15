@@ -21,6 +21,7 @@ Index of the project's design and development documents. Each phase leaves a rec
 | [phase-8-subscriptions.md](phase-8-subscriptions.md) | Phase 8 plan + report: plans, PayMongo checkout (test mode) + local test gateway, signed webhook, reconciliation, go-online and booking gates, Subscription screen |
 | [phase-9-rides.md](phase-9-rides.md) | Phase 9 plan + report: fares, booking gates, matching, race-safe accept, ride state machine, cancel/expiry, privacy, RIDE/MATCH tests |
 | [phase-10-passenger-rides.md](phase-10-passenger-rides.md) | Phase 10 plan + report: Book (map + 3 steps), active ride screen, Rides history, MapService (Leaflet + OSM), emulator end to end |
+| [phase-11-driver-rides.md](phase-11-driver-rides.md) | Phase 11 plan + report: Driver Home (offline / online, compact map), request takeover, driver ride screen, earnings, location cadence, two-client ride on the emulator |
 | [IMPECCABLE-GUIDE.md](IMPECCABLE-GUIDE.md) | When and how to use the impeccable design skill |
 | [design-briefs/passenger-booking.md](design-briefs/passenger-booking.md) | ✅ Confirmed UX brief: passenger booking flow (pickup → destination → choose ride + Mag-book) |
 | [design-briefs/active-ride.md](design-briefs/active-ride.md) | ✅ Confirmed UX brief: passenger active ride screen (searching → arriving → trip/Balikan legs → pay + rate) |
@@ -44,7 +45,7 @@ Phase numbers follow [phase-0-analysis.md § M](phase-0-analysis.md#m-developmen
 | 8 | Subscriptions + PayMongo (test mode) | ✅ Done (pay → server-confirmed active; signed + idempotent webhook; reconciliation; go-online and booking gates; Subscription screen for both roles; API 149 tests, mobile 65 tests; real PayMongo keys pending) |
 | 9 | Ride state machine + matching (backend) | ✅ Done (fares, booking gates, nearest-eligible matching, race-safe accept proven live, every transition + 409s, cancel/expiry, privacy; API 194 tests) |
 | 10 | Passenger ride screens (includes a basic map: tiles, center pin, markers; see booking brief) | ✅ Done (Book on a Leaflet map in 3 steps, active ride screen, cancel, rating, Rides history; P1–P11 on the emulator; API 196, mobile 78 tests) |
-| 11 | Driver ride screens + earnings | ⏳ |
+| 11 | Driver ride screens + earnings | ✅ Done (go online with keep-awake + location cadence, full-screen request with tone and real countdown, accept / skip, every ride step incl. Balikan, driver cancel with reason codes, earnings day / week / month, Rides history; D1–D11 on the emulator with the passenger as a second client; API 200, mobile 101 tests; two-phone run pending) |
 | 12 | Maps (Leaflet): live driver marker, route line (basic map arrives in Phase 10) | ⏳ |
 | 13 | Notifications (in-app + FCM) | ⏳ |
 | 14 | Admin web dashboard | ⏳ |

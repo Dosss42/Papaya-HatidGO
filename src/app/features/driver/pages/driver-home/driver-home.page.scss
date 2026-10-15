@@ -109,6 +109,169 @@
   }
 }
 
+// ---------------------------------------------------------------- the work view (Phase 11)
+// driver-home brief § 3: the state is the headline, readable from ~1 m away.
+
+// The compact map, edge to edge at the top (~⅓ of the screen), only while online.
+.work__map-wrap {
+  position: relative;
+  height: 32vh;
+  min-height: 190px;
+  margin: calc(-1 * (env(safe-area-inset-top) + 20px)) -16px 0;
+}
+
+.work__map {
+  position: absolute;
+  inset: 0;
+  background: var(--hg-surface);
+}
+
+// "Nasaan ako?": a white pill on the map, bottom-right, above Leaflet's panes.
+.work__locate {
+  position: absolute;
+  right: 12px;
+  bottom: 28px;
+  z-index: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 52px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: inset 0 0 0 2px var(--hg-field-line);
+  color: var(--hg-ink);
+  font-family: var(--hg-font);
+  font-size: 1rem;
+  font-weight: 700;
+
+  ion-icon {
+    font-size: 22px;
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--hg-focus);
+    outline-offset: 2px;
+  }
+}
+
+// The sheet over the map's bottom edge (as on the ride screen).
+.work__sheet {
+  position: relative;
+  margin-top: -16px;
+  padding-top: 20px;
+  border-radius: 16px 16px 0 0;
+  background: var(--hg-ground);
+}
+
+.work__head {
+  margin: 8px 0 20px;
+}
+
+.work__state {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-size: 2.1rem;
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--hg-ink);
+}
+
+// Online: a green dot AND the words (never color alone). Green = "working", the success color.
+.work__dot {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--hg-green);
+  box-shadow: 0 0 0 5px var(--hg-green-tint);
+}
+
+.work__lead {
+  margin: 6px 0 0;
+  font-size: 1.15rem;
+  color: var(--hg-ink-soft);
+}
+
+.work__gps {
+  flex-wrap: wrap;
+  align-items: center;
+
+  span {
+    flex: 1;
+    min-width: 12rem;
+  }
+
+  .hg-button {
+    width: auto;
+    margin-left: auto;
+    padding: 0 8px;
+  }
+}
+
+.work__fix {
+  margin: -8px 0 20px;
+}
+
+// "Ngayong araw: ₱540 · 9 biyahe": tap → Earnings.
+.work__today {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 64px;
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  border-radius: var(--hg-radius);
+  background: var(--hg-surface);
+  box-shadow: inset 0 0 0 2px var(--hg-line);
+  color: var(--hg-ink);
+  font-size: 1.2rem;
+  font-weight: 800;
+  text-decoration: none;
+
+  ion-icon {
+    flex: none;
+    font-size: 22px;
+    color: var(--hg-ink-soft);
+  }
+
+  &:active {
+    background: var(--hg-orange-tint);
+  }
+}
+
+.work__tips {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--hg-ink-soft);
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    line-height: 1.4;
+  }
+
+  ion-icon {
+    flex: none;
+    margin-top: 1px;
+    font-size: 22px;
+  }
+}
+
+// Mag-online: the action of the screen, extra-large (≥ 64 dp, brief § 6).
+.work__go {
+  min-height: 68px;
+  font-size: 1.3rem;
+}
+
 // The next step lives in a white footer above the tab bar: always visible, always in the thumb zone.
 .home__footer {
   background: var(--hg-ground);

@@ -1,0 +1,66 @@
+// Earnings (Phase 11): period switch, the total as the largest thing, then the rides behind it.
+
+.periods {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 0 0 20px;
+
+  &__item {
+    min-height: 56px;
+    padding: 0 8px;
+    border: 2px solid var(--hg-field-line);
+    border-radius: var(--hg-radius);
+    background: var(--hg-surface);
+    color: var(--hg-ink);
+    font-family: var(--hg-font);
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.2;
+
+    &--on {
+      border: 3px solid var(--hg-orange);
+      background: var(--hg-orange-tint);
+      font-weight: 800;
+    }
+
+    &:focus-visible {
+      outline: 3px solid var(--hg-focus);
+      outline-offset: 2px;
+    }
+  }
+}
+
+.total {
+  margin: 0 0 24px;
+  padding: 20px 16px;
+  border-radius: var(--hg-radius);
+  background: var(--hg-surface);
+  box-shadow: inset 0 0 0 2px var(--hg-line);
+
+  &__amount {
+    margin: 0;
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1.05;
+    font-variant-numeric: tabular-nums;
+    color: var(--hg-ink);
+  }
+
+  &__count {
+    margin: 6px 0 0;
+    font-size: 1.2rem;
+    font-weight: 800;
+  }
+
+  &__note {
+    margin: 4px 0 0;
+    color: var(--hg-ink-soft);
+  }
+}
+
+.earn__list-title {
+  margin: 0 0 4px;
+  font-size: 1.15rem;
+  font-weight: 800;
+}

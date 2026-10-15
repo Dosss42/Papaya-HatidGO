@@ -38,6 +38,12 @@ export const DRIVER_ROUTES: Routes = [
           import('./pages/driver-rides/driver-rides.page').then((m) => m.DriverRidesPage),
       },
       {
+        // Phase 11: the driver's active ride / ride details. A tab child (the tab bar stays), like
+        // the passenger's; Home leads here while a ride is active.
+        path: 'ride/:id',
+        loadComponent: () => import('./pages/driver-ride/driver-ride.page').then((m) => m.DriverRidePage),
+      },
+      {
         path: 'earnings',
         loadComponent: () =>
           import('./pages/driver-earnings/driver-earnings.page').then((m) => m.DriverEarningsPage),

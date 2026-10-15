@@ -1,0 +1,201 @@
+<ion-content class="ride" [fullscreen]="true">
+  <div slot="fixed" class="hg-statusbar-scrim" aria-hidden="true"></div>
+  @if (ride(); as r) {
+    <div class="ride__map-wrap" [class.ride__map-wrap--small]="r.status === 'in_progress' || over()">
+      <div #map class="ride__map" role="img" [attr.aria-label]="'ride.mapAria' | t"></div>
+      <!-- Only once it's over: during a ride, Home would lead straight back here (the resume rule). -->
+      @if (over()) {
+        <ion-back-button class="ride__back" defaultHref="/driver/home" text="" />
+      }
+    </div>
+
+    <div class="hg-column ride__sheet">
+      @if (weak()) {
+        <p class="ride__weak" role="status">
+          <ion-icon name="cloud-offline-outline" aria-hidden="true" />{{ 'ride.weak' | t: { time: lastUpdate() } }}
+        </p>
+      }
+
+      <!-- 1st: what to do now, readable in one glance. -->
+      <h1 class="ride__line">{{ lineText() }}</h1>
+      <p class="hg-visually-hidden" role="status" aria-live="polite">{{ lineText() }}</p>
+
+      @if (stageList().length) {
+        <ol class="stages" [class.stages--compact]="stageList().length > 4" [attr.aria-label]="'ride.stagesAria' | t">
+          @for (stage of stageList(); track stage.key) {
+            <li class="stages__item" [class]="'stages__item stages__item--' + stage.state">
+              <span class="stages__dot" aria-hidden="true"></span>
+              <span class="stages__label">{{ stage.key | t }}</span>
+              @if (stage.state === 'current') {
+                <span class="hg-visually-hidden">({{ 'ride.stageNow' | t }})</span>
+              } @else if (stage.state === 'done') {
+                <span class="hg-visually-hidden">({{ 'ride.stageDone' | t }})</span>
+              }
+            </li>
+          }
+        </ol>
+      }
+
+      @if (returning() && r.passenger) {
+        <p class="hg-notice hg-notice--ok drive__returning" role="alert">
+          <ion-icon name="checkmark-circle" aria-hidden="true" /><span>{{ 'drive.passengerReturning' | t: { passenger: r.passenger.first_name } }}</span>
+        </p>
+      }
+
+      @if (actionError(); as message) {
+        <p class="hg-notice hg-notice--alert" role="alert">
+          <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ message }}</span>
+        </p>
+      }
+
+      <!-- 2nd: where to go now, with directions in Google Maps (on the road, the place matters most). -->
+      @if (heading(); as to) {
+        <div class="drive__place">
+          <span class="drive__place-text">
+            <span class="drive__place-label">
+              <ion-icon [name]="to === 'pickup' ? 'navigate-circle-outline' : 'flag-outline'" aria-hidden="true" />
+              {{ (to === 'pickup' ? 'drive.pickup' : 'drive.dest') | t }}
+              @if (r.current_leg === 'outbound') {
+                · {{ 'ride.leg1' | t }}
+              } @else if (r.current_leg === 'return') {
+                · {{ 'ride.leg2' | t }}
+              }
+            </span>
+            <strong>{{ (to === 'pickup' ? r.pickup.landmark : r.destination.landmark) || ('book.pinOnly' | t) }}</strong>
+          </span>
+          <a class="drive__directions" [href]="directions(r, to)" target="_blank" rel="noopener"
+            [attr.aria-label]="'drive.directionsAria' | t: { place: ((to === 'pickup' ? 'drive.pickup' : 'drive.dest') | t) }">
+            <ion-icon name="navigate-outline" aria-hidden="true" />{{ 'drive.directions' | t }}
+          </a>
+        </div>
+      }
+
+      <!-- 3rd: the passenger (first name; the phone only while the ride is active). -->
+      @if (!over() && r.passenger) {
+        <section class="driver">
+          <div class="driver__top">
+            <span class="driver__avatar" aria-hidden="true">{{ r.passenger.first_name.charAt(0).toUpperCase() }}</span>
+            <span class="driver__who">
+              <span class="driver__name">{{ r.passenger.first_name }}</span>
+              <span class="driver__meta">{{ (r.ride_type === 'one_way' ? 'book.oneWay' : 'book.twoWay') | t }} · {{ 'ride.estimate' | t: { fare: peso(r.fare.total) } }}</span>
+            </span>
+            @if (r.passenger.phone) {
+              <a class="driver__call" [href]="'tel:' + r.passenger.phone" [attr.aria-label]="'drive.call' | t: { passenger: r.passenger.first_name }">
+                <ion-icon name="call" aria-hidden="true" />
+              </a>
+            }
+          </div>
+          @if (r.passenger_note) {
+            <p class="drive__note">
+              <ion-icon name="chatbubble-ellipses-outline" aria-hidden="true" /><span>"{{ r.passenger_note }}"</span>
+            </p>
+          }
+        </section>
+      }
+
+      @if (r.status === 'in_progress' && r.current_leg === 'waiting') {
+        <p class="ride__context ride__context--timer">
+          <ion-icon name="time-outline" aria-hidden="true" />
+          {{ 'drive.waitingTimer' | t: { chosen: chosenWait(r), elapsed: waitedMinutes() } }}
+        </p>
+      }
+
+      @switch (r.status) {
+        @case ('completed') {
+          <!-- The cash to collect: the most prominent thing once the ride is done. -->
+          <p class="ride__pay">{{ 'drive.collect' | t: { fare: peso(r.fare.total) } }}</p>
+          @if (changed()) {
+            <p class="ride__context">{{ 'ride.fareChanged' | t: { old: peso(r.fare.estimated_total), fare: peso(r.fare.total) } }}</p>
+          }
+          <dl class="facts">
+            <div><dt>{{ 'book.pickupRow' | t }}</dt><dd>{{ r.pickup.landmark || ('book.pinOnly' | t) }}</dd></div>
+            <div><dt>{{ 'book.destRow' | t }}</dt><dd>{{ r.destination.landmark || ('book.pinOnly' | t) }}</dd></div>
+            <div><dt>{{ 'ride.ref' | t: { ref: r.reference_no } }}</dt><dd>{{ (r.ride_type === 'one_way' ? 'book.oneWay' : 'book.twoWay') | t }}</dd></div>
+          </dl>
+        }
+        @case ('cancelled') {
+          @if (r.cancelled_by === 'passenger' && passengerReason(r); as reason) {
+            <p class="ride__context">"{{ reason }}"</p>
+          }
+          @if (r.cancelled_by === 'driver' && r.cancel_reason) {
+            <p class="ride__context">"{{ driverReason(r.cancel_reason) }}"</p>
+          }
+        }
+      }
+    </div>
+  } @else if (loadFailed()) {
+    <div class="hg-column ride__sheet">
+      <p class="hg-notice hg-notice--alert" role="alert">
+        <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ 'common.loadError' | t }}</span>
+      </p>
+    </div>
+  } @else {
+    <div class="ride__loading"><ion-spinner name="crescent" /></div>
+  }
+</ion-content>
+
+<!-- Last, in the thumb zone: the ONE next step; the quiet exits (end here / cancel) far below it. -->
+@if (ride(); as r) {
+  <ion-footer class="ion-no-border ride__footer">
+    <div class="hg-column">
+      @if (next(); as n) {
+        <button class="hg-button hg-button--primary drive__step" type="button" (click)="step()" [disabled]="stepping() || !network.online()">
+          @if (stepping()) {
+            <ion-spinner name="crescent" aria-hidden="true" />
+          }
+          {{ n.key | t }}
+        </button>
+      } @else if (over()) {
+        <button class="hg-button hg-button--primary" type="button" (click)="backHome()">{{ 'drive.backHome' | t }}</button>
+      }
+      @if (canEnd()) {
+        <button class="hg-button hg-button--text ride__cancel" type="button" (click)="endOpen.set(true)">{{ 'drive.endHere' | t }}</button>
+      }
+      @if (cancellable()) {
+        <button class="hg-button hg-button--text ride__cancel" type="button" (click)="openCancel()">{{ 'ride.cancel' | t }}</button>
+      }
+    </div>
+  </ion-footer>
+}
+
+<!-- Cancelling needs a reason (the passenger is told it, in their language). -->
+<ion-modal [isOpen]="cancelOpen()" [initialBreakpoint]="1" [breakpoints]="[0, 1]" (didDismiss)="cancelOpen.set(false)" class="ride__sheet-modal">
+  <ng-template>
+    <div class="hg-column cancel">
+      <h2 class="cancel__title">{{ 'ride.cancelTitle' | t }}</h2>
+      <p class="hg-field__label">{{ 'drive.cancelReasonLabel' | t }}</p>
+      <div class="cancel__reasons" role="radiogroup" [attr.aria-label]="'drive.cancelReasonLabel' | t">
+        @for (reason of reasons; track reason) {
+          <button type="button" class="cancel__reason" role="radio" [class.cancel__reason--on]="cancelReason() === reason"
+            [attr.aria-checked]="cancelReason() === reason" (click)="cancelReason.set(reason)">
+            {{ reasonKey(reason) | t }}
+          </button>
+        }
+      </div>
+      <button class="hg-button hg-button--danger" type="button" (click)="confirmCancel()" [disabled]="!cancelReason() || cancelling()">
+        @if (cancelling()) {
+          <ion-spinner name="crescent" aria-hidden="true" />
+        }
+        {{ 'ride.cancelConfirm' | t }}
+      </button>
+      <button class="hg-button hg-button--text" type="button" (click)="cancelOpen.set(false)">{{ 'ride.cancelKeep' | t }}</button>
+    </div>
+  </ng-template>
+</ion-modal>
+
+<!-- Balikan: the passenger never came back. -->
+<ion-modal [isOpen]="endOpen()" [initialBreakpoint]="1" [breakpoints]="[0, 1]" (didDismiss)="endOpen.set(false)" class="ride__sheet-modal">
+  <ng-template>
+    <div class="hg-column cancel">
+      <h2 class="cancel__title">{{ 'drive.endTitle' | t }}</h2>
+      <p class="drive__end-body">{{ 'drive.endBody' | t }}</p>
+      <button class="hg-button hg-button--danger" type="button" (click)="confirmEnd()" [disabled]="ending()">
+        @if (ending()) {
+          <ion-spinner name="crescent" aria-hidden="true" />
+        }
+        {{ 'drive.endConfirm' | t }}
+      </button>
+      <button class="hg-button hg-button--text" type="button" (click)="endOpen.set(false)">{{ 'ride.cancelKeep' | t }}</button>
+    </div>
+  </ng-template>
+</ion-modal>

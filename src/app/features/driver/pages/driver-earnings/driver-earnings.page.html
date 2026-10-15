@@ -1,13 +1,62 @@
 <ion-content class="hg-tab-page">
+  <ion-refresher slot="fixed" (ionRefresh)="load($event)">
+    <ion-refresher-content />
+  </ion-refresher>
+
   <div class="hg-column">
     <header class="hg-head">
       <h1 class="hg-head__title">{{ 'earnings.title' | t }}</h1>
     </header>
 
-    <app-empty-state
-      icon="wallet-outline"
-      [title]="'earnings.emptyTitle' | t"
-      [text]="'earnings.emptyText' | t"
-    />
+    <!-- Today / This week / This month: the selected one is filled AND bold (never color alone). -->
+    <div class="periods" role="radiogroup" [attr.aria-label]="'earnings.title' | t">
+      @for (p of periods; track p.value) {
+        <button type="button" class="periods__item" role="radio" [class.periods__item--on]="period() === p.value"
+          [attr.aria-checked]="period() === p.value" (click)="choose(p.value)">
+          {{ p.key | t }}
+        </button>
+      }
+    </div>
+
+    @if (failed()) {
+      <p class="hg-notice hg-notice--alert" role="alert">
+        <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ 'earnings.loadError' | t }}</span>
+      </p>
+    }
+
+    @if (data(); as d) {
+      <section class="total" aria-live="polite">
+        <p class="total__amount">{{ peso(d.total) }}</p>
+        <p class="total__count">{{ 'earnings.rides' | t: { n: d.rides_count } }}</p>
+        <p class="total__note">{{ 'earnings.cash' | t }}</p>
+      </section>
+
+      @if (d.rides.length === 0) {
+        <app-empty-state icon="wallet-outline" [title]="'earnings.emptyTitle' | t" [text]="'earnings.none' | t" />
+      } @else {
+        <h2 class="earn__list-title">{{ 'earnings.list' | t }}</h2>
+        <ul class="trips">
+          @for (ride of d.rides; track ride.id) {
+            <li>
+              <a class="trip" [routerLink]="['/driver/ride', ride.id]">
+                <span class="trip__main">
+                  <span class="trip__top">
+                    <span class="trip__date">{{ dateTime(ride.completed_at) }}</span>
+                    <span class="trip__fare">{{ peso(ride.total) }}</span>
+                  </span>
+                  <span class="trip__chips">
+                    <span class="trip__type">{{ (ride.ride_type === 'one_way' ? 'book.oneWay' : 'book.twoWay') | t }}</span>
+                    <span class="trip__type">{{ ride.reference_no }}</span>
+                  </span>
+                </span>
+                <ion-icon class="trip__go" name="chevron-forward" aria-hidden="true" />
+              </a>
+            </li>
+          }
+        </ul>
+      }
+    } @else if (loading()) {
+      <div class="trips__loading"><ion-spinner name="crescent" /></div>
+    }
   </div>
 </ion-content>

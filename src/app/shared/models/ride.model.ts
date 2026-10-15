@@ -102,6 +102,8 @@ export interface Ride {
   } | null;
   vehicle: { plate_number: string; body_number: string | null; color: string; make: string | null; model: string | null } | null;
   rating: { score: number; comment: string | null } | null;
+  /** Only in the DRIVER's copy, once matched: first name, and the phone while the ride is active (Phase 11). */
+  passenger?: { first_name: string; phone: string | null } | null;
 }
 
 /** The passenger's cancel reasons (active-ride brief), sent as stable codes (Phase 10 decision #7). */

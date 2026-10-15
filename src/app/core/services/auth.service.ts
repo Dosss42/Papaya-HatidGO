@@ -10,6 +10,7 @@ import { AppSettingsRepository } from '../database/app-settings.repository';
 import { LocalUserRepository } from '../database/local-user.repository';
 import { I18nService } from '../i18n/i18n.service';
 import { DriverDocumentsService } from './driver-documents.service';
+import { DriverShiftService } from './driver-shift.service';
 import { SubscriptionService } from './subscription.service';
 import { TokenStorageService } from './token-storage.service';
 import { VehicleService } from './vehicle.service';
@@ -31,6 +32,7 @@ export class AuthService {
   private readonly vehicles = inject(VehicleService);
   private readonly documents = inject(DriverDocumentsService);
   private readonly subscriptions = inject(SubscriptionService);
+  private readonly shift = inject(DriverShiftService);
   private readonly base = `${environment.apiUrl}/auth`;
   private static readonly DEVICE_NAME = 'papaya-mobile';
   private static readonly TIMEOUT_MS = 15_000;
@@ -166,6 +168,7 @@ export class AuthService {
 
   /** Revokes the token on the server when possible; the phone forgets it no matter what. */
   async logout(): Promise<void> {
+    await this.shift.goOffline(); // while the token still works: the server stops matching at once
     try {
       await this.request(this.http.post<void>(`${this.base}/logout`, {}));
     } catch {
@@ -185,6 +188,7 @@ export class AuthService {
     this.vehicles.clear();
     this.documents.clear();
     this.subscriptions.clear();
+    this.shift.reset(); // GPS, screen-on and the offers poll stop with the session
     await this.tokens.clear();
     try {
       await this.localUser.clear();

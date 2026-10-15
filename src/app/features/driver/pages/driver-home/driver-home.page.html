@@ -1,77 +1,158 @@
-<ion-content class="hg-tab-page">
+<ion-content class="hg-tab-page" [class.work]="ready()">
   <ion-refresher slot="fixed" (ionRefresh)="load($event)">
     <ion-refresher-content />
   </ion-refresher>
 
-  <div class="hg-column">
-    <app-offline-notice />
+  @if (ready() && showMap()) {
+    <!-- A white strip behind the status bar, so the clock never sits on the map. -->
+    <div slot="fixed" class="hg-statusbar-scrim" aria-hidden="true"></div>
+    <!-- The compact, low-cost map (driver-home brief § 2): only while online, never a stale marker. -->
+    <div class="work__map-wrap">
+      <div #map class="work__map" role="img" [attr.aria-label]="'drive.mapAria' | t"></div>
+      <button type="button" class="work__locate" (click)="locate()">
+        <ion-icon name="locate-outline" aria-hidden="true" />{{ 'drive.whereAmI' | t }}
+      </button>
+    </div>
+  }
 
-    <header class="hg-head">
-      <h1 class="hg-head__title">
-        @for (word of headlineWords(); track $index) {<span class="hg-nowrap">{{ word }}</span>{{ ' ' }}}
-      </h1>
-      <p class="hg-head__lead">
-        {{ 'home.helloLead' | t: { name: firstName() } }}
-        @if (waiting()) {
-          {{ 'home.waitNotice' | t }}
+  <div class="hg-column" [class.work__sheet]="ready() && showMap()">
+    @if (!online()) {
+      <app-offline-notice />
+    }
+
+    @if (ready()) {
+      <!-- The state, readable from across the tricycle seat: a mark + the word, never color alone. -->
+      <header class="work__head">
+        @if (online()) {
+          <h1 class="work__state work__state--on"><span class="work__dot" aria-hidden="true"></span>{{ 'drive.online' | t }}</h1>
+          <p class="work__lead">{{ 'drive.waiting' | t }}</p>
+        } @else if (shift.forced()) {
+          <h1 class="work__state">{{ 'drive.forced' | t }}</h1>
+          <p class="work__lead">{{ forcedText() }}</p>
+        } @else {
+          <h1 class="work__state">{{ 'drive.offline' | t }}</h1>
+          <p class="work__lead">{{ 'drive.offlineLead' | t }}</p>
         }
-      </p>
-    </header>
+      </header>
 
-    @if (loadFailed()) {
-      <p class="hg-notice hg-notice--alert" role="alert">
-        <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ 'common.loadError' | t }}</span>
-      </p>
-    }
+      @if (online() && !network.online()) {
+        <p class="hg-notice hg-notice--alert" role="alert">
+          <ion-icon name="cloud-offline-outline" aria-hidden="true" /><span>{{ 'drive.noInternet' | t }}</span>
+        </p>
+      }
+      @if (online() && shift.gpsLost()) {
+        <div class="hg-notice hg-notice--alert work__gps" role="alert">
+          <ion-icon name="alert-circle" aria-hidden="true" />
+          <span>{{ 'drive.gpsLost' | t }}</span>
+          <button type="button" class="hg-button hg-button--text" (click)="shift.retryGps()">{{ 'common.tryAgain' | t }}</button>
+        </div>
+      }
+      @if (shift.goError(); as problem) {
+        <p class="hg-notice hg-notice--alert" role="alert">
+          <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ problem.message }}</span>
+        </p>
+        @if (problem.link; as link) {
+          <a class="hg-button hg-button--outline work__fix" [routerLink]="link.url">{{ link.key | t }}</a>
+        }
+      } @else if (shift.forced()?.link; as link) {
+        <a class="hg-button hg-button--outline work__fix" [routerLink]="link.url">{{ link.key | t }}</a>
+      }
 
-    @if (subscriptionEnding(); as text) {
-      <a class="hg-notice hg-notice--warn home__expiring" routerLink="/driver/subscription">
-        <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ text }}</span>
+      @if (subscriptionEnding(); as text) {
+        <a class="hg-notice hg-notice--warn home__expiring" routerLink="/driver/subscription">
+          <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ text }}</span>
+        </a>
+      }
+      @if (expiring(); as soon) {
+        <a class="hg-notice hg-notice--warn home__expiring" [routerLink]="soon.link">
+          <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ soon.text }}</span>
+        </a>
+      }
+
+      <a class="work__today" routerLink="/driver/earnings">
+        <!-- Only numbers the server returned: never "₱0" because the total didn't load. -->
+        @if (today(); as d) {
+          <span>{{ 'drive.today' | t: { amount: peso(d.total), n: d.rides_count } }}</span>
+        } @else {
+          <span>{{ 'drive.todayUnknown' | t }}</span>
+        }
+        <ion-icon name="chevron-forward" aria-hidden="true" />
       </a>
-    }
 
-    @if (expiring(); as soon) {
-      <a class="hg-notice hg-notice--warn home__expiring" [routerLink]="soon.link">
-        <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ soon.text }}</span>
-      </a>
-    }
-
-    @if (loading()) {
-      <div class="home__loading"><ion-spinner name="crescent" /></div>
+      @if (online()) {
+        <ul class="work__tips">
+          <li><ion-icon name="battery-charging-outline" aria-hidden="true" />{{ 'drive.screenOn' | t }}</li>
+          <li><ion-icon name="volume-high-outline" aria-hidden="true" />{{ 'drive.volume' | t }}</li>
+        </ul>
+      }
     } @else {
-      <ol class="checklist" [attr.aria-label]="'home.checklistAria' | t">
-        @for (item of items(); track item.title; let i = $index) {
-          <li>
-            @if (item.link) {
-              <a class="checklist__row checklist__row--link" [routerLink]="item.link">
-                <span class="checklist__num" aria-hidden="true">{{ i + 1 }}</span>
-                <span class="checklist__text">
-                  <strong>{{ item.title | t }}</strong>
-                  <app-status-chip [kind]="item.kind" [label]="item.status" [icon]="item.icon" />
-                  @if (i === 1) {
-                    <span class="checklist__docs">
-                      @for (doc of docChips(); track doc.name) {
-                        <span class="mini" [class]="'mini mini--' + doc.view.kind">
-                          <ion-icon [name]="doc.view.icon" aria-hidden="true" />{{ doc.name }}
-                        </span>
-                      }
-                    </span>
-                  }
+      <header class="hg-head">
+        <h1 class="hg-head__title">
+          @for (word of headlineWords(); track $index) {<span class="hg-nowrap">{{ word }}</span>{{ ' ' }}}
+        </h1>
+        <p class="hg-head__lead">
+          {{ 'home.helloLead' | t: { name: firstName() } }}
+          @if (waiting()) {
+            {{ 'home.waitNotice' | t }}
+          }
+        </p>
+      </header>
+
+      @if (loadFailed()) {
+        <p class="hg-notice hg-notice--alert" role="alert">
+          <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ 'common.loadError' | t }}</span>
+        </p>
+      }
+
+      @if (subscriptionEnding(); as text) {
+        <a class="hg-notice hg-notice--warn home__expiring" routerLink="/driver/subscription">
+          <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ text }}</span>
+        </a>
+      }
+
+      @if (expiring(); as soon) {
+        <a class="hg-notice hg-notice--warn home__expiring" [routerLink]="soon.link">
+          <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ soon.text }}</span>
+        </a>
+      }
+
+      @if (loading()) {
+        <div class="home__loading"><ion-spinner name="crescent" /></div>
+      } @else {
+        <ol class="checklist" [attr.aria-label]="'home.checklistAria' | t">
+          @for (item of items(); track item.title; let i = $index) {
+            <li>
+              @if (item.link) {
+                <a class="checklist__row checklist__row--link" [routerLink]="item.link">
+                  <span class="checklist__num" aria-hidden="true">{{ i + 1 }}</span>
+                  <span class="checklist__text">
+                    <strong>{{ item.title | t }}</strong>
+                    <app-status-chip [kind]="item.kind" [label]="item.status" [icon]="item.icon" />
+                    @if (i === 1) {
+                      <span class="checklist__docs">
+                        @for (doc of docChips(); track doc.name) {
+                          <span class="mini" [class]="'mini mini--' + doc.view.kind">
+                            <ion-icon [name]="doc.view.icon" aria-hidden="true" />{{ doc.name }}
+                          </span>
+                        }
+                      </span>
+                    }
+                  </span>
+                  <ion-icon class="checklist__go" name="chevron-forward" aria-hidden="true" />
+                </a>
+              } @else {
+                <span class="checklist__row">
+                  <span class="checklist__num" aria-hidden="true">{{ i + 1 }}</span>
+                  <span class="checklist__text">
+                    <strong>{{ item.title | t }}</strong>
+                    <app-status-chip [kind]="item.kind" [label]="item.status" [icon]="item.icon" />
+                  </span>
                 </span>
-                <ion-icon class="checklist__go" name="chevron-forward" aria-hidden="true" />
-              </a>
-            } @else {
-              <span class="checklist__row">
-                <span class="checklist__num" aria-hidden="true">{{ i + 1 }}</span>
-                <span class="checklist__text">
-                  <strong>{{ item.title | t }}</strong>
-                  <app-status-chip [kind]="item.kind" [label]="item.status" [icon]="item.icon" />
-                </span>
-              </span>
-            }
-          </li>
-        }
-      </ol>
+              }
+            </li>
+          }
+        </ol>
+      }
     }
   </div>
 </ion-content>
@@ -87,9 +168,22 @@
           </a>
         }
       } @else if (ready()) {
-        <!-- Everything done: going online itself arrives with the ride screens (Phase 11). -->
-        <button class="hg-button hg-button--primary" type="button" disabled>{{ 'home.goOnline' | t }}</button>
-        <p class="home__hint">{{ 'home.goOnlineSoon' | t }}</p>
+        @if (online()) {
+          <!-- Going offline is less frequent, and a mistap costs requests: smaller, outlined (brief § 2). -->
+          <button class="hg-button hg-button--outline" type="button" (click)="shift.goOffline()">{{ 'drive.goOffline' | t }}</button>
+        } @else {
+          @if (shift.askingLocation()) {
+            <p class="home__hint">{{ 'drive.locationWhy' | t }}</p>
+          }
+          <button class="hg-button hg-button--primary work__go" type="button" (click)="shift.goOnline()"
+            [disabled]="shift.state() === 'going' || !network.online()">
+            @if (shift.state() === 'going') {
+              <ion-spinner name="crescent" aria-hidden="true" />{{ 'drive.going' | t }}
+            } @else {
+              {{ 'home.goOnline' | t }}
+            }
+          </button>
+        }
       } @else if (nextLabel(); as label) {
         <button class="hg-button hg-button--primary" type="button" (click)="goNext()">{{ label }}</button>
       }

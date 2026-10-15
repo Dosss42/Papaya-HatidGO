@@ -1,20 +1,29 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, ElementRef, OnDestroy, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 import { IonContent, IonFooter, IonIcon, IonRefresher, IonRefresherContent, IonSpinner, ViewWillEnter } from '@ionic/angular';
 import { environment } from '../../../../../environments/environment';
 import { addIcons } from 'ionicons';
-import { alertCircle, callOutline, chevronForward, ellipseOutline, lockClosedOutline, timeOutline } from 'ionicons/icons';
+import {
+  alertCircle, batteryChargingOutline, callOutline, chevronForward, cloudOfflineOutline, ellipseOutline, locateOutline,
+  lockClosedOutline, timeOutline, volumeHighOutline,
+} from 'ionicons/icons';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { MessageKey } from '../../../../core/i18n/messages.en';
 import { TranslatePipe } from '../../../../core/i18n/t.pipe';
 import { AppLifecycleService } from '../../../../core/services/app-lifecycle.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { DriverDocumentsService } from '../../../../core/services/driver-documents.service';
+import { DriverRideService } from '../../../../core/services/driver-ride.service';
+import { DriverShiftService } from '../../../../core/services/driver-shift.service';
+import { AppMap, MapService } from '../../../../core/services/map.service';
+import { NetworkService } from '../../../../core/services/network.service';
+import { RideService } from '../../../../core/services/ride.service';
 import { SubscriptionService } from '../../../../core/services/subscription.service';
 import { VehicleService } from '../../../../core/services/vehicle.service';
-import { endingSoon, phDate, subscriptionChip } from '../../../../shared/utilities/subscription-view';
+import { Earnings } from '../../../../shared/models/driver-ride.model';
+import { endingSoon, peso, phDate, subscriptionChip } from '../../../../shared/utilities/subscription-view';
 import { OfflineNoticeComponent } from '../../../../shared/components/offline-notice/offline-notice.component';
 import { StatusChipComponent } from '../../../../shared/components/status-chip/status-chip.component';
 import { RequirementState } from '../../../../shared/models/driver.model';
@@ -29,11 +38,14 @@ interface ChecklistItem {
 }
 
 /**
- * Driver Home (design-briefs/driver-requirements.md § 3 + § 6): the headline turns the server's
- * compliance status into plain words, the checklist ① tricycle ② documents ③ subscription
- * ④ go online mirrors the server's go-online checks, and ONE primary button always points to
- * the most useful next action. ③ is the real subscription (Phase 8); going online itself
- * arrives in Phase 11.
+ * Driver Home.
+ * - Not ready yet (design-briefs/driver-requirements.md § 3 + § 6): the headline turns the
+ *   server's compliance status into plain words, the checklist ① tricycle ② documents
+ *   ③ subscription ④ go online mirrors the server's go-online checks, and ONE primary button
+ *   always points to the most useful next action.
+ * - Ready (verified + subscribed, Phase 11, design-briefs/driver-home.md): the work view.
+ *   Offline / going online / online with a compact, low-cost map, today's earnings, Mag-online
+ *   or Mag-offline. An active ride opens the ride screen instead.
  */
 @Component({
   selector: 'app-driver-home',
@@ -44,7 +56,7 @@ interface ChecklistItem {
     RouterLink, OfflineNoticeComponent, StatusChipComponent, TranslatePipe,
   ],
 })
-export class DriverHomePage implements ViewWillEnter {
+export class DriverHomePage implements ViewWillEnter, OnDestroy {
   private readonly auth = inject(AuthService);
   private readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
@@ -52,10 +64,25 @@ export class DriverHomePage implements ViewWillEnter {
   private readonly vehicles = inject(VehicleService);
   private readonly subs = inject(SubscriptionService);
   private readonly lifecycle = inject(AppLifecycleService);
+  private readonly driverRides = inject(DriverRideService);
+  private readonly rides = inject(RideService);
+  private readonly maps = inject(MapService);
+  protected readonly shift = inject(DriverShiftService);
+  protected readonly network = inject(NetworkService);
   private inFlight: Promise<void> | null = null;
+
+  private readonly mapEl = viewChild<ElementRef<HTMLElement>>('map');
+  private map: AppMap | null = null;
 
   protected readonly loading = signal(false);
   protected readonly loadFailed = signal(false);
+  /** "Ngayong araw: ₱540 · 9 biyahe" (GET /drivers/me/earnings?period=day). */
+  protected readonly today = signal<Earnings | null>(null);
+  protected readonly peso = peso;
+
+  protected readonly online = computed(() => this.shift.state() === 'online');
+  /** The compact map: only while online with a position that was SENT, never a stale marker (brief § 2). */
+  protected readonly showMap = computed(() => this.online() && !!this.shift.position() && !this.shift.gpsLost());
 
   protected readonly firstName = computed(() => this.auth.currentUser()?.first_name ?? '');
   private readonly checklist = computed(() => this.docs.checklist());
@@ -161,7 +188,28 @@ export class DriverHomePage implements ViewWillEnter {
   );
 
   constructor() {
-    addIcons({ alertCircle, callOutline, chevronForward, ellipseOutline, lockClosedOutline, timeOutline });
+    addIcons({
+      alertCircle, batteryChargingOutline, callOutline, chevronForward, cloudOfflineOutline, ellipseOutline, locateOutline,
+      lockClosedOutline, timeOutline, volumeHighOutline,
+    });
+
+    // The compact map: made when it appears, removed when it goes (offline = no map, brief § 2).
+    // The marker moves only with each SENT position; the view moves only if it left the screen.
+    effect(() => {
+      const el = this.mapEl()?.nativeElement;
+      const at = this.shift.position();
+      if (!el || !at || !this.showMap()) {
+        this.map?.destroy();
+        this.map = null;
+        return;
+      }
+      if (!this.map) {
+        this.map = this.maps.create(el, at, 15);
+        setTimeout(() => this.map?.resize());
+      }
+      this.map.setMarker('driver', at);
+      if (!this.map.contains(at)) this.map.setView(at);
+    });
 
     // Fresh whenever the driver lands on Home. (Ionic doesn't fire a TAB page's ionViewWillEnter
     // when coming back from a full-screen page like the upload screen, so listen to the router.)
@@ -179,6 +227,10 @@ export class DriverHomePage implements ViewWillEnter {
 
   ionViewWillEnter(): void {
     void this.load();
+  }
+
+  ngOnDestroy(): void {
+    this.map?.destroy();
   }
 
   /** One request at a time: the triggers above can fire together (e.g. first open). */
@@ -201,6 +253,48 @@ export class DriverHomePage implements ViewWillEnter {
     } finally {
       this.loading.set(false);
     }
+    if (this.ready()) {
+      this.shift.syncOffline();
+      await Promise.all([this.resumeRide(), this.loadToday()]);
+    }
+  }
+
+  /** A ride in progress (e.g. the app was closed mid-ride): its screen, not Home (brief § 5). */
+  private async resumeRide(): Promise<void> {
+    let ride;
+    try {
+      ride = await this.rides.active();
+    } catch {
+      return; // no internet: try again on the next visit
+    }
+    if (!ride) {
+      // The ride ended while no ride screen was open (e.g. cancelled while on another tab).
+      if (this.shift.rideId() !== null) this.shift.rideEnded();
+      return;
+    }
+    if (!this.router.url.startsWith('/driver/home')) return;
+    this.shift.startRide(ride.id);
+    // Replace Home in the history, so Back from the ride screen doesn't bounce off Home again.
+    void this.router.navigate(['/driver/ride', ride.id], { replaceUrl: true });
+  }
+
+  private async loadToday(): Promise<void> {
+    try {
+      this.today.set(await this.driverRides.earnings('day'));
+    } catch {
+      // Keep the last total; the pull-to-refresh tries again.
+    }
+  }
+
+  /** "Nasaan ako?": back to the driver's last sent position. */
+  protected locate(): void {
+    const at = this.shift.position();
+    if (at) this.map?.setView(at, 15);
+  }
+
+  protected forcedText(): string {
+    const reason = this.shift.forced();
+    return reason ? this.i18n.t(reason.key) : '';
   }
 
   protected goNext(): void {

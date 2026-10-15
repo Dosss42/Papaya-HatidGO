@@ -11,12 +11,13 @@ import { I18nService } from '../../../../core/i18n/i18n.service';
 import { MessageKey } from '../../../../core/i18n/messages.en';
 import { TranslatePipe } from '../../../../core/i18n/t.pipe';
 import { AppLifecycleService } from '../../../../core/services/app-lifecycle.service';
-import { AppMap, LatLng, MapService } from '../../../../core/services/map.service';
+import { AppMap, LatLng, MapService, rideMapInset } from '../../../../core/services/map.service';
 import { NetworkService } from '../../../../core/services/network.service';
 import { RideService } from '../../../../core/services/ride.service';
 import { CancelReason, Ride } from '../../../../shared/models/ride.model';
 import { ApiError } from '../../../../shared/utilities/api-error';
 import { peso } from '../../../../shared/utilities/subscription-view';
+import { driverReasonKey } from '../../../driver/driver-ride-view';
 import { BookingDraftService } from '../../booking-draft.service';
 import {
   canCancel, fareChanged, initials, isOver, minutesSince, returningCooling, showDriverCard, stages, statusLine,
@@ -205,7 +206,7 @@ export class PassengerRidePage implements ViewDidEnter, ViewWillLeave, OnDestroy
       this.framing = framing;
       setTimeout(() => {
         this.map?.resize(); // the map box changes height between the two framings
-        this.map?.fit(phase === 'pickup' ? [pickup, ...(driver ? [driver] : [])] : [pickup, destination]);
+        this.map?.fit(phase === 'pickup' ? [pickup, ...(driver ? [driver] : [])] : [pickup, destination], rideMapInset(el));
       }, 260);
     }
   }
@@ -224,6 +225,12 @@ export class PassengerRidePage implements ViewDidEnter, ViewWillLeave, OnDestroy
 
   protected reasonKey(reason: CancelReason): MessageKey {
     return `ride.reason.${reason}` as MessageKey;
+  }
+
+  /** The driver's reason: a stable code (Phase 11) shown in the passenger's language, else as written. */
+  protected driverReason(reason: string): string {
+    const key = driverReasonKey(reason);
+    return key ? this.i18n.t(key) : reason;
   }
 
   // ---------------------------------------------------------------- actions

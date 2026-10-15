@@ -150,7 +150,8 @@
             <p class="ride__context">{{ 'ride.saved' | t }}</p>
           } @else if (r.cancelled_by !== 'passenger') {
             @if (r.cancelled_by === 'driver' && r.cancel_reason) {
-              <p class="ride__context">"{{ r.cancel_reason }}"</p>
+              <!-- The driver's reason code, in the passenger's language (Phase 11). -->
+              <p class="ride__context">"{{ driverReason(r.cancel_reason) }}"</p>
             }
             <p class="ride__context">{{ 'ride.noCharge' | t }}</p>
           }

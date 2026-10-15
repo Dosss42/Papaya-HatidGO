@@ -1,0 +1,181 @@
+// The incoming request (driver-home brief § 4): the whole display, nothing competing with it.
+
+ion-modal.offer-modal {
+  --width: 100%;
+  --height: 100%;
+  --border-radius: 0;
+  --background: var(--hg-ground);
+}
+
+.offer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: calc(env(safe-area-inset-top) + 20px) 16px calc(env(safe-area-inset-bottom) + 16px);
+  background: var(--hg-ground);
+  color: var(--hg-ink);
+
+  &__body {
+    flex: 1;
+    max-width: 34rem;
+    width: 100%;
+    margin: 0 auto;
+    overflow-y: auto;
+  }
+
+  &__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1.15;
+  }
+
+  // The countdown: tabular digits, so it doesn't jitter as it counts.
+  &__time {
+    flex: none;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: var(--hg-orange-tint);
+    box-shadow: inset 0 0 0 2px var(--hg-orange);
+    font-size: 1.5rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--hg-ink);
+  }
+
+  &__more {
+    margin: 8px 0 0;
+    font-weight: 700;
+    color: var(--hg-ink-soft);
+  }
+
+  &__type {
+    display: inline-block;
+    margin: 20px 0 0;
+    padding: 6px 14px;
+    border-radius: var(--hg-radius);
+    background: var(--hg-surface);
+    box-shadow: inset 0 0 0 2px var(--hg-line);
+    font-size: 1.15rem;
+    font-weight: 800;
+
+    // Balikan: marked by a thicker ink outline (a mark, not a color alone).
+    &--two {
+      box-shadow: inset 0 0 0 3px var(--hg-ink);
+    }
+  }
+
+  &__fare {
+    margin: 16px 0 4px;
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+
+    span {
+      display: block;
+      margin-top: 6px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--hg-ink-soft);
+    }
+  }
+
+  &__places {
+    display: grid;
+    gap: 14px;
+    margin: 20px 0 0;
+  }
+
+  &__place {
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--hg-line);
+
+    dt {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.2rem;
+      font-weight: 800;
+
+      ion-icon {
+        flex: none;
+        font-size: 24px;
+        color: var(--hg-orange);
+      }
+    }
+
+    dd {
+      margin: 4px 0 0 32px;
+      font-size: 1.1rem;
+      color: var(--hg-ink-soft);
+      overflow-wrap: anywhere;
+    }
+  }
+
+  &__note {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 16px 0 0;
+    padding: 12px 14px;
+    border-radius: var(--hg-radius);
+    background: var(--hg-surface);
+    font-size: 1.05rem;
+    line-height: 1.4;
+
+    ion-icon {
+      flex: none;
+      font-size: 24px;
+      color: var(--hg-ink-soft);
+    }
+  }
+
+  &__outcome {
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+    margin: 18vh 0 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+    text-align: center;
+
+    ion-icon {
+      font-size: 56px;
+      color: var(--hg-ink-soft);
+    }
+  }
+
+  // Skip left (outlined, smaller), Accept right (filled, larger), a clear gap between them.
+  &__actions {
+    display: flex;
+    gap: 20px;
+    max-width: 34rem;
+    width: 100%;
+    margin: 16px auto 0;
+
+    .hg-button {
+      min-height: 72px;
+    }
+  }
+
+  &__skip {
+    flex: 1;
+  }
+
+  &__accept {
+    flex: 1.8;
+    font-size: 1.35rem;
+  }
+
+  .hg-notice {
+    margin-top: 16px;
+  }
+}
