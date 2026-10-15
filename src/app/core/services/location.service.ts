@@ -44,6 +44,23 @@ export class LocationService {
     return status;
   }
 
+  /**
+   * The permission state WITHOUT asking (Phase 10): the booking screen shows its own reason
+   * first (brief L1) and only then lets the system prompt appear.
+   */
+  async checkPermission(): Promise<LocationPermission> {
+    try {
+      const status = this.toPermission(await Geolocation.checkPermissions());
+      this._permission.set(status);
+      return status;
+    } catch (err) {
+      if (Capacitor.isNativePlatform()) {
+        throw LocationError.from(err); // location services are off
+      }
+      return 'unknown'; // a browser without the Permissions API asks on getCurrentPosition
+    }
+  }
+
   /** One position fix. Gives up after 10 seconds (TIMEOUT) instead of waiting forever. */
   async getCurrentPosition(): Promise<GeoPoint> {
     if ((await this.ensurePermission()) === 'denied') {

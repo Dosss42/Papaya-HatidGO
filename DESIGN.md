@@ -256,7 +256,27 @@ Ionic sheets get the class `hg-sheet` (`theme/world.scss`). They use Atkinson, a
 The WebView's date picker uses the Android theme (`android/app/src/main/res/values/styles.xml`), which is always Light with Deep Papaya as primary and accent (`colors.xml`). That keeps it white with papaya, never dark or teal. An empty date field shows the app's own prompt, a calendar icon plus "Choose a date", because Android's empty date input shows nothing.
 
 ### Navigation
-White toolbar, no border, 60px; back button in Ink, 52px target, 28px arrow. No title in the toolbar.
+White toolbar, no border, 60px; back button in Ink, 52px target, 28px arrow. No title in the toolbar. **Exception (Phase 10):** on full-bleed map screens (the ride screen), Back floats on the map as a 52px white disc with a 2px Field Line ring, top-left below the status bar. There's no toolbar band, so the driver card fits, and no shadow.
+
+### Map screens (Phase 10)
+- **Map:** Leaflet + OpenStreetMap behind `MapService`, with the required "© OpenStreetMap contributors" credit always visible. No zoom buttons (pinch). About 40% of the screen while choosing pins, smaller once the choice or the status matters more.
+- **Markers:** CSS + inline SVG, no image files. Pickup = Deep Papaya ring on white. Destination = Ink pin (a rotated square with a white center). Driver = the authored tricycle in a white disc with a papaya ring. The booking screen's **fixed center pin** has the same shapes, larger (the map moves under it).
+- **Status-bar scrim:** full-bleed screens put a white strip behind the transparent status bar (`.hg-statusbar-scrim`), so scrolled content never runs under the clock.
+- **Pinned footer:** the step's or status's one orange button sits in a white footer above the tab bar (2px Hairline top), as on Driver Home. Notices that qualify it (fare changed, errors) sit just above the button; the estimate line ("This is an estimate. You pay the driver in cash.") sits directly above the price button.
+
+### Ride option cards and choice chips (Phase 10)
+The One-way / Balikan cards follow the **Plan Card** rules: full width, 84px minimum, the name (1.15rem/800) over a Soft Ink meaning, the price on the right (1.4rem/800), a green check on the chosen card and an empty Soft Ink ring on the others. **Choice chips** (Balikan wait time, cancel reasons) are 56px tall, Warm Field with a 2px Field Line, at least 8px apart. Chosen = 3px Deep Papaya + Papaya Tint.
+
+### The ride screen (Phase 10)
+- **Hierarchy:**
+  1. The status line, the page heading (1.75rem/800), readable in one glance.
+  2. Body no. + plate, the second-largest text (1.5rem/800, never truncated).
+  3. At most one action.
+- **Stage track:** dots joined by a 3px line. Done = filled Deep Papaya. Current = papaya ring with the label in Ink 800. To do = Hairline ring. Labels are 1rem and wrap at word breaks. A 6-stage Balikan track shows only the current label (the others stay readable to screen readers).
+- **Driver card:** Warm Field, a 2px Hairline ring. A papaya-tint initials avatar (no photos), name, "{color} tricycle", ★ average only from 5 ratings. The **call** button is a 56px **outline** disc (Deep Papaya ring and icon), never green: green means done.
+- **Pay line (completed):** the most prominent thing, before the rating: Papaya Tint, a 2px Deep Papaya border, 1.35rem/800.
+- **Cancel:** a quiet Soft Ink text button at the very bottom, never next to the call button. It opens the flow's one modal sheet, which holds the only **danger button** in the app (`.hg-button--danger`: Alert fill, white text).
+- **Weak connection:** a slim Alert banner directly above the status line, "Weak connection. Last update: 40 sec ago." The last known status stays on screen.
 
 ### Logo
 Authored SVG: a side-view Philippine tricycle with one roof over sidecar and driver, a papaya leaf growing from the roof. Deep Papaya roof and motorcycle, Bright Papaya sidecar and hubs, leaf greens, Ink wheels and frame, white window. Decorative (`aria-hidden`); the name is always written beside it. On Get Started it sits on a 232px Papaya Tint disc and settles in once (500ms rise and fade, ease-out); under reduced motion it appears instantly.

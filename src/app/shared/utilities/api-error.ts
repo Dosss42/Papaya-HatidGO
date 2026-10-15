@@ -14,6 +14,8 @@ export interface ApiError {
   code: string; // e.g. INVALID_CREDENTIALS, VALIDATION_FAILED, NETWORK
   message: string; // in the app's language (the API answers in it too), safe to show
   fieldErrors: Record<string, string>; // first message per field
+  /** Facts to recover with (Phase 9 API): e.g. the new estimate (FARE_CHANGED), ride_id (ACTIVE_RIDE_EXISTS). */
+  data?: Record<string, unknown>;
 }
 
 export function toApiError(err: unknown, t: Translate): ApiError {
@@ -27,7 +29,7 @@ export function toApiError(err: unknown, t: Translate): ApiError {
       };
     }
 
-    const body = (err.error ?? {}) as { message?: string; code?: string; errors?: Record<string, string[]> };
+    const body = (err.error ?? {}) as { message?: string; code?: string; errors?: Record<string, string[]>; data?: Record<string, unknown> };
     const fieldErrors: Record<string, string> = {};
     for (const [field, messages] of Object.entries(body.errors ?? {})) {
       fieldErrors[field] = messages[0];
@@ -38,6 +40,7 @@ export function toApiError(err: unknown, t: Translate): ApiError {
       code: body.code ?? 'HTTP_ERROR',
       message: body.message ?? t('error.unknown'),
       fieldErrors,
+      ...(body.data ? { data: body.data } : {}),
     };
   }
 

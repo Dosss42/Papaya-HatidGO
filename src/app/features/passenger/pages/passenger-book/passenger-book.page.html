@@ -1,52 +1,304 @@
-<ion-content class="hg-tab-page">
-  <div class="hg-column">
+<ion-content class="book" [fullscreen]="true">
+  <!-- A white strip behind the status bar, so scrolled content never runs under the clock. -->
+  <div slot="fixed" class="hg-statusbar-scrim" aria-hidden="true"></div>
+  <!-- The map: the shared context of all three steps (brief § 3). Always mounted, so tiles load once. -->
+  <div class="book__map-wrap" [class.book__map-wrap--small]="step() === 3" [class.book__map-wrap--idle]="gate() !== 'ready'">
+    <div #map class="book__map" [attr.aria-label]="'book.mapAria' | t" role="region"></div>
+
+    @if (gate() === 'ready' && step() < 3) {
+      <!-- The fixed center pin: the passenger moves the MAP under it (brief § 4, step 1). -->
+      <span class="book__pin" [class.book__pin--dest]="step() === 2" aria-hidden="true"></span>
+      <button type="button" class="book__locate" (click)="locate()" [attr.aria-label]="'book.useMyLocation' | t">
+        @if (locating() === 'finding') {
+          <ion-spinner name="crescent" />
+        } @else {
+          <ion-icon name="locate" aria-hidden="true" />
+        }
+      </button>
+    }
+  </div>
+
+  <div class="hg-column book__sheet">
     <app-offline-notice />
 
-    <!-- The map (top of the screen in the booking brief). A plain area until the map arrives. -->
-    <div class="hg-map-placeholder" role="img" [attr.aria-label]="'book.mapHere' | t">
-      <div>
-        <ion-icon name="location" aria-hidden="true" />
-        <p>{{ 'book.mapHere' | t }}</p>
-      </div>
-    </div>
-
-    <!-- Step and instruction only when booking is open: behind the gate they'd ask the impossible. -->
-    @if (subscribed()) {
-      <p class="book__step">1 / 3</p>
-    }
-    <header class="hg-head">
-      <h1 class="hg-head__title">{{ 'book.title' | t }}</h1>
-      @if (subscribed()) {
-        <p class="hg-head__lead">{{ 'book.lead' | t }}</p>
+    @switch (gate()) {
+      @case ('checking') {
+        <div class="book__loading"><ion-spinner name="crescent" /></div>
       }
-    </header>
-
-    @if (!checked()) {
-      <div class="book__loading"><ion-spinner name="crescent" /></div>
-    } @else if (!subscribed()) {
-      <!-- The gate (Phase 8): say why, and the one way forward. -->
-      <p class="hg-notice hg-notice--warn" role="note">
-        <ion-icon name="card-outline" aria-hidden="true" /><span>{{ gateText() }}</span>
-      </p>
-      <a class="hg-button hg-button--primary" routerLink="/passenger/subscription">{{ 'book.subscribe' | t }}</a>
-    } @else {
-      @if (endingText(); as text) {
-        <a class="hg-notice hg-notice--warn book__ending" routerLink="/passenger/subscription">
-          <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ text }}</span>
-        </a>
+      @case ('error') {
+        <p class="hg-notice hg-notice--alert" role="alert">
+          <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ 'common.loadError' | t }}</span>
+        </p>
+        <button class="hg-button hg-button--outline" type="button" (click)="retryGates()">{{ 'common.tryAgain' | t }}</button>
       }
+      @case ('subscribe') {
+        <!-- The subscription gate (Phase 8): known at the start, never a failure at the last tap. -->
+        <header class="hg-head">
+          <h1 class="hg-head__title">{{ 'book.title' | t }}</h1>
+        </header>
+        <p class="hg-notice hg-notice--warn" role="note">
+          <ion-icon name="card-outline" aria-hidden="true" /><span>{{ gateText() }}</span>
+        </p>
+        <a class="hg-button hg-button--primary" routerLink="/passenger/subscription">{{ 'book.subscribe' | t }}</a>
+      }
+      @case ('ready') {
+        @if (endingText(); as text) {
+          <a class="hg-notice hg-notice--warn book__ending" routerLink="/passenger/subscription">
+            <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ text }}</span>
+          </a>
+        }
 
-      <label class="hg-field">
-        <span class="hg-field__label">{{ 'book.landmark' | t }}</span>
-        <ion-input fill="outline" [placeholder]="'book.landmarkPlaceholder' | t" [disabled]="true" />
-      </label>
+        <p class="book__step">{{ 'book.step' | t: { n: step() } }}</p>
 
-      <p class="hg-notice hg-notice--info" role="note">
-        <ion-icon name="construct-outline" aria-hidden="true" />
-        <span>{{ 'book.preview' | t }}</span>
-      </p>
+        @switch (step()) {
+          @case (1) {
+            <header class="hg-head">
+              <h1 class="hg-head__title">{{ 'book.title' | t }}</h1>
+              <p class="hg-head__lead">{{ 'book.lead' | t }}</p>
+            </header>
 
-      <button class="hg-button hg-button--primary" type="button" disabled>{{ 'book.next' | t }}</button>
+            @switch (locating()) {
+              @case ('ask') {
+                <!-- L1: the reason first, then Android's own prompt. -->
+                <div class="hg-notice hg-notice--info book__ask">
+                  <ion-icon name="location-outline" aria-hidden="true" />
+                  <div>
+                    <p><strong>{{ 'book.l1Title' | t }}</strong> {{ 'book.l1Body' | t }}</p>
+                    <button class="hg-button hg-button--outline" type="button" (click)="locate()">{{ 'book.l1Button' | t }}</button>
+                  </div>
+                </div>
+              }
+              @case ('denied') {
+                <p class="hg-notice hg-notice--info" role="note">
+                  <ion-icon name="information-circle-outline" aria-hidden="true" /><span>{{ 'book.l2' | t }}</span>
+                </p>
+              }
+              @case ('failed') {
+                <div class="hg-notice hg-notice--info book__ask" role="note">
+                  <ion-icon name="information-circle-outline" aria-hidden="true" />
+                  <div>
+                    <p>{{ 'book.l3' | t }}</p>
+                    <button class="hg-button hg-button--outline" type="button" (click)="locate()">{{ 'common.tryAgain' | t }}</button>
+                  </div>
+                </div>
+              }
+            }
+
+            @if (pinError() === 'e1') {
+              <p class="hg-notice hg-notice--alert" role="alert">
+                <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ 'book.e1' | t }}</span>
+              </p>
+            }
+
+            <label class="hg-field">
+              <span class="hg-field__label">{{ 'book.landmark' | t }}</span>
+              <input class="book__input" type="text" maxlength="120" [placeholder]="'book.landmarkPlaceholder' | t"
+                [ngModel]="landmark()" (ngModelChange)="landmark.set($event)" />
+            </label>
+          }
+
+          @case (2) {
+            <button type="button" class="book__row" (click)="goToStep(1)">
+              <span class="book__row-dot book__row-dot--pickup" aria-hidden="true"></span>
+              <span class="book__row-text">
+                <span class="book__row-label">{{ 'book.pickupRow' | t }}</span>
+                <span>{{ draft.pickup()?.landmark || ('book.pinOnly' | t) }}</span>
+              </span>
+              <span class="book__row-edit">{{ 'book.edit' | t }}</span>
+            </button>
+
+            <header class="hg-head">
+              <h1 class="hg-head__title">{{ 'book.destTitle' | t }}</h1>
+              <p class="hg-head__lead">{{ 'book.destLead' | t }}</p>
+            </header>
+
+            @if (pinError(); as e) {
+              <p class="hg-notice hg-notice--alert" role="alert">
+                <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ (e === 'e1' ? 'book.e1' : 'book.e2') | t }}</span>
+              </p>
+            }
+
+            <label class="hg-field">
+              <span class="hg-field__label">{{ 'book.landmark' | t }}</span>
+              <input class="book__input" type="text" maxlength="120" [placeholder]="'book.destPlaceholder' | t"
+                [ngModel]="landmark()" (ngModelChange)="landmark.set($event)" />
+            </label>
+          }
+
+          @case (3) {
+            <div class="book__route">
+              <button type="button" class="book__row" (click)="goToStep(1)">
+                <span class="book__row-dot book__row-dot--pickup" aria-hidden="true"></span>
+                <span class="book__row-text">
+                  <span class="book__row-label">{{ 'book.pickupRow' | t }}</span>
+                  <span>{{ draft.pickup()?.landmark || ('book.pinOnly' | t) }}</span>
+                </span>
+                <span class="book__row-edit">{{ 'book.edit' | t }}</span>
+              </button>
+              <button type="button" class="book__row" (click)="goToStep(2)">
+                <span class="book__row-dot book__row-dot--dest" aria-hidden="true"></span>
+                <span class="book__row-text">
+                  <span class="book__row-label">{{ 'book.destRow' | t }}</span>
+                  <span>{{ draft.destination()?.landmark || ('book.pinOnly' | t) }}</span>
+                </span>
+                <span class="book__row-edit">{{ 'book.edit' | t }}</span>
+              </button>
+            </div>
+
+            <header class="hg-head">
+              <h1 class="hg-head__title">{{ 'book.rideTitle' | t }}</h1>
+            </header>
+
+            @if (estimateFailed()) {
+              <div class="hg-notice hg-notice--alert book__ask" role="alert">
+                <ion-icon name="alert-circle" aria-hidden="true" />
+                <div>
+                  <p>{{ 'book.e3' | t }}</p>
+                  <button class="hg-button hg-button--outline" type="button" (click)="fetchEstimate()">{{ 'common.tryAgain' | t }}</button>
+                </div>
+              </div>
+            } @else if (!draft.estimate()) {
+              <!-- Skeleton cards while the fares load: never a full-screen spinner (brief § 5). -->
+              <div class="options" aria-busy="true">
+                <div class="option option--skeleton"></div>
+                <div class="option option--skeleton"></div>
+              </div>
+            } @else {
+              <div class="options" role="radiogroup" [attr.aria-label]="'book.rideTitle' | t">
+                @for (option of cards(); track option.ride_type) {
+                  <button
+                    type="button"
+                    class="option"
+                    role="radio"
+                    [class.option--on]="draft.rideType() === option.ride_type"
+                    [attr.aria-checked]="draft.rideType() === option.ride_type"
+                    (click)="chooseType(option.ride_type)"
+                  >
+                    <span class="option__text">
+                      <span class="option__name">{{ (option.ride_type === 'one_way' ? 'book.oneWay' : 'book.twoWay') | t }}</span>
+                      <span class="option__meaning">{{ (option.ride_type === 'one_way' ? 'book.oneWayMeaning' : 'book.twoWayMeaning') | t }}</span>
+                    </span>
+                    <span class="option__price">{{ peso(option.total) }}</span>
+                    <ion-icon
+                      class="option__mark"
+                      [class.option__mark--off]="draft.rideType() !== option.ride_type"
+                      [name]="draft.rideType() === option.ride_type ? 'checkmark-circle' : 'ellipse-outline'"
+                      aria-hidden="true"
+                    />
+                  </button>
+                }
+              </div>
+
+              @if (draft.rideType() === 'two_way') {
+                <fieldset class="chips" #waitChips>
+                  <legend class="hg-field__label">{{ 'book.waitLabel' | t }}</legend>
+                  <div class="chips__row">
+                    @for (minutes of waitChoices(); track minutes) {
+                      <button type="button" class="chip-choice" [class.chip-choice--on]="draft.waitChosen() && draft.waitMinutes() === minutes"
+                        [attr.aria-pressed]="draft.waitChosen() && draft.waitMinutes() === minutes" (click)="chooseWait(minutes)">
+                        {{ waitLabel(minutes) }}
+                      </button>
+                    }
+                    <button type="button" class="chip-choice" [class.chip-choice--on]="draft.waitChosen() && draft.waitMinutes() === null"
+                      [attr.aria-pressed]="draft.waitChosen() && draft.waitMinutes() === null" (click)="chooseWait(null)">
+                      {{ 'book.waitUnsure' | t }}
+                    </button>
+                  </div>
+                </fieldset>
+              }
+
+              @if (draft.chosen(); as chosen) {
+                <button type="button" class="book__toggle" [attr.aria-expanded]="showDetails()" (click)="showDetails.set(!showDetails())">
+                  {{ (showDetails() ? 'book.hideDetails' : 'book.details') | t }}
+                  <ion-icon [name]="showDetails() ? 'chevron-up' : 'chevron-down'" aria-hidden="true" />
+                </button>
+                @if (showDetails()) {
+                  <dl class="breakdown">
+                    @if (chosen.breakdown.minimum_applied) {
+                      <div><dt>{{ 'book.row.minimum' | t }}</dt><dd>{{ peso(chosen.outbound_fare) }}</dd></div>
+                    } @else {
+                      <div><dt>{{ 'book.row.base' | t }}</dt><dd>{{ peso(chosen.breakdown.base_fare) }}</dd></div>
+                      <div>
+                        <dt>{{ 'book.row.distance' | t: { km: chosen.distance_km, rate: peso(chosen.breakdown.rate_per_km) } }}</dt>
+                        <dd>{{ peso(+chosen.outbound_fare - +chosen.breakdown.base_fare) }}</dd>
+                      </div>
+                    }
+                    @if (chosen.ride_type === 'two_way') {
+                      <div><dt>{{ 'book.row.return' | t }}</dt><dd>{{ peso(chosen.return_fare ?? '0') }}</dd></div>
+                      <div>
+                        <dt>{{ 'book.row.waiting' | t }}</dt>
+                        <dd>{{ +chosen.waiting_fee === 0 ? ('book.row.waitingFree' | t) : peso(chosen.waiting_fee) }}</dd>
+                      </div>
+                    }
+                    @if (+chosen.service_fee > 0) {
+                      <div><dt>{{ 'book.row.service' | t }}</dt><dd>{{ peso(chosen.service_fee) }}</dd></div>
+                    }
+                    <div class="breakdown__total"><dt>{{ 'book.row.total' | t }}</dt><dd>{{ peso(chosen.total) }}</dd></div>
+                  </dl>
+                }
+              }
+
+              @if (showNote() || draft.note()) {
+                <label class="hg-field">
+                  <span class="hg-field__label">{{ 'book.noteLabel' | t }}</span>
+                  <textarea class="book__input book__textarea" maxlength="200" rows="2" [placeholder]="'book.notePlaceholder' | t"
+                    [ngModel]="draft.note()" (ngModelChange)="draft.note.set($event)"></textarea>
+                </label>
+              } @else {
+                <button type="button" class="hg-button hg-button--text book__add-note" (click)="showNote.set(true)">{{ 'book.addNote' | t }}</button>
+              }
+            }
+          }
+        }
+      }
     }
   </div>
 </ion-content>
+
+<!-- The ONE primary action of the step, always in reach above the tab bar (brief § 6). -->
+@if (gate() === 'ready') {
+  <ion-footer class="ion-no-border book__footer">
+    <div class="hg-column">
+      @switch (step()) {
+        @case (1) {
+          <button class="hg-button hg-button--primary" type="button" [disabled]="!center() || !!pinError()" (click)="confirmPickup()">
+            {{ 'book.next' | t }}
+          </button>
+        }
+        @case (2) {
+          <button class="hg-button hg-button--primary" type="button" [disabled]="!center() || !!pinError()" (click)="confirmDestination()">
+            {{ 'book.destButton' | t }}
+          </button>
+        }
+        @case (3) {
+          @if (fareChange(); as change) {
+            <p class="hg-notice hg-notice--warn book__notice" role="alert">
+              <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ 'book.e5' | t: change }}</span>
+            </p>
+          }
+          @if (bookError(); as message) {
+            <p class="hg-notice hg-notice--alert book__notice" role="alert">
+              <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ message }}</span>
+            </p>
+          }
+          @if (draft.chosen()) {
+            <p class="book__estimate">{{ 'book.estimateNotice' | t }}</p>
+          }
+          <button class="hg-button hg-button--primary" type="button" (click)="book()"
+            [disabled]="!draft.ready() || booking() || estimating() || !network.online()">
+            @if (booking()) {
+              <ion-spinner name="crescent" aria-hidden="true" /> {{ 'book.booking' | t }}
+            } @else if (draft.chosen(); as chosen) {
+              {{ 'book.bookButton' | t: { fare: peso(chosen.total) } }}
+            } @else {
+              {{ 'book.bookButton' | t: { fare: '—' } }}
+            }
+          </button>
+          @if (draft.estimate() && !draft.ready()) {
+            <p class="book__hint">{{ (draft.rideType() ? 'book.chooseWait' : 'book.chooseFirst') | t }}</p>
+          }
+        }
+      }
+    </div>
+  </ion-footer>
+}

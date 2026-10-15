@@ -1,8 +1,91 @@
-// Book preview: map area on top, then step 1 of the booking sheet (design-briefs/passenger-booking.md).
+// Book (booking brief): the map on top, the step's content below, the one orange button pinned
+// above the tab bar. DESIGN.md rhythm: labels above 60px fields, Role-Card style option cards.
 
-.hg-map-placeholder p {
-  margin: 6px 0 0;
-  font-size: 1rem;
+.book {
+  --padding-top: 0;
+}
+
+.book__map-wrap {
+  position: relative;
+  height: 40vh; // ~40%: the step's field and retry stay above the pinned button (brief § 6)
+  min-height: 200px;
+  transition: height 200ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  &--small {
+    height: 28vh; // step 3: the choice matters more than the map
+    min-height: 180px;
+  }
+
+  &--idle .book__map {
+    filter: grayscale(0.6) opacity(0.7); // visible but inactive behind a gate (brief § 5)
+    pointer-events: none;
+  }
+}
+
+.book__map {
+  position: absolute;
+  inset: 0;
+  background: var(--hg-surface);
+}
+
+// The fixed center pin (the map moves under it). Its tip sits exactly on the center.
+.book__pin {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 500; // above Leaflet's tiles (400)
+  width: 34px;
+  height: 34px;
+  margin: -34px 0 0 -17px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  background: var(--hg-orange);
+  box-shadow: inset 0 0 0 10px var(--hg-orange), inset 0 0 0 17px #fff, 0 0 0 2px #fff;
+  pointer-events: none;
+
+  &--dest {
+    background: var(--hg-ink);
+    box-shadow: inset 0 0 0 10px var(--hg-ink), inset 0 0 0 17px #fff, 0 0 0 2px #fff;
+  }
+}
+
+.book__locate {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 500;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--hg-ink);
+  box-shadow: inset 0 0 0 2px var(--hg-field-line);
+
+  ion-icon {
+    font-size: 26px;
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--hg-ink);
+    outline-offset: 3px;
+  }
+}
+
+.book__sheet {
+  position: relative;
+  padding: 20px 16px 24px;
+  margin-top: -16px; // the sheet overlaps the map a little, like a bottom sheet
+  border-radius: 16px 16px 0 0;
+  background: var(--hg-ground);
+}
+
+.book__loading {
+  display: grid;
+  place-items: center;
+  min-height: 120px;
 }
 
 .book__step {
@@ -12,13 +95,321 @@
   color: var(--hg-ink-soft);
 }
 
-.book__loading {
-  display: grid;
-  place-items: center;
-  min-height: 80px;
-}
-
-// "Your subscription ends on …" is a link to the Subscription page.
 .book__ending {
   text-decoration: none;
+}
+
+.book__ask {
+  > div {
+    flex: 1;
+  }
+
+  p {
+    margin: 0 0 10px;
+  }
+}
+
+// Native inputs styled like the app's fields (as on the upload screen).
+.book__input {
+  width: 100%;
+  min-height: 60px;
+  padding: 0 16px;
+  border: 2px solid var(--hg-field-line);
+  border-radius: var(--hg-radius);
+  background: var(--hg-surface);
+  color: var(--hg-ink);
+  font-family: var(--hg-font);
+  font-size: 1.1rem;
+
+  &::placeholder {
+    color: var(--hg-ink-soft);
+    opacity: 1;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--hg-orange);
+  }
+}
+
+.book__textarea {
+  min-height: 88px;
+  padding: 14px 16px;
+  resize: none;
+}
+
+// Pickup / destination summary rows (tap = edit that step).
+.book__route {
+  margin-bottom: 8px;
+}
+
+.book__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  margin-bottom: 8px;
+  padding: 8px 4px;
+  border: 0;
+  border-bottom: 2px solid var(--hg-line);
+  background: transparent;
+  color: var(--hg-ink);
+  font-family: var(--hg-font);
+  font-size: 1.05rem;
+  text-align: left;
+
+  &-dot {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+
+    &--pickup {
+      box-shadow: inset 0 0 0 5px var(--hg-orange);
+    }
+
+    &--dest {
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      background: var(--hg-ink);
+    }
+  }
+
+  &-text {
+    display: grid;
+    flex: 1;
+    gap: 2px;
+    min-width: 0;
+
+    > span:last-child {
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2; // landmark notes: 2 lines max in summaries (brief § 5)
+      -webkit-box-orient: vertical;
+    }
+  }
+
+  &-label {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--hg-ink-soft);
+  }
+
+  &-edit {
+    flex: none;
+    font-weight: 700;
+    color: var(--hg-orange);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+}
+
+// Ride option cards: the Role Card selected look (DESIGN.md), price on the right.
+.options {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 84px;
+  padding: 12px 48px 12px 16px;
+  border: 2px solid var(--hg-field-line);
+  border-radius: var(--hg-radius);
+  background: var(--hg-surface);
+  color: var(--hg-ink);
+  font-family: var(--hg-font);
+  text-align: left;
+
+  &__text {
+    display: grid;
+    flex: 1;
+    gap: 2px;
+  }
+
+  &__name {
+    font-size: 1.15rem;
+    font-weight: 800;
+  }
+
+  &__meaning {
+    font-size: 1rem;
+    color: var(--hg-ink-soft);
+  }
+
+  &__price {
+    font-size: 1.4rem;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  &__mark {
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    transform: translateY(-50%);
+    font-size: 26px;
+    color: var(--hg-green);
+
+    &--off {
+      color: var(--hg-ink-soft);
+    }
+  }
+
+  &--on {
+    border: 3px solid var(--hg-orange);
+    background: var(--hg-orange-tint);
+    padding-left: 15px;
+
+    .option__meaning {
+      color: var(--hg-ink);
+    }
+  }
+
+  &--skeleton {
+    border-color: var(--hg-line);
+    background: linear-gradient(90deg, var(--hg-surface) 0%, var(--hg-line) 50%, var(--hg-surface) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.2s linear infinite;
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--hg-ink);
+    outline-offset: 3px;
+  }
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+// Wait-time chips (Balikan only).
+.chips {
+  margin: 0 0 16px;
+  padding: 0;
+  border: 0;
+
+  &__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+}
+
+.chip-choice {
+  min-height: 56px; // every control ≥ 56px (DESIGN.md)
+  padding: 0 16px;
+  border: 2px solid var(--hg-field-line);
+  border-radius: var(--hg-radius);
+  background: var(--hg-surface);
+  color: var(--hg-ink);
+  font-family: var(--hg-font);
+  font-size: 1.05rem;
+  font-weight: 700;
+
+  &--on {
+    border: 3px solid var(--hg-orange);
+    background: var(--hg-orange-tint);
+  }
+}
+
+.book__toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 56px;
+  margin-bottom: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--hg-ink);
+  font-family: var(--hg-font);
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.breakdown {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  border-radius: var(--hg-radius);
+  background: var(--hg-surface);
+
+  div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  dt {
+    color: var(--hg-ink-soft);
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  &__total {
+    padding-top: 8px;
+    border-top: 2px solid var(--hg-line);
+
+    dt {
+      color: var(--hg-ink);
+      font-weight: 700;
+    }
+  }
+}
+
+.book__add-note {
+  margin-bottom: 8px;
+}
+
+// The pinned footer (like Driver Home's): the notice, the estimate line and the one button.
+.book__footer {
+  padding: 12px 16px calc(env(safe-area-inset-bottom) + 8px);
+  background: var(--hg-ground);
+  box-shadow: inset 0 2px 0 var(--hg-line);
+}
+
+.book__notice {
+  margin-bottom: 10px;
+}
+
+.book__estimate {
+  margin: 0 0 8px;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--hg-ink);
+}
+
+.book__hint {
+  margin: 8px 0 0;
+  text-align: center;
+  font-size: 1rem;
+  color: var(--hg-ink-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .book__map-wrap {
+    transition: none;
+  }
+
+  .option--skeleton {
+    animation: none;
+  }
 }

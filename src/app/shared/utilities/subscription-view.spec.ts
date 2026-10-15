@@ -1,5 +1,5 @@
 import { Plan, SubscriptionSummary } from '../models/subscription.model';
-import { endingSoon, monthsFree, peso, phDate, subscriptionChip } from './subscription-view';
+import { endingSoon, monthsFree, peso, phDate, phDateTime, subscriptionChip } from './subscription-view';
 
 const plan = (months: number, price: string): Plan => ({
   id: months,
@@ -59,5 +59,6 @@ describe('subscription-view (Phase 8)', () => {
   it('shows dates on the Philippine calendar', () => {
     // 17:00 UTC on Oct 31 is already Nov 1 in Manila (UTC+8).
     expect(phDate('2026-10-31T17:00:00Z')).toBe('Nov 1, 2026');
+    expect(phDateTime('2026-10-12T08:29:00Z')).toBe('Oct 12 · 4:29 PM'); // UTC+8
   });
 });

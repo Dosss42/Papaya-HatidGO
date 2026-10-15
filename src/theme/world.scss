@@ -76,6 +76,16 @@
     }
   }
 
+  // Destructive, only where something can't be undone (Phase 10: "Kanselahin ang biyahe").
+  &--danger {
+    background: var(--hg-alert);
+    color: #fff;
+
+    &:active:not(:disabled) {
+      background: #8f1c13;
+    }
+  }
+
   // Text-only link action, still a full-height touch target.
   &--text {
     background: transparent;
@@ -490,4 +500,78 @@ ion-action-sheet.hg-sheet {
       color: var(--hg-green);
     }
   }
+}
+
+// ---------- Map markers (Phase 10, MapService) ----------
+// Global on purpose: Leaflet builds these elements itself, outside any component's styles.
+.hg-marker {
+  background: none;
+  border: 0;
+
+  &__dot {
+    // Pickup: a Deep Papaya ring with a white center.
+    display: block;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: inset 0 0 0 7px var(--hg-orange), 0 0 0 2px #fff;
+  }
+
+  &__pin {
+    // Destination: an Ink pin (a rotated square with one sharp corner = the tip).
+    display: block;
+    width: 28px;
+    height: 28px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    background: var(--hg-ink);
+    box-shadow: inset 0 0 0 8px var(--hg-ink), inset 0 0 0 14px #fff, 0 0 0 2px #fff;
+  }
+
+  &__driver {
+    // The driver: the tricycle drawing in a white disc with a papaya ring.
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--hg-orange);
+    box-shadow: inset 0 0 0 3px var(--hg-orange);
+
+    svg {
+      width: 30px;
+      height: 30px;
+    }
+  }
+}
+
+// The OpenStreetMap credit (required by its licence), readable but small.
+.leaflet-control-attribution {
+  font-family: var(--hg-font);
+  font-size: 0.75rem;
+}
+
+// Read by screen readers, not shown (e.g. "(now)" after the current ride stage).
+.hg-visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+// Behind the (transparent) status bar on full-bleed map screens (Phase 10): content scrolled up
+// stops at the clock instead of running under it. White, per the Always White rule.
+.hg-statusbar-scrim {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 700;
+  height: env(safe-area-inset-top);
+  background: var(--hg-ground);
+  pointer-events: none;
 }

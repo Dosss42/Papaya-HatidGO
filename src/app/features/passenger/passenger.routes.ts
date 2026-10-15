@@ -24,6 +24,13 @@ export const PASSENGER_ROUTES: Routes = [
           import('./pages/passenger-rides/passenger-rides.page').then((m) => m.PassengerRidesPage),
       },
       {
+        // Phase 10: the active ride / ride details. A child of the tabs, so the tab bar stays
+        // visible (active-ride brief § 7); the Book tab leads back here while a ride is active.
+        path: 'ride/:id',
+        loadComponent: () =>
+          import('./pages/passenger-ride/passenger-ride.page').then((m) => m.PassengerRidePage),
+      },
+      {
         path: 'account',
         loadComponent: () =>
           import('./pages/passenger-account/passenger-account.page').then(

@@ -57,3 +57,11 @@ export function endingSoon(summary: SubscriptionSummary | null): boolean {
 export function phDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-US', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', year: 'numeric' });
 }
+
+/** A timestamp as date + time in the Philippines, e.g. "Oct 12 · 4:29 PM" (ride history, Phase 10). */
+export function phDateTime(iso: string): string {
+  const d = new Date(iso);
+  const date = d.toLocaleDateString('en-US', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric' });
+  const time = d.toLocaleTimeString('en-US', { timeZone: 'Asia/Manila', hour: 'numeric', minute: '2-digit' });
+  return `${date} · ${time}`;
+}

@@ -19,8 +19,8 @@ export type LocationPermission = 'granted' | 'approximate' | 'denied' | 'prompt'
 
 export type LocationErrorKind = 'DENIED' | 'GPS_OFF' | 'TIMEOUT' | 'CONFIG' | 'UNAVAILABLE';
 
-// User-facing Taglish messages (glossary: docs/design-briefs/passenger-booking.md § 8).
-// Pages may show a more specific message for their context; these are the defaults.
+// Fallback Taglish text for logs and the Diagnostics page. Screens show the translated message
+// instead: i18n key `location.<KIND>` (messages.en.ts / messages.fil.ts, Phase 10).
 const MESSAGES: Record<LocationErrorKind, string> = {
   DENIED: 'Hindi pinayagan ang lokasyon. Buksan ang Settings para payagan ito.',
   GPS_OFF: 'Hindi makuha ang lokasyon mo. Siguraduhing naka-on ang GPS.',

@@ -19,3 +19,6 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="40 56 464 464">
 // Raw (NOT percent-encoded): ionicons parses the text after ";utf8," as markup to find the <svg>,
 // exactly like its own icon exports.
 export const TRICYCLE_ICON = `data:image/svg+xml;utf8,${svg.replace(/\n/g, '')}`;
+
+/** The same drawing as inline markup, for places that need an <svg> element (the driver's map marker). */
+export const TRICYCLE_SVG = svg.replace(/\n/g, '');
