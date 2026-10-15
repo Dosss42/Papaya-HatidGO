@@ -35,7 +35,8 @@
         }
       </header>
 
-      @if (online() && !network.online()) {
+      <!-- From the offers check itself failing, not the phone's flag (which can be wrong on weak signal). -->
+      @if (online() && shift.connectionLost()) {
         <p class="hg-notice hg-notice--alert" role="alert">
           <ion-icon name="cloud-offline-outline" aria-hidden="true" /><span>{{ 'drive.noInternet' | t }}</span>
         </p>
@@ -176,7 +177,7 @@
             <p class="home__hint">{{ 'drive.locationWhy' | t }}</p>
           }
           <button class="hg-button hg-button--primary work__go" type="button" (click)="shift.goOnline()"
-            [disabled]="shift.state() === 'going' || !network.online()">
+            [disabled]="shift.state() === 'going'">
             @if (shift.state() === 'going') {
               <ion-spinner name="crescent" aria-hidden="true" />{{ 'drive.going' | t }}
             } @else {

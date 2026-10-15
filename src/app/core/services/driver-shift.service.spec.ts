@@ -199,6 +199,21 @@ describe('DriverShiftService (Phase 11)', () => {
     expect(shift.shown()?.offer_id).toBe(1);
   });
 
+  it('shows "No internet" only after two failed checks in a row, and clears it on the next success', async () => {
+    await online();
+    for (const _ of [1, 2]) {
+      const polled = shift.poll();
+      http.expectOne(`${api}/drivers/me/offers`).error(new ProgressEvent('offline'));
+      await polled;
+      if (_ === 1) expect(shift.connectionLost()).toBe(false); // one miss can be a blip
+    }
+    expect(shift.connectionLost()).toBe(true);
+    const polled = shift.poll();
+    http.expectOne(`${api}/drivers/me/offers`).flush({ data: [], meta: { is_online: true } });
+    await polled;
+    expect(shift.connectionLost()).toBe(false);
+  });
+
   it('Mag-offline tells the server', async () => {
     await online();
     const going = shift.goOffline();

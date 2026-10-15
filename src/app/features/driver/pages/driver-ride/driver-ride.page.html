@@ -139,7 +139,7 @@
   <ion-footer class="ion-no-border ride__footer">
     <div class="hg-column">
       @if (next(); as n) {
-        <button class="hg-button hg-button--primary drive__step" type="button" (click)="step()" [disabled]="stepping() || !network.online()">
+        <button class="hg-button hg-button--primary drive__step" type="button" (click)="step()" [disabled]="stepping()">
           @if (stepping()) {
             <ion-spinner name="crescent" aria-hidden="true" />
           }

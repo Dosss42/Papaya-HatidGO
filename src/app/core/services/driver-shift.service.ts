@@ -67,6 +67,13 @@ export class DriverShiftService {
   /** "+1 pang request". */
   readonly queued = computed(() => this.offers().filter((o) => o.offer_id !== this.shown()?.offer_id).length);
 
+  /**
+   * The offers check failed twice in a row (~10 s): the "No internet" banner. Judged from real
+   * requests, not the phone's network flag, which can say "offline" on a weak but working signal.
+   */
+  readonly connectionLost = signal(false);
+  private failedPolls = 0;
+
   /** The ride in progress (the poll pauses; the GPS sends the trail instead). */
   readonly rideId = signal<number | null>(null);
 
@@ -190,6 +197,8 @@ export class DriverShiftService {
   private stopLocal(): void {
     this.state.set('offline');
     this.stopPolling();
+    this.failedPolls = 0;
+    this.connectionLost.set(false);
     this.clearShown();
     this.offers.set([]);
     if (this.rideId() === null) {
@@ -218,6 +227,8 @@ export class DriverShiftService {
     try {
       const { offers, isOnline, clockOffsetMs } = await this.api.offers();
       this.clockOffset = clockOffsetMs;
+      this.failedPolls = 0;
+      this.connectionLost.set(false);
       if (this.state() !== 'online' || this.rideId() !== null) return; // changed while waiting
       if (!isOnline) {
         await this.forceOffline();
@@ -235,7 +246,9 @@ export class DriverShiftService {
         this.showNext();
       }
     } catch {
-      // No internet or a slow server: try again in 5 s.
+      // No internet or a slow server: try again in 5 s (the banner after two misses in a row).
+      this.failedPolls++;
+      if (this.failedPolls >= 2) this.connectionLost.set(true);
     } finally {
       this.polling = false;
     }

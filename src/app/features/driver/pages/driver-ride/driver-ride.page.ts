@@ -16,7 +16,6 @@ import { AppLifecycleService } from '../../../../core/services/app-lifecycle.ser
 import { DriverRideService } from '../../../../core/services/driver-ride.service';
 import { DriverShiftService } from '../../../../core/services/driver-shift.service';
 import { AppMap, LatLng, MapService, rideMapInset } from '../../../../core/services/map.service';
-import { NetworkService } from '../../../../core/services/network.service';
 import { RideService } from '../../../../core/services/ride.service';
 import { DriverCancelReason } from '../../../../shared/models/driver-ride.model';
 import { Ride } from '../../../../shared/models/ride.model';
@@ -55,7 +54,6 @@ export class DriverRidePage implements ViewDidEnter, ViewWillLeave, OnDestroy {
   private readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
   private readonly lifecycle = inject(AppLifecycleService);
-  protected readonly network = inject(NetworkService);
 
   private readonly mapEl = viewChild<ElementRef<HTMLElement>>('map');
   private map: AppMap | null = null;

@@ -18,7 +18,6 @@ import { DriverDocumentsService } from '../../../../core/services/driver-documen
 import { DriverRideService } from '../../../../core/services/driver-ride.service';
 import { DriverShiftService } from '../../../../core/services/driver-shift.service';
 import { AppMap, MapService } from '../../../../core/services/map.service';
-import { NetworkService } from '../../../../core/services/network.service';
 import { RideService } from '../../../../core/services/ride.service';
 import { SubscriptionService } from '../../../../core/services/subscription.service';
 import { VehicleService } from '../../../../core/services/vehicle.service';
@@ -68,7 +67,6 @@ export class DriverHomePage implements ViewWillEnter, OnDestroy {
   private readonly rides = inject(RideService);
   private readonly maps = inject(MapService);
   protected readonly shift = inject(DriverShiftService);
-  protected readonly network = inject(NetworkService);
   private inFlight: Promise<void> | null = null;
 
   private readonly mapEl = viewChild<ElementRef<HTMLElement>>('map');

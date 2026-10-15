@@ -98,6 +98,7 @@ The student asked for the phase straight through. The briefs' open decisions kee
 | 3 | The route map zoomed out too far, with the destination pin hidden | DevTools on the WebView showed it: the map is ~240 px tall, starts at the very top of the screen, and the fit's 48 px padding put the pin under the status bar and the back button | `rideMapInset()` measures what floats over the map, and `fit()` pads by it. This also fixes the passenger's ride screen |
 | 4 | The test helper's booking looked successful on an `ACTIVE_RIDE_EXISTS` error | The error answer also has a `data` field | Check `data.id` (test script only) |
 | 5 | The status bar sat on the online Home map | No white strip behind it | `hg-statusbar-scrim` while the map shows |
+| 6 | (Found by the student after the report) **"Go online" couldn't be tapped** on the emulator | Android had lost its "internet verified" check (Wi-Fi with "!"; slow link), so the Network plugin said `connected: false` while the API still answered. The button was disabled on that flag, with no explanation | The phone's flag no longer disables **Go online** or the **ride step** button; a real failure shows its own message. The "No internet" banner now comes from two failed offers checks in a row (`connectionLost`). New unit test (102) |
 
 ---
 
