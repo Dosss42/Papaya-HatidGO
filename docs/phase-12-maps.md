@@ -45,7 +45,7 @@ The student asked for the phase straight through; these were taken without askin
 | 3 | The marker **glides** for ~1 s to each new position; with "Remove animations" on, it jumps | Positions arrive every 4–10 s; a jump looks like teleporting. Reduced motion is a DESIGN.md rule |
 | 4 | A driver position older than **45 s** is **stale**: the marker turns grey-ringed and the screen says "Last location: 2 min ago" instead of the distance | The driver sends every 10 s during a ride; 45 s = several missed sends. Never show an old position as live (active-ride brief) |
 | 5 | The driven path is shown only on a **finished** ride's details, to its passenger and driver, and it covers **the trip only** (from "Simulan ang biyahe" on) | While the ride is active, the live marker is the information; afterwards the path is the record (useful in a complaint). Nobody else can read it, and the driver's whereabouts before the pickup aren't part of the passenger's record (added during the live check, problem 4) |
-| 6 | The path is **thinned on the server** to ≤ 300 points | A long ride at 10 s per point stays small for a phone on mobile data |
+| 6 | The path is **thinned on the server** to ≤ 600 points (300 at first) | A long ride stays small for a phone on mobile data, yet keeps its turns |
 | 7 | **The student chose MapTiler "Streets"** (asked during the phase) over Google Maps and plain OpenStreetMap. The key lives in `src/environments/map-key.ts`, which is **git-ignored**; without a key the app falls back to OpenStreetMap | The OSM tiles have no high-resolution version, so street names were small and soft on dense phone screens ("not clear"). MapTiler is sharp (@2x), Google-like, and free (no credit card); Google Maps needs a billing account and a rewrite of `MapService`. CARTO now requires a key too (tried, refused). Keys are never committed (the student's rule) |
 
 ## 4. Test plan (summary)
@@ -66,7 +66,7 @@ The student asked for the phase straight through; these were taken without askin
 
 | Step | Result |
 |---|---|
-| 12.1 | API `GET /rides/{id}/trail`: the trip's path (from `started_at`), oldest first, thinned to ≤ 300 points, 404 for anyone else's ride. `TrailTest` (5 tests). API **205 tests** ✅ |
+| 12.1 | API `GET /rides/{id}/trail`: the trip's path (from `started_at`), oldest first, thinned to ≤ 600 points, 404 for anyone else's ride. `TrailTest` (5 tests). API **205 tests** ✅ |
 | 12.2 | `MapService`: `setLine` (route / approach / trail), `setMarker(…, { glide })`, `setMarkerStale`, and `rideMapInset` rewritten. `map-geometry.ts` holds the pure helpers + `rideLines()`; line and stale styles are in `world.scss`. 7 new unit tests ✅ |
 | 12.3 | Passenger: the route on Book steps 2–3; on the ride screen the route, approach, gliding marker, "Last location: … ago", and the driven path; a finished ride's map back at full height ✅ |
 | 12.4 | Driver: the same lines from the last position sent; the own marker goes stale when the GPS is lost; the driven path when finished ✅ |
@@ -84,6 +84,7 @@ The student asked for the phase straight through; these were taken without askin
 | 6 | Juan's and Maria's dev subscriptions had ended (it's 11 days later) | Dev data from Phase 8 | Extended in the dev database for testing (no code change) |
 | 7 | WAMP didn't start from the script (UAC prompt cancelled) | Windows asks before WAMP starts | MySQL was up shortly after; tests ran normally |
 | 8 | On MapTiler, a finished ride showed **no line at all** | Two fits ran close together (the route, then the driven path that arrived right after). **Leaflet ignores a new view while a zoom animation is running**, so the second fit was dropped and the new line stayed drawn for the old zoom (DevTools showed it collapsed to one point off-screen) | Fits now snap (`animate: false`, after `map.stop()`). Only the marker glide and "Nasaan ako?" animate |
+| 10 | (The student, after the report) **"Straight lines between points are not enough: show the way he went"** | A point every 10 s joins far-apart spots with straight jumps that cut corners; a failed upload kept only the newest 5 points, so a signal gap became one long jump | During a ride the phone **records a point about every 3 s** (uploads still every 10 s, in batches), skips standing still (< 5 m) and vague fixes (> ±50 m), and **keeps every unsent point** through a gap (up to ~30 min), sent oldest first. Waiting online keeps the GPS at 10 s (battery). The server keeps up to 600 points. An L-shaped drive on the emulator now shows both corners (`p12-27`) |
 | 9 | "Last location: 2 min ago" looked too old during the check | It wasn't: more time had passed than I estimated. The API gave the right age (0 → 21 s over 20 s), and the emulator's and the PC's clocks matched | No change; the hidden announcement correctly kept the age at the moment it went stale (48 s) |
 
 ---
@@ -117,7 +118,7 @@ Which lines show is decided in one pure function used by both ride screens: the 
 `GET /rides/{id}/trail` reads `ride_locations`, the points the driver's phone sent every 10 s. It returns:
 - only the points recorded **from "Simulan ang biyahe" on**: the trip the passenger paid for, not where the driver was before;
 - **oldest first**, for the ride's own passenger and driver (anyone else gets 404, so ride ids can't be probed);
-- at most **300 points**: a long ride is thinned evenly, always keeping the first and the last point, so the line still starts and ends where the trip did.
+- at most **600 points**: a long ride is thinned evenly, always keeping the first and the last point, so the line still starts and ends where the trip did.
 
 The app asks for it once, when a ride is finished, and draws it solid in Deep Papaya; the map frames the pins and the whole path. It's useful when a passenger and a driver disagree about a ride, or for the admin later (Phase 14).
 
@@ -186,5 +187,7 @@ The `impeccable-finish-reviewer` returned **8 material fixes**, all applied and 
 - **Your MapTiler key** is only on this PC (`src/environments/map-key.ts`, not committed). On another PC, create that file from `map-key.example.ts` and paste the key again. **Before release**, restrict the key in your MapTiler account (allowed origins).
 - **Dev data:** Juan's and Maria's subscriptions were extended to Nov 24 in the dev database for testing.
 - The one ESLint error (`register.page.ts:54`) is still the older one, left as is.
+
+**After the report (problem 10):** the driven path now follows the roads taken: a point every ~3 s during a ride, nothing dropped in a signal gap. Unit tests 112 (3 new); the corner test is `p12-27`.
 
 **Next:** Phase 13, notifications: in-app and push (FCM) for "a driver accepted", "your driver is here", "the ride was cancelled", subscription reminders. **It needs your Firebase project** (`google-services.json`), which only you can create.
