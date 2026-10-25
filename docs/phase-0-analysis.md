@@ -774,7 +774,7 @@ Android (GPS + network location · FINE/COARSE permission)
 | 13 | Grace period after subscription expiry | ⏳ Open (default 0 days) |
 | 14 | Seeded driver requirements: driver's license (front+back), OR/CR, franchise/MTOP permit, barangay/police/NBI clearance. All required, expiring, critical. Admin-configurable. | ✅ Confirmed |
 | 15 | Exact service area | ⏳ Open (circle setting for now) |
-| 16 | Admin UI framework: Bootstrap or Tailwind | ⏳ Open (Phase 14) |
+| 16 | Admin UI framework: Bootstrap or Tailwind | ✅ Tailwind (the student, 2026-10-26, Phase 14) |
 | 17 | Subscription plan lengths: 1, 6, 12 months (`duration_months`, replacing the `billing_cycle` enum); longer plans priced as "months free" | ✅ Confirmed |
 | 18 | Location used only while booking and during a ride (no background tracking of passengers) | ✅ Confirmed |
 | 19 | Active ride: distance shown instead of an ETA in minutes (no road routing in the MVP); tap-to-call opens the phone dialer (number not printed, only during the active ride); optional cancel reasons | ✅ Confirmed |
