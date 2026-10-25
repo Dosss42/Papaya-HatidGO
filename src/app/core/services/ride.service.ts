@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { I18nService } from '../i18n/i18n.service';
-import { BookingOptions, BookingRequest, CancelReason, Estimate, Ride, TripPoint } from '../../shared/models/ride.model';
+import { BookingOptions, BookingRequest, CancelReason, Estimate, Ride, RideTrail, TripPoint } from '../../shared/models/ride.model';
 import { apiCall } from './api-call';
 
 type Wrapped<T> = Observable<{ data: T }>;
@@ -46,6 +46,11 @@ export class RideService {
   /** The polling target (every 4 s on the ride screen). */
   get(id: number): Promise<Ride> {
     return this.call(this.http.get<{ data: Ride }>(`${this.base}/rides/${id}`));
+  }
+
+  /** The path the driver actually drove, oldest first, thinned to ≤ 300 points (Phase 12). Both roles. */
+  trail(id: number): Promise<RideTrail> {
+    return this.call(this.http.get<{ data: RideTrail }>(`${this.base}/rides/${id}/trail`));
   }
 
   history(page = 1): Promise<Ride[]> {

@@ -79,6 +79,7 @@ export class DriverShiftService {
 
   readonly gpsLost = this.location.gpsLost;
   readonly position = this.location.sentPosition;
+  readonly sentAt = this.location.sentAt;
 
   constructor() {
     // The server refused an idle ping (409 NOT_ONLINE): it has already stopped matching us.

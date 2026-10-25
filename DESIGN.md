@@ -278,6 +278,18 @@ The One-way / Balikan cards follow the **Plan Card** rules: full width, 84px min
 - **Cancel:** a quiet Soft Ink text button at the very bottom, never next to the call button. It opens the flow's one modal sheet, which holds the **danger button** (`.hg-button--danger`: Alert fill, white text), used only to confirm what can't be undone: cancelling a ride (both roles) and the driver's "End the ride here" (Phase 11).
 - **Weak connection:** a slim Alert banner directly above the status line, "Weak connection. Last update: 40 sec ago." The last known status stays on screen.
 
+### Map lines and the live driver (Phase 12)
+- **Base map:** MapTiler "Streets" in high resolution (sharp names on dense screens), with the credit "© MapTiler © OpenStreetMap contributors" always visible. OpenStreetMap is the fallback when no key is set.
+- **Three lines, told apart by pattern** (`.hg-line--*`, drawn under the markers):
+  - **Route** (the planned trip, pickup → destination): straight, Ink at 75%, 3px, dashes 10/8. It's straight on purpose: the fare uses the straight-line distance, and the dashes read as "direction", not "the road to take".
+  - **Approach** (the driver coming to the pickup): Deep Papaya dots, 4px. Shown only while the position is live.
+  - **Driven path** (a finished ride, the trip part only): solid Deep Papaya, 4px.
+- **Booking:** the route appears once both points exist. In step 2 it follows the center pin as the map moves.
+- **Live driver marker:** glides ~1 s to each new position (ease-out); under "Remove animations" it jumps.
+- **Stale** (older than 45 s): the ring and the tricycle turn Soft Ink at 70% opacity, the approach line disappears, and the distance line becomes "Last location: 2 min ago" with a clock icon. Never an old position shown as live.
+- **Fitting pins:** maps leave the status bar + 36px clear at the top and 36px at the bottom (the sheet overlap). The floating back button only covers a corner, so its height isn't reserved across the map.
+- **Finished ride:** the passenger's map returns to full height. A finished ride's map is its record.
+
 ### Driver at work (Phase 11)
 - **Work state as the headline:** "You're offline." / "● You're online" at 2.1rem/800, the largest text on Home. Online carries a Leaf Green dot with a Leaf Tint halo **and** the words (never color alone). A Soft Ink lead says what's happening ("Waiting for passengers…") or why ("You were taken offline." + the reason, with an outline button to the fix).
 - **Go online / Go offline:** Go online is the screen's orange button, extra-large (68px, 1.3rem). Online, it becomes an **outline** "Go offline" of the normal size: going offline is rarer, and a mistap costs requests. No confirmation either way.

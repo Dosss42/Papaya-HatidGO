@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnDestroy, computed, effect, inject, input, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, computed, effect, inject, input, signal, untracked, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Haptics } from '@capacitor/haptics';
 import {
@@ -15,6 +15,7 @@ import { TranslatePipe } from '../../../../core/i18n/t.pipe';
 import { AppLifecycleService } from '../../../../core/services/app-lifecycle.service';
 import { DriverRideService } from '../../../../core/services/driver-ride.service';
 import { DriverShiftService } from '../../../../core/services/driver-shift.service';
+import { ageText, isStale, rideLines } from '../../../../core/services/map-geometry';
 import { AppMap, LatLng, MapService, rideMapInset } from '../../../../core/services/map.service';
 import { RideService } from '../../../../core/services/ride.service';
 import { DriverCancelReason } from '../../../../shared/models/driver-ride.model';
@@ -58,6 +59,8 @@ export class DriverRidePage implements ViewDidEnter, ViewWillLeave, OnDestroy {
   private readonly mapEl = viewChild<ElementRef<HTMLElement>>('map');
   private map: AppMap | null = null;
   private framing: string | null = null;
+  /** The path actually driven (a finished ride), loaded once. */
+  private driven: LatLng[] | null = null;
   private timer: ReturnType<typeof setInterval> | null = null;
   private visible = false;
   private inFlight = false;
@@ -95,6 +98,21 @@ export class DriverRidePage implements ViewDidEnter, ViewWillLeave, OnDestroy {
   protected readonly waitedMinutes = computed(() => minutesSince(this.ride()?.times.destination_reached_at ?? null, this.now()));
   protected readonly weak = computed(() => this.pollFailed() && !!this.ride() && !this.over());
 
+  /** How old the last SENT position is (the same one the passenger sees), in ms. */
+  private readonly sendAgeMs = computed(() => {
+    const at = this.shift.sentAt();
+    return at === null ? null : Math.max(0, this.now() - at);
+  });
+  /** Stale when the GPS is lost OR the last send is older than 45 s (no data, server errors): finish review #2. */
+  protected readonly positionStale = computed(() => !this.over() && (this.shift.gpsLost() || isStale(this.sendAgeMs())));
+  protected readonly gpsLost = this.shift.gpsLost;
+  protected readonly sendAge = computed(() => {
+    const ms = this.sendAgeMs();
+    if (ms === null) return '';
+    const age = ageText(ms);
+    return this.i18n.t(age.key, { n: age.n });
+  });
+
   protected readonly lastUpdate = computed(() => {
     const at = this.lastOkAt();
     if (!at) return '';
@@ -119,10 +137,16 @@ export class DriverRidePage implements ViewDidEnter, ViewWillLeave, OnDestroy {
       }
     });
 
-    // The driver's own marker = the last position SENT (the same one the passenger sees).
+    // The driver's own marker = the last position SENT (the same one the passenger sees): each
+    // send moves it (gliding) and its approach line; a lost GPS greys it out.
     effect(() => {
-      const at = this.shift.position();
-      if (this.map && !this.over()) this.map.setMarker('driver', at);
+      this.shift.position();
+      this.shift.gpsLost();
+      // Only those two: drawMap reads the ride too, and the poll already redraws on each new ride.
+      untracked(() => {
+        const ride = this.ride();
+        if (this.map && ride) this.drawMap(ride);
+      });
     });
   }
 
@@ -165,6 +189,9 @@ export class DriverRidePage implements ViewDidEnter, ViewWillLeave, OnDestroy {
     } catch {
       this.pollFailed.set(true);
       if (!this.ride()) this.loadFailed.set(true);
+      // Still redraw: the last send keeps ageing and may now be stale (finish review #1).
+      const ride = this.ride();
+      if (ride) this.drawMap(ride);
     } finally {
       this.inFlight = false;
     }
@@ -184,10 +211,23 @@ export class DriverRidePage implements ViewDidEnter, ViewWillLeave, OnDestroy {
     if (isOver(fresh)) {
       this.stopTimer();
       if (this.shift.rideId() === fresh.id) this.shift.rideEnded(); // back to waiting (if online)
+      void this.loadDriven(fresh);
     } else {
       this.shift.startRide(fresh.id); // resumed after reopening the app: the trail runs again
     }
     setTimeout(() => this.drawMap(fresh));
+  }
+
+  /** A finished ride: the path actually driven, once (Phase 12 decision #5). */
+  private async loadDriven(ride: Ride): Promise<void> {
+    if (this.driven) return;
+    try {
+      const trail = await this.rides.trail(ride.id);
+      this.driven = trail.points.map((p) => ({ lat: p.lat, lng: p.lng }));
+      this.drawMap(ride);
+    } catch {
+      // No connection: the planned route stays on the map.
+    }
   }
 
   private drawMap(ride: Ride): void {
@@ -196,21 +236,28 @@ export class DriverRidePage implements ViewDidEnter, ViewWillLeave, OnDestroy {
     const pickup: LatLng = { lat: +ride.pickup.lat, lng: +ride.pickup.lng };
     const destination: LatLng = { lat: +ride.destination.lat, lng: +ride.destination.lng };
     const me = isOver(ride) ? null : this.shift.position();
+    const stale = this.positionStale();
 
     this.map ??= this.maps.create(el, pickup, 16);
     this.map.setMarker('pickup', pickup);
     this.map.setMarker('destination', destination);
-    this.map.setMarker('driver', me);
+    this.map.setMarker('driver', me, { glide: true });
+    this.map.setMarkerStale('driver', stale);
+    const lines = rideLines(ride.status, pickup, destination, me, stale, this.driven);
+    this.map.setLine('route', lines.route);
+    this.map.setLine('approach', lines.approach);
+    this.map.setLine('trail', lines.trail);
 
     // Before the trip: me + the pickup. From the start: the whole route. Re-framed only when
     // that changes, so the driver's own panning isn't undone every poll.
     const phase = this.heading() === 'pickup' && ride.status !== 'in_progress' ? 'pickup' : 'route';
-    const framing = phase === 'pickup' && me ? 'pickup+me' : phase;
+    const framing = phase === 'pickup' && me ? 'pickup+me' : lines.trail ? 'trail' : phase;
     if (framing !== this.framing) {
       this.framing = framing;
+      const points = phase === 'pickup' ? [pickup, ...(me ? [me] : [])] : [pickup, destination, ...(lines.trail ?? [])];
       setTimeout(() => {
         this.map?.resize();
-        this.map?.fit(phase === 'pickup' ? [pickup, ...(me ? [me] : [])] : [pickup, destination], rideMapInset(el));
+        this.map?.fit(points, rideMapInset(el));
       }, 260);
     }
   }

@@ -1,7 +1,7 @@
 <ion-content class="ride" [fullscreen]="true">
   <div slot="fixed" class="hg-statusbar-scrim" aria-hidden="true"></div>
   @if (ride(); as r) {
-    <div class="ride__map-wrap" [class.ride__map-wrap--small]="r.status === 'in_progress' || over()">
+    <div class="ride__map-wrap" [class.ride__map-wrap--small]="r.status === 'in_progress'">
       <div #map class="ride__map" role="img" [attr.aria-label]="'ride.mapAria' | t"></div>
       <!-- Only once it's over: during a ride, Home would lead straight back here (the resume rule). -->
       @if (over()) {
@@ -13,6 +13,14 @@
       @if (weak()) {
         <p class="ride__weak" role="status">
           <ion-icon name="cloud-offline-outline" aria-hidden="true" />{{ 'ride.weak' | t: { time: lastUpdate() } }}
+        </p>
+      }
+
+      <!-- The own position, as the passenger sees it: lost GPS, or nothing sent for 45 s (mark + word, Phase 12). -->
+      @if (positionStale()) {
+        <p class="hg-notice hg-notice--alert" role="status">
+          <ion-icon name="alert-circle" aria-hidden="true" />
+          <span>{{ gpsLost() ? ('drive.gpsLost' | t) : ('drive.lastSent' | t: { time: sendAge() }) }}</span>
         </p>
       }
 

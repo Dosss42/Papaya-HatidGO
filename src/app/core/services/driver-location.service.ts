@@ -30,6 +30,8 @@ export class DriverLocationService {
 
   /** The last position SENT (the compact map's marker moves only with each send: brief § 2). */
   readonly sentPosition = signal<GeoPoint | null>(null);
+  /** When that position was sent (this phone's clock): older than 45 s = stale, even with GPS working (Phase 12). */
+  readonly sentAt = signal<number | null>(null);
   /** The GPS stopped answering (banner "Nawala ang GPS…"). */
   readonly gpsLost = signal(false);
   /** The server refused a ping because it has the driver offline (409 NOT_ONLINE). */
@@ -68,6 +70,7 @@ export class DriverLocationService {
     this.buffer = [];
     this.clearTimers();
     this.sentPosition.set(null);
+    this.sentAt.set(null);
     this.gpsLost.set(false);
     await this.gps.stopWatch().catch(() => undefined);
   }
@@ -174,5 +177,6 @@ export class DriverLocationService {
     this.lastSent = point;
     this.lastSentAt = Date.now();
     this.sentPosition.set(point);
+    this.sentAt.set(this.lastSentAt);
   }
 }

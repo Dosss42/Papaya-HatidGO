@@ -98,12 +98,24 @@ export interface Ride {
     last_name: string;
     phone: string | null; // only while the ride is matched and active
     rating: { average: number | null; count: number }; // average only from 5 ratings
-    location: { lat: string; lng: string; updated_at: string | null; distance_to_pickup_km: number } | null;
+    location: {
+      lat: string;
+      lng: string;
+      updated_at: string | null;
+      age_seconds?: number | null; // Phase 12: on the server's clock
+      distance_to_pickup_km: number;
+    } | null;
   } | null;
   vehicle: { plate_number: string; body_number: string | null; color: string; make: string | null; model: string | null } | null;
   rating: { score: number; comment: string | null } | null;
   /** Only in the DRIVER's copy, once matched: first name, and the phone while the ride is active (Phase 11). */
   passenger?: { first_name: string; phone: string | null } | null;
+}
+
+/** GET /rides/{id}/trail (Phase 12): the driven path, oldest first. */
+export interface RideTrail {
+  total_points: number; // before thinning
+  points: { lat: number; lng: number; recorded_at: string }[];
 }
 
 /** The passenger's cancel reasons (active-ride brief), sent as stable codes (Phase 10 decision #7). */

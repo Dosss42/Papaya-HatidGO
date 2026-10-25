@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnDestroy, computed, effect, inject, input, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, computed, effect, inject, input, signal, untracked, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Haptics } from '@capacitor/haptics';
@@ -11,6 +11,7 @@ import { I18nService } from '../../../../core/i18n/i18n.service';
 import { MessageKey } from '../../../../core/i18n/messages.en';
 import { TranslatePipe } from '../../../../core/i18n/t.pipe';
 import { AppLifecycleService } from '../../../../core/services/app-lifecycle.service';
+import { ageNow, ageText, isStale, rideLines } from '../../../../core/services/map-geometry';
 import { AppMap, LatLng, MapService, rideMapInset } from '../../../../core/services/map.service';
 import { NetworkService } from '../../../../core/services/network.service';
 import { RideService } from '../../../../core/services/ride.service';
@@ -55,6 +56,8 @@ export class PassengerRidePage implements ViewDidEnter, ViewWillLeave, OnDestroy
   private map: AppMap | null = null;
   /** Which framing the map last used: before the trip (pickup + driver) or the trip (whole route). */
   private framing: string | null = null;
+  /** The path actually driven (a finished ride), loaded once. */
+  private driven: LatLng[] | null = null;
   private timer: ReturnType<typeof setInterval> | null = null;
   private visible = false;
   private inFlight = false;
@@ -97,6 +100,26 @@ export class PassengerRidePage implements ViewDidEnter, ViewWillLeave, OnDestroy
   protected readonly cooling = computed(() => !!this.ride() && returningCooling(this.ride()!, this.now()));
   protected readonly weak = computed(() => this.pollFailed() && !!this.ride() && !this.over());
 
+  /** When the last ride answer arrived (the driver's age is the server's age at that moment + the time since). */
+  private readonly receivedAt = signal(Date.now());
+  /** How old the driver's position is now, in ms, on one clock (finish review #5). */
+  private readonly driverAgeMs = computed(() =>
+    ageNow(this.ride()?.driver?.location?.age_seconds, this.receivedAt(), this.now()),
+  );
+  /** The driver's last position is too old to call live (decision #4): say how old instead of a distance. */
+  protected readonly driverStale = computed(() => !!this.ride()?.driver?.location && !this.over() && isStale(this.driverAgeMs()));
+  protected readonly locationAge = computed(() => {
+    const ms = this.driverAgeMs();
+    if (ms === null) return '';
+    const age = ageText(ms);
+    return this.i18n.t(age.key, { n: age.n });
+  });
+  /**
+   * Read out once when the position goes stale, with the age at that moment (finish review #6):
+   * the ticking age would otherwise be re-announced on every poll.
+   */
+  protected readonly staleAnnouncement = signal('');
+
   protected readonly arrivedMinutes = computed(() => minutesSince(this.ride()?.times.arrived_at ?? null, this.now()));
   protected readonly waitedMinutes = computed(() => minutesSince(this.ride()?.times.destination_reached_at ?? null, this.now()));
 
@@ -110,6 +133,11 @@ export class PassengerRidePage implements ViewDidEnter, ViewWillLeave, OnDestroy
 
   constructor() {
     addIcons({ alertCircle, call, checkmarkCircle, cloudOfflineOutline, star, starOutline, timeOutline });
+
+    effect(() => {
+      const stale = this.driverStale();
+      untracked(() => this.staleAnnouncement.set(stale ? this.i18n.t('ride.lastLocation', { time: this.locationAge() }) : ''));
+    });
 
     // Paused in the background, refreshed at once when the app comes back (brief § 6).
     effect(() => {
@@ -165,6 +193,10 @@ export class PassengerRidePage implements ViewDidEnter, ViewWillLeave, OnDestroy
     } catch {
       this.pollFailed.set(true);
       if (!this.ride()) this.loadFailed.set(true);
+      // Our own connection dropped: the driver's position keeps ageing, so redraw it as it is
+      // (going stale) rather than leaving a live-looking marker and approach line (finish review #1).
+      const ride = this.ride();
+      if (ride) this.drawMap(ride);
     } finally {
       this.inFlight = false;
     }
@@ -177,11 +209,25 @@ export class PassengerRidePage implements ViewDidEnter, ViewWillLeave, OnDestroy
       void Haptics.vibrate({ duration: 400 }).catch(() => undefined);
     }
     this.ride.set(fresh);
+    this.receivedAt.set(Date.now());
     if (isOver(fresh)) {
       this.stopTimer(); // nothing more will change
       if (fresh.status === 'completed') this.draft.reset(); // the next booking starts fresh
+      void this.loadDriven(fresh);
     }
     setTimeout(() => this.drawMap(fresh)); // after Angular has rendered the map box
+  }
+
+  /** A finished ride: the path actually driven, once (decision #5). Without it, the planned route stays. */
+  private async loadDriven(ride: Ride): Promise<void> {
+    if (this.driven || !ride.driver) return;
+    try {
+      const trail = await this.rides.trail(ride.id);
+      this.driven = trail.points.map((p) => ({ lat: p.lat, lng: p.lng }));
+      this.drawMap(ride);
+    } catch {
+      // No connection: the planned route stays on the map.
+    }
   }
 
   // ---------------------------------------------------------------- map
@@ -192,21 +238,33 @@ export class PassengerRidePage implements ViewDidEnter, ViewWillLeave, OnDestroy
     const pickup: LatLng = { lat: +ride.pickup.lat, lng: +ride.pickup.lng };
     const destination: LatLng = { lat: +ride.destination.lat, lng: +ride.destination.lng };
     const driver = ride.driver?.location ? { lat: +ride.driver.location.lat, lng: +ride.driver.location.lng } : null;
+    const stale = this.driverStale();
 
     this.map ??= this.maps.create(el, pickup, 16);
     this.map.setMarker('pickup', pickup);
     this.map.setMarker('destination', destination);
-    this.map.setMarker('driver', driver);
+    // The live driver glides to each new position, and looks old when it is (Phase 12).
+    this.map.setMarker('driver', driver, { glide: true });
+    this.map.setMarkerStale('driver', stale);
+    const lines = rideLines(ride.status, pickup, destination, driver, stale, this.driven);
+    this.map.setLine('route', lines.route);
+    this.map.setLine('approach', lines.approach);
+    this.map.setLine('trail', lines.trail);
 
     // Before the trip, where the driver is matters (pickup + driver); from the start, the whole
     // route. Re-framed only when that changes, so the passenger's own panning isn't undone each poll.
     const phase = ['requested', 'accepted', 'driver_arriving', 'arrived'].includes(ride.status) ? 'pickup' : 'route';
-    const framing = phase === 'pickup' && driver ? 'pickup+driver' : phase; // a driver appearing re-frames too
+    // A driver appearing re-frames too, and so does the driven path arriving (it may stray wider).
+    // The box's size is part of the key: the map grows back after the trip, and Leaflet must
+    // measure it again even when the framing itself stays the same (finish review #4).
+    const size = ride.status === 'in_progress' ? 'small' : 'full';
+    const framing = `${phase === 'pickup' && driver ? 'pickup+driver' : lines.trail ? 'trail' : phase}|${size}`;
     if (framing !== this.framing) {
       this.framing = framing;
+      const points = phase === 'pickup' ? [pickup, ...(driver ? [driver] : [])] : [pickup, destination, ...(lines.trail ?? [])];
       setTimeout(() => {
         this.map?.resize(); // the map box changes height between the two framings
-        this.map?.fit(phase === 'pickup' ? [pickup, ...(driver ? [driver] : [])] : [pickup, destination], rideMapInset(el));
+        this.map?.fit(points, rideMapInset(el));
       }, 260);
     }
   }

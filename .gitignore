@@ -69,3 +69,6 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# The MapTiler key (Phase 12): local only, never committed. Template: src/environments/map-key.example.ts
+/src/environments/map-key.ts

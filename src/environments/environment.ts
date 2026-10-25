@@ -1,3 +1,6 @@
+import { MAPTILER_KEY } from './map-key';
+import { mapTilesFor } from './map-tiles';
+
 // Development settings: used by `npm start` and `ng build --configuration development`.
 export const environment = {
   production: false,
@@ -11,11 +14,6 @@ export const environment = {
   // The admin's phone number, shown to suspended drivers as "Tawagan ang admin" (Phase 7).
   // Empty = not decided yet: the button stays hidden. Set the real number before release.
   supportPhone: '',
-  // Map tiles (Phase 10, MapService). OpenStreetMap: free, no key; the attribution is REQUIRED
-  // by its licence. Swap the URL here if another tile provider is ever needed.
-  mapTiles: {
-    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution: '© OpenStreetMap contributors',
-    maxZoom: 19,
-  },
+  // Map tiles (Phase 12): MapTiler 'Streets' when map-key.ts has a key, else OpenStreetMap.
+  mapTiles: mapTilesFor(MAPTILER_KEY),
 };

@@ -202,7 +202,10 @@ export class PassengerBookPage implements ViewDidEnter, ViewWillLeave {
       // after Angular has rendered the map box
       this.map = this.maps.create(this.mapEl().nativeElement, start ?? townCenter(options), 16);
       this.center.set(this.map.center());
-      this.stopMoveListener = this.map.onMoveEnd((c) => this.center.set(c));
+      this.stopMoveListener = this.map.onMoveEnd((c) => {
+        this.center.set(c);
+        this.drawRoute(); // step 2: the line follows the pin being placed
+      });
       this.drawMarkers();
       if (this.step() === 3) this.fitBothAfterResize();
     });
@@ -257,6 +260,20 @@ export class PassengerBookPage implements ViewDidEnter, ViewWillLeave {
     const step = this.step();
     this.map.setMarker('pickup', step >= 2 ? this.draft.pickup() : null);
     this.map.setMarker('destination', step === 3 ? this.draft.destination() : null);
+    this.drawRoute();
+  }
+
+  /**
+   * The route line "once both points exist" (booking brief § 2, Phase 12): straight and dashed,
+   * like the distance the fare is computed on (decision #1). Step 2 draws it to the center pin
+   * as the passenger moves the map; step 3 to the chosen destination.
+   */
+  private drawRoute(): void {
+    if (!this.map) return;
+    const pickup = this.draft.pickup();
+    const step = this.step();
+    const to = step === 3 ? this.draft.destination() : step === 2 ? this.center() : null;
+    this.map.setLine('route', pickup && to ? [pickup, to] : null);
   }
 
   // ---------------------------------------------------------------- the steps

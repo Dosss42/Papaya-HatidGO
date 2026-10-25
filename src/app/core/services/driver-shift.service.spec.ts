@@ -55,7 +55,7 @@ describe('DriverShiftService (Phase 11)', () => {
         {
           provide: DriverLocationService,
           useValue: {
-            ...location, retryNow: vi.fn(), gpsLost: signal(false), sentPosition: signal(null), serverOffline: signal(false), rideOver: signal(false),
+            ...location, retryNow: vi.fn(), gpsLost: signal(false), sentPosition: signal(null), serverOffline: signal(false), rideOver: signal(false), sentAt: signal(null),
           },
         },
       ],

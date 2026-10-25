@@ -2,7 +2,8 @@
   <!-- A white strip behind the status bar, so scrolled content never runs under the clock. -->
   <div slot="fixed" class="hg-statusbar-scrim" aria-hidden="true"></div>
   @if (ride(); as r) {
-    <div class="ride__map-wrap" [class.ride__map-wrap--small]="r.status === 'in_progress' || over()">
+    <!-- Small only during the trip (the status matters most then); a finished ride's map is its record (Phase 12). -->
+    <div class="ride__map-wrap" [class.ride__map-wrap--small]="r.status === 'in_progress'">
       <div #map class="ride__map" role="img" [attr.aria-label]="'ride.mapAria' | t"></div>
       <!-- Back floats on the map (no toolbar band), so the driver card fits on screen. -->
       <ion-back-button class="ride__back" defaultHref="/passenger/rides" text="" />
@@ -71,10 +72,19 @@
         </section>
       }
 
+      <!-- An old position is never shown as live: whenever the marker is drawn stale, the screen
+           says how old it is instead of a distance (Phase 12; mark + word). Read out once on the change. -->
+      @if (driverStale()) {
+        <p class="ride__context"><ion-icon name="time-outline" aria-hidden="true" />{{ 'ride.lastLocation' | t: { time: locationAge() } }}</p>
+      }
+      <p class="hg-visually-hidden" role="status" aria-live="polite">{{ staleAnnouncement() }}</p>
+
       <!-- The context block, per status (brief § 3). -->
       @if (r.status === 'accepted' || r.status === 'driver_arriving') {
         @if (r.driver?.location; as at) {
-          <p class="ride__context ride__context--strong">{{ 'ride.distance' | t: { km: at.distance_to_pickup_km } }}</p>
+          @if (!driverStale()) {
+            <p class="ride__context ride__context--strong">{{ 'ride.distance' | t: { km: at.distance_to_pickup_km } }}</p>
+          }
         }
         <dl class="facts"><div><dt>{{ 'ride.yourPickup' | t }}</dt><dd>{{ r.pickup.landmark || ('book.pinOnly' | t) }}</dd></div></dl>
       }
