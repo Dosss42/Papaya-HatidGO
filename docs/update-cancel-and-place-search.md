@@ -108,3 +108,11 @@ Captures: `p13x-08-board.png`, `p13x-09-board-takeover.png`, `p13x-10-auto-accep
 The server is unchanged: drivers within 3 km still get the push notification ("New ride request") when the app is in the background. Admin label: "Drivers notified first (push + ring) within".
 
 **Emulator check:** Maria booked **0.3 km** from Juan: no popup; the request appeared in the list with one ring (`p13x-11-list-only.png`). **Tests:** app **130** (the Phase 11 request tests now choose from the list first; new: rings once, never opens by itself).
+
+### 6c. The whole town on the list (the student, same day)
+
+**The student:** "The driver far away in Papaya can't see it." A booking in the town center was 8.2 km from a driver at the town's northern edge, beyond the 5 km list.
+
+**Change:** the list now reaches **the whole service area by default**: every online driver in town sees every booking, nearest first (setting `matching.board_radius_km` = **0**; a migration changed the existing 5 to 0). The admin can still limit it to a distance ("Drivers see open requests within (0 = the whole service area)", 0–50 km).
+
+**Emulator check:** Juan at the northern edge saw the student's own booking in Poblacion Central and a test booking in the center, both "Pickup: 8.2 km from you" (`p13x-12-whole-town.png`). **Tests:** API **254** (new: a driver ~7.8 km away sees and accepts by default; the 5 km limit still works when the admin sets it).
