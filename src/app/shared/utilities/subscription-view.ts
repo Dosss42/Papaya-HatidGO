@@ -58,6 +58,11 @@ export function phDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-US', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+/** A timestamp as the time people see in the Philippines, e.g. "4:29 PM". */
+export function phTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString('en-US', { timeZone: 'Asia/Manila', hour: 'numeric', minute: '2-digit' });
+}
+
 /** A timestamp as date + time in the Philippines, e.g. "Oct 12 · 4:29 PM" (ride history, Phase 10). */
 export function phDateTime(iso: string): string {
   const d = new Date(iso);

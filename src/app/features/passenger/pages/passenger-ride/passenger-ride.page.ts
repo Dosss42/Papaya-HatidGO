@@ -17,11 +17,12 @@ import { NetworkService } from '../../../../core/services/network.service';
 import { RideService } from '../../../../core/services/ride.service';
 import { CancelReason, Ride } from '../../../../shared/models/ride.model';
 import { ApiError } from '../../../../shared/utilities/api-error';
-import { peso } from '../../../../shared/utilities/subscription-view';
+import { peso, phTime } from '../../../../shared/utilities/subscription-view';
 import { driverReasonKey } from '../../../driver/driver-ride-view';
 import { BookingDraftService } from '../../booking-draft.service';
 import {
-  canCancel, fareChanged, initials, isOver, minutesSince, returningCooling, showDriverCard, stages, statusLine,
+  cancelBecauseLate, cancelOpensAt, canCancel, fareChanged, initials, isOver, minutesSince, returningCooling, showDriverCard,
+  stages, statusLine,
 } from '../../ride-view';
 
 /** Every 4 s while the screen is visible (brief § 6: "3–5 seconds"). */
@@ -94,6 +95,11 @@ export class PassengerRidePage implements ViewDidEnter, ViewWillLeave, OnDestroy
   });
   protected readonly stageList = computed(() => (this.ride() ? stages(this.ride()!) : []));
   protected readonly cancellable = computed(() => !!this.ride() && canCancel(this.ride()!));
+  /** "You can cancel at 3:52 PM if they haven't arrived" while the driver is on the way. */
+  protected readonly cancelOpens = computed(() => {
+    const opens = this.ride() ? cancelOpensAt(this.ride()!) : null;
+    return opens ? phTime(opens) : null;
+  });
   protected readonly driverCard = computed(() => !!this.ride() && showDriverCard(this.ride()!));
   protected readonly over = computed(() => !!this.ride() && isOver(this.ride()!));
   protected readonly changed = computed(() => !!this.ride() && fareChanged(this.ride()!));
@@ -294,7 +300,8 @@ export class PassengerRidePage implements ViewDidEnter, ViewWillLeave, OnDestroy
   // ---------------------------------------------------------------- actions
 
   protected openCancel(): void {
-    this.cancelReason.set(null);
+    // Opened because the driver is late: that's almost surely the reason (still changeable).
+    this.cancelReason.set(this.ride() && cancelBecauseLate(this.ride()!) ? 'driver_late' : null);
     this.actionError.set(null);
     this.cancelOpen.set(true);
   }

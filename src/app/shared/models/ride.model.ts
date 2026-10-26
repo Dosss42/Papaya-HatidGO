@@ -92,6 +92,11 @@ export interface Ride {
     string | null
   >;
   cancelled_by: 'passenger' | 'driver' | 'system' | 'admin' | null;
+  /**
+   * The passenger's Cancel (the cancel window): allowed before the driver sets off, then only
+   * from opens_at (the driver is late). Only in the passenger's own view of the ride.
+   */
+  passenger_cancel?: { allowed: boolean; opens_at: string | null } | null;
   cancel_reason: string | null;
   driver: {
     first_name: string;

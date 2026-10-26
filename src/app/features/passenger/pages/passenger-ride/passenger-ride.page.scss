@@ -382,6 +382,14 @@
   color: var(--hg-ink-soft);
 }
 
+// In place of Cancel while the driver is on the way: when it opens (the cancel window).
+.ride__cancel-later {
+  margin: 12px 4px 0;
+  color: var(--hg-ink-soft);
+  text-align: center;
+  line-height: 1.4;
+}
+
 // The cancel sheet.
 .cancel {
   padding: 24px 16px calc(env(safe-area-inset-bottom) + 16px);

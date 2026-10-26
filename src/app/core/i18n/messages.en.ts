@@ -143,6 +143,14 @@ export const EN = {
   'book.lead': 'Move the map to place your pickup.',
   'book.landmark': 'Landmark (optional)',
   'book.landmarkPlaceholder': 'e.g. blue gate, next to the sari-sari store',
+  'book.searchLabel': 'Search a place',
+  'book.searchPlaceholder': 'e.g. public market, school, church',
+  'book.searching': 'Searching…',
+  'book.searchNone': 'No place found inside the service area. Try another name, or move the map.',
+  'book.searchFailed': "Couldn't search right now. Move the map to the place instead.",
+  'book.searchClear': 'Clear the search',
+  'book.searchResults': 'Places found',
+  'book.autoNamed': 'Named from the map. You can change it.',
   'book.next': 'Pick me up here',
 
   // Driver Home (preview)
@@ -413,6 +421,7 @@ export const EN = {
   'ride.rebook': 'Book again',
   'ride.changeBooking': 'Change the booking',
   'ride.cancel': 'Cancel',
+  'ride.cancelLater': "Your driver is on the way. You can cancel at {time} if they haven't arrived.",
   'ride.cancelTitle': 'Cancel the ride?',
   'ride.cancelReasonLabel': 'Why? (optional)',
   'ride.cancelConfirm': 'Cancel the ride',

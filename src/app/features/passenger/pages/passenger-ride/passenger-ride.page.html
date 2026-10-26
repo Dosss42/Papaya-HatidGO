@@ -223,6 +223,9 @@
       }
       @if (cancellable()) {
         <button class="hg-button hg-button--text ride__cancel" type="button" (click)="openCancel()">{{ 'ride.cancel' | t }}</button>
+      } @else if (cancelOpens(); as opens) {
+        <!-- The driver is on the way: no Cancel yet, but the passenger knows when it opens. -->
+        <p class="ride__cancel-later">{{ 'ride.cancelLater' | t: { time: opens } }}</p>
       }
     </div>
   </ion-footer>

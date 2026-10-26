@@ -90,10 +90,57 @@
               </p>
             }
 
+            <!-- Place search (MapTiler Geocoding): a result moves the map there. Hidden without a key. -->
+            @if (geocoding.available) {
+              <div class="place-search">
+                <label class="hg-field place-search__field">
+                  <span class="hg-field__label">{{ 'book.searchLabel' | t }}</span>
+                  <span class="place-search__box">
+                    <ion-icon class="place-search__icon" name="search" aria-hidden="true" />
+                    <input class="book__input place-search__input" type="search" enterkeyhint="search" autocomplete="off" maxlength="80"
+                      [placeholder]="'book.searchPlaceholder' | t" [ngModel]="query()" (ngModelChange)="onQuery($event)" />
+                    @if (query()) {
+                      <button type="button" class="place-search__clear" (click)="clearSearch()" [attr.aria-label]="'book.searchClear' | t">
+                        <ion-icon name="close-circle" aria-hidden="true" />
+                      </button>
+                    }
+                  </span>
+                </label>
+                @if (searching()) {
+                  <p class="place-search__status" role="status"><ion-spinner name="crescent" aria-hidden="true" />{{ 'book.searching' | t }}</p>
+                } @else if (searchFailed()) {
+                  <p class="place-search__status" role="status">{{ 'book.searchFailed' | t }}</p>
+                } @else if (results(); as found) {
+                  @if (found.length === 0) {
+                    <p class="place-search__status" role="status">{{ 'book.searchNone' | t }}</p>
+                  } @else {
+                    <ul class="place-search__results" [attr.aria-label]="'book.searchResults' | t">
+                      @for (place of found; track $index) {
+                        <li>
+                          <button type="button" class="place-search__result" (click)="pick(place)">
+                            <ion-icon name="location-outline" aria-hidden="true" />
+                            <span class="place-search__text">
+                              <span class="place-search__name">{{ place.name }}</span>
+                              @if (place.detail) {
+                                <span class="place-search__detail">{{ place.detail }}</span>
+                              }
+                            </span>
+                          </button>
+                        </li>
+                      }
+                    </ul>
+                  }
+                }
+              </div>
+            }
+
             <label class="hg-field">
               <span class="hg-field__label">{{ 'book.landmark' | t }}</span>
               <input class="book__input" type="text" maxlength="120" [placeholder]="'book.landmarkPlaceholder' | t"
-                [ngModel]="landmark()" (ngModelChange)="landmark.set($event)" />
+                [ngModel]="landmark()" (ngModelChange)="onLandmark($event)" />
+              @if (autoNamed()) {
+                <span class="hg-field__hint">{{ 'book.autoNamed' | t }}</span>
+              }
             </label>
           }
 
@@ -118,10 +165,57 @@
               </p>
             }
 
+            <!-- Place search (MapTiler Geocoding): a result moves the map there. Hidden without a key. -->
+            @if (geocoding.available) {
+              <div class="place-search">
+                <label class="hg-field place-search__field">
+                  <span class="hg-field__label">{{ 'book.searchLabel' | t }}</span>
+                  <span class="place-search__box">
+                    <ion-icon class="place-search__icon" name="search" aria-hidden="true" />
+                    <input class="book__input place-search__input" type="search" enterkeyhint="search" autocomplete="off" maxlength="80"
+                      [placeholder]="'book.searchPlaceholder' | t" [ngModel]="query()" (ngModelChange)="onQuery($event)" />
+                    @if (query()) {
+                      <button type="button" class="place-search__clear" (click)="clearSearch()" [attr.aria-label]="'book.searchClear' | t">
+                        <ion-icon name="close-circle" aria-hidden="true" />
+                      </button>
+                    }
+                  </span>
+                </label>
+                @if (searching()) {
+                  <p class="place-search__status" role="status"><ion-spinner name="crescent" aria-hidden="true" />{{ 'book.searching' | t }}</p>
+                } @else if (searchFailed()) {
+                  <p class="place-search__status" role="status">{{ 'book.searchFailed' | t }}</p>
+                } @else if (results(); as found) {
+                  @if (found.length === 0) {
+                    <p class="place-search__status" role="status">{{ 'book.searchNone' | t }}</p>
+                  } @else {
+                    <ul class="place-search__results" [attr.aria-label]="'book.searchResults' | t">
+                      @for (place of found; track $index) {
+                        <li>
+                          <button type="button" class="place-search__result" (click)="pick(place)">
+                            <ion-icon name="location-outline" aria-hidden="true" />
+                            <span class="place-search__text">
+                              <span class="place-search__name">{{ place.name }}</span>
+                              @if (place.detail) {
+                                <span class="place-search__detail">{{ place.detail }}</span>
+                              }
+                            </span>
+                          </button>
+                        </li>
+                      }
+                    </ul>
+                  }
+                }
+              </div>
+            }
+
             <label class="hg-field">
               <span class="hg-field__label">{{ 'book.landmark' | t }}</span>
               <input class="book__input" type="text" maxlength="120" [placeholder]="'book.destPlaceholder' | t"
-                [ngModel]="landmark()" (ngModelChange)="landmark.set($event)" />
+                [ngModel]="landmark()" (ngModelChange)="onLandmark($event)" />
+              @if (autoNamed()) {
+                <span class="hg-field__hint">{{ 'book.autoNamed' | t }}</span>
+              }
             </label>
           }
 

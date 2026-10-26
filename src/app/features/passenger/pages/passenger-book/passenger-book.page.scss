@@ -413,3 +413,114 @@
     animation: none;
   }
 }
+
+// ---------- Place search (after Phase 13) ----------
+// A field like the others with a search icon inside; results are 56px+ rows split by Hairline,
+// each a location mark + the place name (700) over where it is (Soft Ink).
+.place-search {
+  margin-bottom: 20px;
+
+  &__field {
+    margin-bottom: 0;
+  }
+
+  &__box {
+    position: relative;
+    display: block;
+  }
+
+  &__icon {
+    position: absolute;
+    top: 50%;
+    left: 16px;
+    transform: translateY(-50%);
+    font-size: 22px;
+    color: var(--hg-ink-soft);
+    pointer-events: none;
+  }
+
+  &__input.book__input {
+    padding-left: 48px;
+    padding-right: 56px;
+
+    &::-webkit-search-cancel-button {
+      display: none; // our own clear button is bigger
+    }
+  }
+
+  &__clear {
+    position: absolute;
+    top: 50%;
+    right: 2px;
+    transform: translateY(-50%);
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border: 0;
+    background: none;
+    color: var(--hg-ink-soft);
+    font-size: 24px;
+  }
+
+  &__status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 4px 0;
+    color: var(--hg-ink-soft);
+    line-height: 1.4;
+
+    ion-spinner {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  &__results {
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__result {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    width: 100%;
+    min-height: 56px;
+    padding: 12px 4px;
+    border: 0;
+    border-bottom: 2px solid var(--hg-line);
+    background: none;
+    color: var(--hg-ink);
+    font-family: var(--hg-font);
+    font-size: 1rem;
+    text-align: start;
+
+    ion-icon {
+      flex: none;
+      margin-top: 2px;
+      font-size: 22px;
+      color: var(--hg-orange);
+    }
+
+    &:active {
+      background: var(--hg-surface);
+    }
+  }
+
+  &__text {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  &__name {
+    font-weight: 700;
+  }
+
+  &__detail {
+    color: var(--hg-ink-soft);
+  }
+}

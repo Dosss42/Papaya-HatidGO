@@ -26,6 +26,7 @@ Index of the project's design and development documents. Each phase leaves a rec
 | [phase-11-driver-rides.md](phase-11-driver-rides.md) | Phase 11 plan + report: Driver Home (offline / online, compact map), request takeover, driver ride screen, earnings, location cadence, two-client ride on the emulator |
 | [phase-12-maps.md](phase-12-maps.md) | Phase 12 plan + report: route line, live gliding driver marker, stale positions, the trip's driven path, MapTiler (key kept local) |
 | [phase-13-notifications.md](phase-13-notifications.md) | Phase 13 plan + report: in-app Alerts, Firebase push (FCM HTTP v1 from Laravel), who gets what, reminders, permission, finish review |
+| [update-cancel-and-place-search.md](update-cancel-and-place-search.md) | After Phase 13: the passenger can't cancel once the driver is on the way (unless 10 min late); place search and the pickup named from the map |
 | [phase-14-admin-web.md](phase-14-admin-web.md) | Phase 14 plan + report: the admin website (repo papaya-hatidgo-admin), admin API, photo review via token, live map, insert-only fares, reports, audit log |
 | [IMPECCABLE-GUIDE.md](IMPECCABLE-GUIDE.md) | When and how to use the impeccable design skill |
 | [design-briefs/passenger-booking.md](design-briefs/passenger-booking.md) | ✅ Confirmed UX brief: passenger booking flow (pickup → destination → choose ride + Mag-book) |

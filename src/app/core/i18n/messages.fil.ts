@@ -145,6 +145,14 @@ export const FIL: Record<MessageKey, string> = {
   'book.lead': 'Igagalaw mo ang mapa para mailagay ang pickup mo.',
   'book.landmark': 'Landmark (opsyonal)',
   'book.landmarkPlaceholder': 'hal. asul na gate, tabi ng sari-sari store',
+  'book.searchLabel': 'Maghanap ng lugar',
+  'book.searchPlaceholder': 'hal. palengke, eskwelahan, simbahan',
+  'book.searching': 'Naghahanap…',
+  'book.searchNone': 'Walang nahanap sa loob ng service area. Subukan ang ibang pangalan, o igalaw ang mapa.',
+  'book.searchFailed': 'Hindi makapaghanap ngayon. Igalaw na lang ang mapa papunta sa lugar.',
+  'book.searchClear': 'Burahin ang hinahanap',
+  'book.searchResults': 'Mga nahanap na lugar',
+  'book.autoNamed': 'Galing sa mapa ang pangalan. Puwede mong palitan.',
   'book.next': 'Dito ako susunduin',
 
   // Driver Home (preview)
@@ -415,6 +423,7 @@ export const FIL: Record<MessageKey, string> = {
   'ride.rebook': 'Mag-book ulit',
   'ride.changeBooking': 'Baguhin ang booking',
   'ride.cancel': 'Kanselahin',
+  'ride.cancelLater': 'Papunta na ang driver mo. Puwede kang mag-cancel pagsapit ng {time} kung wala pa siya.',
   'ride.cancelTitle': 'Kanselahin ang biyahe?',
   'ride.cancelReasonLabel': 'Bakit? (opsyonal)',
   'ride.cancelConfirm': 'Kanselahin ang biyahe',

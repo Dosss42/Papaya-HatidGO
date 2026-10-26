@@ -6,12 +6,13 @@ import { filter } from 'rxjs';
 import { IonContent, IonFooter, IonIcon, IonSpinner, Platform, ViewDidEnter, ViewWillLeave } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
-  alertCircle, cardOutline, checkmarkCircle, chevronDown, chevronUp, ellipseOutline, informationCircleOutline, locate,
-  locationOutline, navigateOutline,
+  alertCircle, cardOutline, checkmarkCircle, chevronDown, chevronUp, closeCircle, ellipseOutline, informationCircleOutline,
+  locate, locationOutline, navigateOutline, search,
 } from 'ionicons/icons';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { TranslatePipe } from '../../../../core/i18n/t.pipe';
 import { AppLifecycleService } from '../../../../core/services/app-lifecycle.service';
+import { GeocodingService, PlaceResult } from '../../../../core/services/geocoding.service';
 import { LocationService } from '../../../../core/services/location.service';
 import { AppMap, LatLng, MapService } from '../../../../core/services/map.service';
 import { NetworkService } from '../../../../core/services/network.service';
@@ -23,7 +24,7 @@ import { BookingOptions, Estimate, FareOption, RideType } from '../../../../shar
 import { ApiError } from '../../../../shared/utilities/api-error';
 import { endingSoon, peso, phDate } from '../../../../shared/utilities/subscription-view';
 import { BookingDraftService } from '../../booking-draft.service';
-import { insideArea, tooClose, townCenter } from '../../booking-checks';
+import { areaBox, insideArea, tooClose, townCenter } from '../../booking-checks';
 
 /** Where the booking screen stands before the steps can run (booking brief § 5, "Gates"). */
 type Gate = 'checking' | 'subscribe' | 'ready' | 'error';
@@ -53,6 +54,7 @@ export class PassengerBookPage implements ViewDidEnter, ViewWillLeave {
   private readonly lifecycle = inject(AppLifecycleService);
   protected readonly network = inject(NetworkService);
   protected readonly draft = inject(BookingDraftService);
+  protected readonly geocoding = inject(GeocodingService);
 
   private readonly mapEl = viewChild.required<ElementRef<HTMLElement>>('map');
   private readonly waitChips = viewChild<ElementRef<HTMLElement>>('waitChips');
@@ -76,6 +78,26 @@ export class PassengerBookPage implements ViewDidEnter, ViewWillLeave {
   protected readonly showDetails = signal(false);
   protected readonly showNote = signal(false);
   private readonly fromPrice = signal<string | null>(null);
+
+  // Place search + the spot's name (the student's request after Phase 13; MapTiler Geocoding).
+  protected readonly query = signal('');
+  /** null = no search shown; [] = nothing found inside the service area. */
+  protected readonly results = signal<PlaceResult[] | null>(null);
+  protected readonly searching = signal(false);
+  protected readonly searchFailed = signal(false);
+  /** The landmark came from the map (not typed): shown with "you can change it". */
+  protected readonly autoNamed = signal(false);
+  /** Typed by the passenger: never replaced by an automatic name. */
+  private landmarkTyped = false;
+  /**
+   * A map move WE cause (a search pick, a step change) is not a new spot: moves until this time
+   * aren't named. A deadline, not a flag: if the map was already there and no move comes, the
+   * passenger's own next move still counts.
+   */
+  private skipNamesUntil = 0;
+  private searchTimer: ReturnType<typeof setTimeout> | null = null;
+  private nameTimer: ReturnType<typeof setTimeout> | null = null;
+  private searchSeq = 0;
 
   protected readonly peso = peso;
   protected readonly step = this.draft.step;
@@ -108,8 +130,8 @@ export class PassengerBookPage implements ViewDidEnter, ViewWillLeave {
 
   constructor() {
     addIcons({
-      alertCircle, cardOutline, checkmarkCircle, chevronDown, chevronUp, ellipseOutline, informationCircleOutline, locate,
-      locationOutline, navigateOutline,
+      alertCircle, cardOutline, checkmarkCircle, chevronDown, chevronUp, closeCircle, ellipseOutline, informationCircleOutline,
+      locate, locationOutline, navigateOutline, search,
     });
 
     // Back from the ride screen or Subscription (another stack) doesn't always fire this tab's
@@ -205,6 +227,7 @@ export class PassengerBookPage implements ViewDidEnter, ViewWillLeave {
       this.stopMoveListener = this.map.onMoveEnd((c) => {
         this.center.set(c);
         this.drawRoute(); // step 2: the line follows the pin being placed
+        this.nameSpot(c); // the pin's spot gets a name for the landmark
       });
       this.drawMarkers();
       if (this.step() === 3) this.fitBothAfterResize();
@@ -276,6 +299,96 @@ export class PassengerBookPage implements ViewDidEnter, ViewWillLeave {
     this.map.setLine('route', pickup && to ? [pickup, to] : null);
   }
 
+  // ---------------------------------------------------------------- place search + the spot's name
+
+  /** Typing in the search box: asks after a short pause (not on every letter), from 3 letters. */
+  protected onQuery(text: string): void {
+    this.query.set(text);
+    this.searchFailed.set(false);
+    if (this.searchTimer) clearTimeout(this.searchTimer);
+    if (text.trim().length < 3) {
+      this.results.set(null);
+      this.searching.set(false);
+      return;
+    }
+    this.searching.set(true);
+    this.searchTimer = setTimeout(() => void this.runSearch(text), 400);
+  }
+
+  private async runSearch(text: string): Promise<void> {
+    const options = this.options();
+    if (!options) return;
+    const seq = ++this.searchSeq; // only the newest search may show its results
+    try {
+      const near = this.center() ?? townCenter(options);
+      const found = (await this.geocoding.search(text, near, areaBox(options))).filter((p) => insideArea(options, p));
+      if (seq === this.searchSeq) this.results.set(found);
+    } catch {
+      if (seq === this.searchSeq) {
+        this.results.set(null);
+        this.searchFailed.set(true);
+      }
+    } finally {
+      if (seq === this.searchSeq) this.searching.set(false);
+    }
+  }
+
+  /** A result chosen: the map goes there and the place's name becomes the landmark. */
+  protected pick(place: PlaceResult): void {
+    this.clearSearch();
+    this.landmark.set(place.name);
+    this.landmarkTyped = false;
+    this.autoNamed.set(true);
+    this.skipNamesUntil = Date.now() + 1500; // keep the place's own name, not the street under it
+    this.map?.setView({ lat: place.lat, lng: place.lng }, 17);
+  }
+
+  protected clearSearch(): void {
+    if (this.searchTimer) clearTimeout(this.searchTimer);
+    this.searchSeq++;
+    this.query.set('');
+    this.results.set(null);
+    this.searching.set(false);
+    this.searchFailed.set(false);
+  }
+
+  /** The passenger typed the landmark: it's theirs now, and no automatic name replaces it. */
+  protected onLandmark(text: string): void {
+    this.landmark.set(text);
+    this.landmarkTyped = text.trim() !== '';
+    this.autoNamed.set(false);
+  }
+
+  /**
+   * After the map stops: name the spot under the pin (street, barangay) unless the passenger typed
+   * their own. Waits a moment, so dragging the map doesn't send a request on every stop.
+   */
+  private nameSpot(point: LatLng): void {
+    if (this.nameTimer) clearTimeout(this.nameTimer);
+    if (Date.now() < this.skipNamesUntil) return;
+    if (!this.geocoding.available || this.step() === 3 || this.landmarkTyped) return;
+    const step = this.step();
+    this.nameTimer = setTimeout(async () => {
+      const name = await this.geocoding.nameAt(point).catch(() => null);
+      // Still the same step and spot, and not typed meanwhile.
+      const now = this.center();
+      if (!name || this.step() !== step || this.landmarkTyped || !now || now.lat !== point.lat || now.lng !== point.lng) return;
+      this.landmark.set(name);
+      this.autoNamed.set(true);
+    }, 700);
+  }
+
+  /**
+   * Entering a step: its kept landmark counts as the passenger's. `mapWillMove` = we are about to
+   * move the map ourselves, and that move isn't a new spot to name.
+   */
+  private resetNaming(mapWillMove: boolean): void {
+    this.clearSearch();
+    this.landmarkTyped = this.landmark().trim() !== '';
+    this.autoNamed.set(false);
+    this.skipNamesUntil = mapWillMove ? Date.now() + 1500 : 0;
+  }
+
   // ---------------------------------------------------------------- the steps
 
   /** Step 1 → 2: "Dito ako susunduin". */
@@ -283,9 +396,7 @@ export class PassengerBookPage implements ViewDidEnter, ViewWillLeave {
     const point = this.center();
     if (!point || this.pinError()) return;
     this.draft.pickup.set({ ...point, landmark: this.landmark().trim() });
-    this.landmark.set(this.draft.destination()?.landmark ?? '');
-    this.goToStep(2);
-    if (this.draft.destination()) this.map?.setView(this.draft.destination()!);
+    this.goToStep(2); // sets the field to the destination's landmark and moves to it, if any
   }
 
   /** Step 2 → 3: "Dito ako pupunta" → both fares at once. */
@@ -305,10 +416,14 @@ export class PassengerBookPage implements ViewDidEnter, ViewWillLeave {
     this.bookError.set(null);
     if (step === 1) {
       this.landmark.set(this.draft.pickup()?.landmark ?? '');
-      if (this.draft.pickup()) this.map?.setView(this.draft.pickup()!, 17);
+      const target = this.draft.pickup();
+      this.resetNaming(!!target && !!this.map);
+      if (target) this.map?.setView(target, 17);
     } else if (step === 2) {
       this.landmark.set(this.draft.destination()?.landmark ?? '');
-      const target = this.draft.destination() ?? this.draft.pickup();
+      // No destination yet: the map stays at the pickup, and only the passenger's own move is named.
+      const target = this.draft.destination();
+      this.resetNaming(!!target && !!this.map);
       if (target) this.map?.setView(target, 17);
     }
     this.drawMarkers();

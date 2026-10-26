@@ -1,5 +1,5 @@
 import { BookingOptions } from '../../shared/models/ride.model';
-import { distanceKm, insideArea, tooClose, townCenter } from './booking-checks';
+import { areaBox, distanceKm, insideArea, tooClose, townCenter } from './booking-checks';
 
 const options: BookingOptions = {
   ride_types: ['one_way', 'two_way'],
@@ -24,5 +24,10 @@ describe('booking-checks (Phase 10)', () => {
 
   it('opens on the town center when there is no location', () => {
     expect(townCenter(options)).toEqual({ lat: 15.35, lng: 121.05 });
+  });
+
+  it('gives the place search the square around the service area', () => {
+    // 8 km: about 0.072° of latitude, and a little more of longitude at 15° N.
+    expect(areaBox(options)).toEqual([120.9753, 15.2779, 121.1247, 15.4221]);
   });
 });

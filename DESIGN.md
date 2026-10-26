@@ -304,6 +304,11 @@ The One-way / Balikan cards follow the **Plan Card** rules: full width, 84px min
 - **Period switch (Earnings):** three equal 56px choice chips (Today / This week / This month), chosen = 3px Deep Papaya + Papaya Tint + 800 weight. The total is in a Warm Field card at 3rem/800, the rides below it as the Rides list rows.
 - **Sound:** the request tone is the app's only sound (a generated two-note chime). It repeats with a 700ms vibration every 5 s until the driver acts.
 
+### Place search and the cancel window (after Phase 13)
+- **Search a place** (Book, steps 1–2): a normal 60px field with a Soft Ink search icon inside and a 56px clear button. Results are 56px+ rows split by 2px Hairline: a Deep Papaya location mark, the name (700), and where it is (Soft Ink). Status lines ("Searching…", nothing found, couldn't search) are Soft Ink, never an alert: the map always still works.
+- **A name from the map** fills the landmark with a Soft Ink hint under it: "Named from the map. You can change it." Typing replaces it for good.
+- **While the driver is on the way**, the passenger's quiet Cancel text button is replaced by a centred Soft Ink line saying when it opens. When it opens because the driver is late, the cancel sheet starts on "The driver is taking long".
+
 ### Notifications (Phase 13)
 - **Alerts tab:** a bell, in both roles (the driver's 5-tab bar sets its labels at the 16px floor with no side padding, so "Earnings" fits at 360dp). Unread count in a Deep Papaya pill with a 2px white ring, "9+" above nine, and "N unread" for screen readers.
 - **Alert rows:** a 44px round icon by subject (tricycle, paper, card, power), the time in Soft Ink, a 1.05rem title, the body in Soft Ink. **New** = the word "New" in a papaya pill + an 800 title + a papaya-tint icon + Ink body; read rows are calm. Rows are split by 2px Hairline; the whole row is the button.

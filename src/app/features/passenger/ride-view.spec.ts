@@ -1,5 +1,5 @@
 import { Ride } from '../../shared/models/ride.model';
-import { canCancel, fareChanged, initials, minutesSince, returningCooling, showDriverCard, stages, statusLine } from './ride-view';
+import { cancelBecauseLate, cancelOpensAt, canCancel, fareChanged, initials, minutesSince, returningCooling, showDriverCard, stages, statusLine } from './ride-view';
 
 const ride = (over: Partial<Ride> = {}): Ride =>
   ({
@@ -52,8 +52,20 @@ describe('ride-view (Phase 10)', () => {
     expect(stages(ride({ status: 'cancelled' }))).toEqual([]);
   });
 
-  it('allows cancelling only before the trip starts, and shows the driver card only while active', () => {
-    expect(['requested', 'accepted', 'driver_arriving', 'arrived'].every((s) => canCancel(ride({ status: s as Ride['status'] })))).toBe(true);
+  it('follows the server cancel window, and shows the driver card only while active', () => {
+    // The server's answer decides (the cancel window).
+    const onTheWay = ride({ status: 'driver_arriving', passenger_cancel: { allowed: false, opens_at: '2026-10-27T07:52:00Z' } });
+    expect(canCancel(onTheWay)).toBe(false);
+    expect(cancelOpensAt(onTheWay)).toBe('2026-10-27T07:52:00Z');
+    expect(cancelBecauseLate(onTheWay)).toBe(false);
+    const late = ride({ status: 'driver_arriving', passenger_cancel: { allowed: true, opens_at: '2026-10-27T07:52:00Z' } });
+    expect(canCancel(late)).toBe(true);
+    expect(cancelOpensAt(late)).toBeNull();
+    expect(cancelBecauseLate(late)).toBe(true);
+    expect(canCancel(ride({ status: 'arrived', passenger_cancel: { allowed: false, opens_at: null } }))).toBe(false);
+    // An older server without the field: only before the driver sets off.
+    expect(canCancel(ride({ status: 'accepted' }))).toBe(true);
+    expect(canCancel(ride({ status: 'driver_arriving' }))).toBe(false);
     expect(canCancel(ride({ status: 'in_progress' }))).toBe(false);
     expect(showDriverCard(ride({ status: 'accepted' }))).toBe(true);
     expect(showDriverCard(ride({ status: 'completed' }))).toBe(false);

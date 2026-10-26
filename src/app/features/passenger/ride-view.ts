@@ -78,9 +78,22 @@ function currentStage(ride: Ride): number {
   }
 }
 
-/** Kanselahin is shown only until the trip starts (hidden, not disabled, afterwards: brief § 5). */
+/**
+ * Kanselahin is shown only while the server allows it (hidden, not disabled, otherwise: brief § 5).
+ * The server decides: before the driver sets off, or once the driver is late (the cancel window).
+ */
 export function canCancel(ride: Ride): boolean {
-  return ['requested', 'accepted', 'driver_arriving', 'arrived'].includes(ride.status);
+  return ride.passenger_cancel ? ride.passenger_cancel.allowed : ['requested', 'accepted'].includes(ride.status);
+}
+
+/** While the driver is on the way: from when the passenger may cancel (null = no such time). */
+export function cancelOpensAt(ride: Ride): string | null {
+  return ride.passenger_cancel && !ride.passenger_cancel.allowed ? ride.passenger_cancel.opens_at : null;
+}
+
+/** Cancel opened because the driver is late: the sheet starts on that reason. */
+export function cancelBecauseLate(ride: Ride): boolean {
+  return ride.status === 'driver_arriving' && !!ride.passenger_cancel?.allowed;
 }
 
 export function isOver(ride: Ride): boolean {
