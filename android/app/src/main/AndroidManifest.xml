@@ -45,6 +45,19 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+
+        <!-- Push notifications (Phase 13): the one-color tricycle as the small icon, papaya as its
+             color in the notification shade, and "Account & reminders" for a push that names no
+             channel. The app creates the channels ("rides", "general") when it registers. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_stat_tricycle" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/papaya_deep" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="general" />
     </application>
 
     <!-- Permissions -->
@@ -55,4 +68,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-feature android:name="android.hardware.location.gps" />
+
+    <!-- Push notifications (Phase 13): Android 13+ asks the user; the app explains why first. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 </manifest>

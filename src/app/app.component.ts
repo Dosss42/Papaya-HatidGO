@@ -1,4 +1,4 @@
-import { Component, effect, inject } from '@angular/core';
+import { Component, effect, inject, untracked } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { IonApp, IonRouterOutlet } from '@ionic/angular';
@@ -6,6 +6,7 @@ import { addIcons } from 'ionicons';
 import { AppLifecycleService } from './core/services/app-lifecycle.service';
 import { AuthService } from './core/services/auth.service';
 import { NetworkService } from './core/services/network.service';
+import { NotificationsService } from './core/services/notifications.service';
 import { TRICYCLE_ICON } from './shared/icons/tricycle.icon';
 
 @Component({
@@ -17,6 +18,7 @@ export class AppComponent {
   private readonly auth = inject(AuthService);
   private readonly network = inject(NetworkService);
   private readonly lifecycle = inject(AppLifecycleService);
+  private readonly notifications = inject(NotificationsService);
 
   constructor() {
     // The app's authored icons, usable as <ion-icon name="tricycle"> everywhere.
@@ -35,6 +37,17 @@ export class AppComponent {
       if (this.auth.isOffline() && this.network.online() && this.lifecycle.isActive()) {
         void this.auth.refreshSession();
       }
+    });
+
+    // Notifications (Phase 13): on for a passenger or driver the API has confirmed, off at logout.
+    // (While the app runs on the saved user copy, offline, it waits: registering needs the API.)
+    effect(() => {
+      const role = this.auth.role();
+      const confirmed = this.auth.sessionState() === 'authenticated';
+      untracked(() => {
+        if (confirmed && (role === 'passenger' || role === 'driver')) void this.notifications.start(role);
+        else if (role === null) this.notifications.stop();
+      });
     });
   }
 }

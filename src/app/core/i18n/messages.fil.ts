@@ -112,6 +112,7 @@ export const FIL: Record<MessageKey, string> = {
   'tabs.account': 'Account',
   'tabs.home': 'Home',
   'tabs.earnings': 'Kita',
+  'tabs.alerts': 'Abiso',
 
   // Account
   'account.title': 'Account',
@@ -534,4 +535,28 @@ export const FIL: Record<MessageKey, string> = {
   'location.TIMEOUT': 'Hindi makuha ang lokasyon mo. Subukan ulit.',
   'location.CONFIG': 'May problema sa setup ng app (location permission).',
   'location.UNAVAILABLE': 'Hindi makuha ang lokasyon mo.',
+
+  // Alerts and push notifications (Phase 13)
+  'alerts.title': 'Mga abiso',
+  'alerts.markAll': 'Basahin lahat',
+  'alerts.new': 'Bago',
+  'alerts.emptyTitle': 'Wala pang abiso',
+  'alerts.emptyText': 'Dito lalabas ang balita sa biyahe, mga paalala at bayad.',
+  'alerts.loadError': 'Hindi ma-load ang mga abiso mo.',
+  'alerts.more': 'Ipakita ang mas luma',
+  'alerts.view': 'Tingnan',
+  'alerts.unreadAria': '{n} hindi pa nababasa',
+  'alerts.offTitle': 'Naka-off ang notifications',
+  'alerts.offAsk': 'Kapag sarado ang app, hindi mo malalaman ang tungkol sa biyahe mo o mga paalala.',
+  'alerts.offSettings': 'Kapag sarado ang app, hindi mo malalaman ang tungkol sa biyahe mo o mga paalala. Para i-on: Settings ng phone › Apps › Papaya HatidGo › Notifications.',
+  'push.titlePassenger': 'Malaman kapag nandito na ang driver',
+  'push.bodyPassenger': 'Payagan ang notifications para masabihan ka kapag may tumanggap, dumating o nag-cancel na driver, kahit sarado ang app.',
+  'push.titleDriver': 'Huwag palampasin ang pasahero',
+  'push.bodyDriver': 'Payagan ang notifications para marinig ang bagong request kahit nasa background ang app, at malaman kapag naaprubahan o mag-e-expire ang mga papel mo.',
+  'push.allow': 'Payagan ang notifications',
+  'push.later': 'Mamaya na',
+  'push.channelRides': 'Biyahe',
+  'push.channelRidesHint': 'Bagong request at ang biyahe mo: tinanggap, dumating, na-cancel',
+  'push.channelGeneral': 'Account at mga paalala',
+  'push.channelGeneralHint': 'Mga papel, subscription at bayad',
 };

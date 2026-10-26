@@ -1,5 +1,5 @@
 <ion-tabs>
-  <ion-tab-bar slot="bottom" class="hg-tabs">
+  <ion-tab-bar slot="bottom" class="hg-tabs hg-tabs--five">
     <ion-tab-button tab="home">
       <ion-icon name="home-outline" aria-hidden="true" />
       <ion-label>{{ 'tabs.home' | t }}</ion-label>
@@ -15,6 +15,15 @@
       <ion-label>{{ 'tabs.earnings' | t }}</ion-label>
     </ion-tab-button>
 
+    <!-- Phase 13: the badge counts unread alerts; screen readers hear "Alerts, 2 unread". -->
+    <ion-tab-button tab="alerts">
+      <ion-icon name="notifications-outline" aria-hidden="true" />
+      <ion-label>{{ 'tabs.alerts' | t }}</ion-label>
+      @if (notifications.unread() > 0) {
+        <ion-badge class="hg-tab-badge"><span aria-hidden="true">{{ badge(notifications.unread()) }}</span><span class="hg-visually-hidden">{{ 'alerts.unreadAria' | t: { n: notifications.unread() } }}</span></ion-badge>
+      }
+    </ion-tab-button>
+
     <ion-tab-button tab="account">
       <ion-icon name="person-circle-outline" aria-hidden="true" />
       <ion-label>{{ 'tabs.account' | t }}</ion-label>
@@ -24,3 +33,5 @@
 
 <!-- Phase 11: an incoming request interrupts whichever tab is open (driver-home brief § 4). -->
 <app-request-alert />
+
+<app-push-prompt role="driver" />

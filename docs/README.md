@@ -23,6 +23,7 @@ Index of the project's design and development documents. Each phase leaves a rec
 | [phase-10-passenger-rides.md](phase-10-passenger-rides.md) | Phase 10 plan + report: Book (map + 3 steps), active ride screen, Rides history, MapService (Leaflet + OSM), emulator end to end |
 | [phase-11-driver-rides.md](phase-11-driver-rides.md) | Phase 11 plan + report: Driver Home (offline / online, compact map), request takeover, driver ride screen, earnings, location cadence, two-client ride on the emulator |
 | [phase-12-maps.md](phase-12-maps.md) | Phase 12 plan + report: route line, live gliding driver marker, stale positions, the trip's driven path, MapTiler (key kept local) |
+| [phase-13-notifications.md](phase-13-notifications.md) | Phase 13 plan + report: in-app Alerts, Firebase push (FCM HTTP v1 from Laravel), who gets what, reminders, permission, finish review |
 | [phase-14-admin-web.md](phase-14-admin-web.md) | Phase 14 plan + report: the admin website (repo papaya-hatidgo-admin), admin API, photo review via token, live map, insert-only fares, reports, audit log |
 | [IMPECCABLE-GUIDE.md](IMPECCABLE-GUIDE.md) | When and how to use the impeccable design skill |
 | [design-briefs/passenger-booking.md](design-briefs/passenger-booking.md) | ✅ Confirmed UX brief: passenger booking flow (pickup → destination → choose ride + Mag-book) |
@@ -49,7 +50,7 @@ Phase numbers follow [phase-0-analysis.md § M](phase-0-analysis.md#m-developmen
 | 10 | Passenger ride screens (includes a basic map: tiles, center pin, markers; see booking brief) | ✅ Done (Book on a Leaflet map in 3 steps, active ride screen, cancel, rating, Rides history; P1–P11 on the emulator; API 196, mobile 78 tests) |
 | 11 | Driver ride screens + earnings | ✅ Done (go online with keep-awake + location cadence, full-screen request with tone and real countdown, accept / skip, every ride step incl. Balikan, driver cancel with reason codes, earnings day / week / month, Rides history; D1–D11 on the emulator with the passenger as a second client; API 200, mobile 101 tests; two-phone run pending) |
 | 12 | Maps: live driver marker, route line | ✅ Done (dashed route on Book and both ride screens, gliding driver marker, approach line, stale positions shown as old, the trip's driven path on finished rides, MapTiler with a local key; M1–M7 on the emulator; API 206, mobile 109 tests) |
-| 13 | Notifications (in-app + FCM) | ⏳ |
+| 13 | Notifications (in-app + FCM) | ✅ Done (Alerts tab for both roles with unread badge; real Firebase push for requests, ride steps, cancels, papers, subscriptions; reminders sent once; phone tokens tied to the login; N1–N4, N9, N10 on the emulator with real FCM; API 243, mobile 122 tests) |
 | 14 | Admin web dashboard (built before 13, the student's choice) | ✅ Done (new repo papaya-hatidgo-admin: Angular + Tailwind; verification with photo review, live map, rides, users, fares + settings, plans + payments, requirements, reports, audit log; admins only; A1–A11 in the browser; API 217, admin 9 tests) |
 | 15 | Full testing + case study documentation | ⏳ |
 

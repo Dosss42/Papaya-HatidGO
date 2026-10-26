@@ -49,6 +49,11 @@ export const DRIVER_ROUTES: Routes = [
           import('./pages/driver-earnings/driver-earnings.page').then((m) => m.DriverEarningsPage),
       },
       {
+        // Phase 13: the Alerts list, the same page as /passenger/alerts.
+        path: 'alerts',
+        loadComponent: () => import('../notifications/alerts.page').then((m) => m.AlertsPage),
+      },
+      {
         path: 'account',
         loadComponent: () =>
           import('./pages/driver-account/driver-account.page').then((m) => m.DriverAccountPage),

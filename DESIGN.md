@@ -304,6 +304,14 @@ The One-way / Balikan cards follow the **Plan Card** rules: full width, 84px min
 - **Period switch (Earnings):** three equal 56px choice chips (Today / This week / This month), chosen = 3px Deep Papaya + Papaya Tint + 800 weight. The total is in a Warm Field card at 3rem/800, the rides below it as the Rides list rows.
 - **Sound:** the request tone is the app's only sound (a generated two-note chime). It repeats with a 700ms vibration every 5 s until the driver acts.
 
+### Notifications (Phase 13)
+- **Alerts tab:** a bell, in both roles (the driver's 5-tab bar sets its labels at the 16px floor with no side padding, so "Earnings" fits at 360dp). Unread count in a Deep Papaya pill with a 2px white ring, "9+" above nine, and "N unread" for screen readers.
+- **Alert rows:** a 44px round icon by subject (tricycle, paper, card, power), the time in Soft Ink, a 1.05rem title, the body in Soft Ink. **New** = the word "New" in a papaya pill + an 800 title + a papaya-tint icon + Ink body; read rows are calm. Rows are split by 2px Hairline; the whole row is the button.
+- **Notifications off:** an Info notice at the top of Alerts, with an outline "Allow notifications" while Android can still ask, or the Settings path once refused.
+- **Permission sheet:** once after login, a bottom sheet with the bell in a 72px papaya-tint disc, a role title ("Know when your driver is here" / "Don't miss a passenger"), one orange "Allow notifications", and "Not now" as a text button.
+- **While the app is open:** a push becomes a white toast at the top (2px Field Line ring, title 800, body Soft Ink, a Deep Papaya "View" 56px tall, 10 s), never over the screen that already shows it.
+- **Android:** the small icon is the tricycle outline in one color (`ic_stat_tricycle`), tinted Deep Papaya in the shade.
+
 ### Logo
 Authored SVG: a side-view Philippine tricycle with one roof over sidecar and driver, a papaya leaf growing from the roof. Deep Papaya roof and motorcycle, Bright Papaya sidecar and hubs, leaf greens, Ink wheels and frame, white window. Decorative (`aria-hidden`); the name is always written beside it. On Get Started it sits on a 232px Papaya Tint disc and settles in once (500ms rise and fade, ease-out); under reduced motion it appears instantly.
 

@@ -110,6 +110,7 @@ export const EN = {
   'tabs.account': 'Account',
   'tabs.home': 'Home',
   'tabs.earnings': 'Earnings',
+  'tabs.alerts': 'Alerts',
 
   // Account
   'account.title': 'Account',
@@ -532,6 +533,30 @@ export const EN = {
   'location.TIMEOUT': "We can't get your location. Try again.",
   'location.CONFIG': 'The app is missing its location setup.',
   'location.UNAVAILABLE': "We can't get your location.",
+
+  // Alerts and push notifications (Phase 13)
+  'alerts.title': 'Alerts',
+  'alerts.markAll': 'Mark all as read',
+  'alerts.new': 'New',
+  'alerts.emptyTitle': 'No alerts yet',
+  'alerts.emptyText': 'Ride updates, reminders and payment news will show up here.',
+  'alerts.loadError': "Couldn't load your alerts.",
+  'alerts.more': 'Show older alerts',
+  'alerts.view': 'View',
+  'alerts.unreadAria': '{n} unread',
+  'alerts.offTitle': 'Notifications are off',
+  'alerts.offAsk': "With the app closed, you won't hear about your rides or reminders.",
+  'alerts.offSettings': "With the app closed, you won't hear about your rides or reminders. To turn them on: phone Settings › Apps › Papaya HatidGo › Notifications.",
+  'push.titlePassenger': 'Know when your driver is here',
+  'push.bodyPassenger': 'Allow notifications so we can tell you when a driver accepts, arrives or cancels, even with the app closed.',
+  'push.titleDriver': "Don't miss a passenger",
+  'push.bodyDriver': 'Allow notifications to hear new ride requests while the app is in the background, and to know when your papers are approved or expiring.',
+  'push.allow': 'Allow notifications',
+  'push.later': 'Not now',
+  'push.channelRides': 'Rides',
+  'push.channelRidesHint': 'New requests and your ride: driver accepted, arrived, cancelled',
+  'push.channelGeneral': 'Account & reminders',
+  'push.channelGeneralHint': 'Papers, subscription and payments',
 } as const;
 
 export type MessageKey = keyof typeof EN;

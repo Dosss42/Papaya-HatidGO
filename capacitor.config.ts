@@ -22,6 +22,12 @@ const config: CapacitorConfig = {
     CapacitorSQLite: {
       androidIsEncryption: false,
     },
+    // Push notifications (Phase 13). While the app is OPEN, a push is not shown as a system banner
+    // (empty list): the app shows its own short message, or nothing when the screen already shows
+    // it (the ride screen, the request takeover). Closed or in the background, Android shows it.
+    PushNotifications: {
+      presentationOptions: [],
+    },
   },
 };
 

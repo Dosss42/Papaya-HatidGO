@@ -1,0 +1,80 @@
+<ion-content class="hg-tab-page">
+  <ion-refresher slot="fixed" (ionRefresh)="load($event)">
+    <ion-refresher-content />
+  </ion-refresher>
+
+  <div class="hg-column">
+    <header class="hg-head alerts__head">
+      <h1 class="hg-head__title">{{ 'alerts.title' | t }}</h1>
+      @if (notifications.unread() > 0) {
+        <button class="hg-button hg-button--text alerts__all" type="button" (click)="markAll()" [disabled]="markingAll()">
+          {{ 'alerts.markAll' | t }}
+        </button>
+      }
+    </header>
+
+    <!-- Notifications off (N10): the app still works; say what's missed and how to turn them on. -->
+    @if (notifications.permission() === 'prompt') {
+      <section class="hg-notice hg-notice--info alerts__off" aria-labelledby="alerts-off-title">
+        <ion-icon name="notifications-off-outline" aria-hidden="true" />
+        <div>
+          <h2 id="alerts-off-title" class="alerts__off-title">{{ 'alerts.offTitle' | t }}</h2>
+          <p>{{ 'alerts.offAsk' | t }}</p>
+          <button class="hg-button hg-button--outline alerts__off-button" type="button" (click)="notifications.allow()">
+            {{ 'push.allow' | t }}
+          </button>
+        </div>
+      </section>
+    } @else if (notifications.permission() === 'denied') {
+      <section class="hg-notice hg-notice--info alerts__off" aria-labelledby="alerts-off-title">
+        <ion-icon name="notifications-off-outline" aria-hidden="true" />
+        <div>
+          <h2 id="alerts-off-title" class="alerts__off-title">{{ 'alerts.offTitle' | t }}</h2>
+          <p>{{ 'alerts.offSettings' | t }}</p>
+        </div>
+      </section>
+    }
+
+    @if (failed()) {
+      <p class="hg-notice hg-notice--alert" role="alert">
+        <ion-icon name="alert-circle" aria-hidden="true" /><span>{{ 'alerts.loadError' | t }}</span>
+      </p>
+    }
+
+    @if (list(); as alerts) {
+      @if (alerts.length === 0) {
+        <app-empty-state icon="notifications-outline" [title]="'alerts.emptyTitle' | t" [text]="'alerts.emptyText' | t" />
+      } @else {
+        <ul class="alerts">
+          @for (alert of alerts; track alert.id) {
+            <li>
+              <button type="button" class="alert" [class.alert--new]="!alert.read_at" (click)="open(alert)">
+                <span class="alert__icon"><ion-icon [name]="icon(alert.kind)" aria-hidden="true" /></span>
+                <span class="alert__main">
+                  <span class="alert__top">
+                    @if (!alert.read_at) {
+                      <span class="alert__new">{{ 'alerts.new' | t }}</span>
+                    }
+                    <span class="alert__time">{{ dateTime(alert.created_at) }}</span>
+                  </span>
+                  <span class="alert__title">{{ alert.title }}</span>
+                  <span class="alert__body">{{ alert.body }}</span>
+                </span>
+              </button>
+            </li>
+          }
+        </ul>
+        @if (hasMore()) {
+          <button class="hg-button hg-button--outline alerts__more" type="button" (click)="more()" [disabled]="loadingMore()">
+            @if (loadingMore()) {
+              <ion-spinner name="crescent" aria-hidden="true" />
+            }
+            {{ 'alerts.more' | t }}
+          </button>
+        }
+      }
+    } @else if (!failed()) {
+      <div class="alerts__loading"><ion-spinner name="crescent" /></div>
+    }
+  </div>
+</ion-content>

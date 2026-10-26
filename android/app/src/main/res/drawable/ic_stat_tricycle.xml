@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Phase 13: the small icon of every push notification (status bar + notification shade).
+     Android draws it in ONE color (white in the status bar, papaya in the shade, see
+     default_notification_color), so it is the app's tricycle outline (shared/icons/tricycle.icon.ts),
+     not the full-color logo, which would show as a white square. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="464"
+    android:viewportHeight="464">
+    <group android:translateX="-40" android:translateY="-56">
+        <path
+            android:pathData="M64,336V176a32,32 0,0 1,32 -32h160v192H64 M112,200h96v64h-96z M256,288h96l40,-96 M368,176h56 M392,192l40,192 M96,384a48,48 0,1 0,96 0a48,48 0,1 0,-96 0 M384,384a48,48 0,1 0,96 0a48,48 0,1 0,-96 0"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="32"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:fillColor="#00000000" />
+    </group>
+</vector>
