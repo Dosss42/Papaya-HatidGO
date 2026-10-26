@@ -39,4 +39,27 @@ Asked by the student after Phase 13 (2026-10-26):
 
 Captures: `.impeccable/review/p13x-*.png`.
 
+---
+
+## 5. Fares and the map along the real roads (2026-10-27)
+
+**The problem (the student):** "the line is straight and doesn't calculate the real way; the fare is too low." The fare used the straight-line distance, and real roads are usually 20–50% longer.
+
+**Decision:** the student first chose OpenRouteService (it needs an account and a key), then preferred to avoid that. So the server uses **OSRM**: a free routing server on OpenStreetMap roads (the same data as the map tiles), with **no account and no key**. OpenRouteService still works if a key is ever put in `.env` (`OPENROUTESERVICE_KEY`).
+
+| What | How |
+|---|---|
+| Where | On the SERVER (`RoutingService`), for both the estimate and the booking: the fare never comes from the phone |
+| Same fare twice | Each trip's route is kept for a day, so the booking a minute later uses the same road and never says "the fare changed" by itself |
+| Saved | The road line is saved on the ride (`route_points`, thinned to ≤ 300 points) and drawn on both phones |
+| Map | Step 2: straight while the destination pin moves (no request per move). Step 3 and the ride screens: the road |
+| Fallback | OSRM unreachable or no road found: the straight line × **1.3** (a typical detour in a town), saved as `distance_by_road = false`. Booking never stops |
+| Fair use | OSRM's public server asks for light use (about 1 request a second); one cached route per trip is far below that. For a real launch, run your own OSRM or use a keyed service |
+
+**Measured (General Tinio):** Poblacion Central → a spot 4.7 km away in a straight line = **5.69 km by road** (+21%). On the booking screen, the line runs through town and along the river road to Concepcion.
+
+**Tests:** API **249** (4 routing tests with a faked OSRM / OpenRouteService: road distance and line, one shared route, the fallback, thinning); app **127** (the road line rule). Capture: `.impeccable/review/p13x-07-road.png`.
+
+---
+
 **For the student:** in MapTiler's dashboard, restrict the key to your app and admin site before release (it's visible inside the APK, like any map key).

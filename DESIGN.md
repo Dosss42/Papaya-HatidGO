@@ -281,7 +281,7 @@ The One-way / Balikan cards follow the **Plan Card** rules: full width, 84px min
 ### Map lines and the live driver (Phase 12)
 - **Base map:** MapTiler "Streets" in high resolution (sharp names on dense screens), with the credit "© MapTiler © OpenStreetMap contributors" always visible. OpenStreetMap is the fallback when no key is set.
 - **Three lines, told apart by pattern** (`.hg-line--*`, drawn under the markers):
-  - **Route** (the planned trip, pickup → destination): straight, Ink at 75%, 3px, dashes 10/8. It's straight on purpose: the fare uses the straight-line distance, and the dashes read as "direction", not "the road to take".
+  - **Route** (the planned trip, pickup → destination): Ink at 75%, 3px, dashes 10/8. **Along the roads** since the routing update (after Phase 13): it's the road the fare was measured on. Straight only while the destination pin is being moved (step 2), and on rides booked before the update.
   - **Approach** (the driver coming to the pickup): Deep Papaya dots, 4px. Shown only while the position is live.
   - **Driven path** (a finished ride, the trip part only): solid Deep Papaya, 4px.
 - **Booking:** the route appears once both points exist. In step 2 it follows the center pin as the map moves.
