@@ -110,8 +110,10 @@ php artisan schedule:work
 | Changed | Command (in that folder) |
 |---|---|
 | The API | `php artisan test` |
-| The mobile app | `npm test` |
-| The admin website | `npm test` |
+| The mobile app | `npm test -- --watch=false` |
+| The admin website | `npm test -- --watch=false` |
+
+(`--watch=false` runs the tests once and stops; without it they keep re-running on every save until Ctrl+C.)
 
 **3. Save your work to GitHub, in the folder you changed:**
 
