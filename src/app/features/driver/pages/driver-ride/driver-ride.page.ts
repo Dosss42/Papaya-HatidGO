@@ -15,7 +15,7 @@ import { TranslatePipe } from '../../../../core/i18n/t.pipe';
 import { AppLifecycleService } from '../../../../core/services/app-lifecycle.service';
 import { DriverRideService } from '../../../../core/services/driver-ride.service';
 import { DriverShiftService } from '../../../../core/services/driver-shift.service';
-import { ageText, isStale, rideLines } from '../../../../core/services/map-geometry';
+import { ageText, isStale, rideLines, roadPoints } from '../../../../core/services/map-geometry';
 import { AppMap, LatLng, MapService, rideMapInset } from '../../../../core/services/map.service';
 import { RideService } from '../../../../core/services/ride.service';
 import { DriverCancelReason } from '../../../../shared/models/driver-ride.model';
@@ -243,7 +243,7 @@ export class DriverRidePage implements ViewDidEnter, ViewWillLeave, OnDestroy {
     this.map.setMarker('destination', destination);
     this.map.setMarker('driver', me, { glide: true });
     this.map.setMarkerStale('driver', stale);
-    const lines = rideLines(ride.status, pickup, destination, me, stale, this.driven);
+    const lines = rideLines(ride.status, pickup, destination, me, stale, this.driven, roadPoints(ride.route));
     this.map.setLine('route', lines.route);
     this.map.setLine('approach', lines.approach);
     this.map.setLine('trail', lines.trail);

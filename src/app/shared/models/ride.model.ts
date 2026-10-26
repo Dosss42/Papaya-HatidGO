@@ -40,7 +40,11 @@ export interface FareOption {
 }
 
 export interface Estimate {
+  /** Along the roads when by_road, else the straight line × the detour factor (after Phase 13). */
   distance_km: string;
+  by_road?: boolean;
+  /** The road line, [[lat, lng], …]. */
+  route?: [number, number][];
   options: FareOption[];
 }
 
@@ -74,6 +78,9 @@ export interface Ride {
   destination: Place;
   passenger_note: string | null;
   distance_km: string;
+  /** The road the fare was measured on, [[lat, lng], …]; null on rides booked before roads. */
+  route?: [number, number][] | null;
+  distance_by_road?: boolean;
   return_distance_km: string | null;
   fare: {
     outbound_fare: string;

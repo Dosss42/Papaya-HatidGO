@@ -14,6 +14,7 @@ import { TranslatePipe } from '../../../../core/i18n/t.pipe';
 import { AppLifecycleService } from '../../../../core/services/app-lifecycle.service';
 import { GeocodingService, PlaceResult } from '../../../../core/services/geocoding.service';
 import { LocationService } from '../../../../core/services/location.service';
+import { roadPoints } from '../../../../core/services/map-geometry';
 import { AppMap, LatLng, MapService } from '../../../../core/services/map.service';
 import { NetworkService } from '../../../../core/services/network.service';
 import { RideService } from '../../../../core/services/ride.service';
@@ -274,7 +275,8 @@ export class PassengerBookPage implements ViewDidEnter, ViewWillLeave {
       const destination = this.draft.destination();
       if (!this.map || !pickup || !destination) return;
       this.map.resize();
-      this.map.fit([pickup, destination]);
+      // The whole road in view (it can bend outside the two pins).
+      this.map.fit(roadPoints(this.draft.estimate()?.route) ?? [pickup, destination]);
     }, 260);
   }
 
@@ -287,16 +289,17 @@ export class PassengerBookPage implements ViewDidEnter, ViewWillLeave {
   }
 
   /**
-   * The route line "once both points exist" (booking brief § 2, Phase 12): straight and dashed,
-   * like the distance the fare is computed on (decision #1). Step 2 draws it to the center pin
-   * as the passenger moves the map; step 3 to the chosen destination.
+   * The route line "once both points exist" (booking brief § 2, Phase 12). Step 2: straight to the
+   * center pin while the passenger moves the map (no route request on every move). Step 3: the
+   * ROAD the fare was measured on, from the estimate (after Phase 13); straight until it arrives.
    */
   private drawRoute(): void {
     if (!this.map) return;
     const pickup = this.draft.pickup();
     const step = this.step();
+    const road = step === 3 ? roadPoints(this.draft.estimate()?.route) : null;
     const to = step === 3 ? this.draft.destination() : step === 2 ? this.center() : null;
-    this.map.setLine('route', pickup && to ? [pickup, to] : null);
+    this.map.setLine('route', road ?? (pickup && to ? [pickup, to] : null));
   }
 
   // ---------------------------------------------------------------- place search + the spot's name
@@ -438,6 +441,8 @@ export class PassengerBookPage implements ViewDidEnter, ViewWillLeave {
     try {
       const estimate = await this.rides.estimate(pickup, destination, this.draft.rideType() === 'two_way' ? this.draft.waitMinutes() : null);
       this.draft.estimate.set(estimate);
+      this.drawRoute(); // the road replaces the straight line
+      this.fitBothAfterResize();
       if (this.draft.rideType() && !estimate.options.some((o) => o.ride_type === this.draft.rideType())) {
         this.draft.rideType.set(null); // the admin switched that type off meanwhile
       }

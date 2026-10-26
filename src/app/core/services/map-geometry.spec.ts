@@ -1,4 +1,4 @@
-import { STALE_AFTER_MS, ageNow, ageText, easeOut, isStale, lerpPoint, rideLines, samePoint } from './map-geometry';
+import { STALE_AFTER_MS, ageNow, ageText, easeOut, isStale, lerpPoint, rideLines, roadPoints, samePoint } from './map-geometry';
 
 const pickup = { lat: 15.35, lng: 121.05 };
 const destination = { lat: 15.37, lng: 121.05 };
@@ -53,5 +53,16 @@ describe('map-geometry (Phase 12)', () => {
     expect(samePoint(pickup, driver)).toBe(false);
     expect(samePoint(null, null)).toBe(true);
     expect(samePoint(pickup, null)).toBe(false);
+  });
+
+  it('draws the road the fare used, or the straight line for older rides (after Phase 13)', () => {
+    const a = { lat: 15.35, lng: 121.05 };
+    const b = { lat: 15.37, lng: 121.05 };
+    const road = roadPoints([[15.35, 121.05], [15.36, 121.06], [15.37, 121.05]]);
+    expect(road).toEqual([a, { lat: 15.36, lng: 121.06 }, b]);
+    expect(rideLines('accepted', a, b, null, false, null, road).route).toEqual(road);
+    expect(rideLines('accepted', a, b, null, false, null, null).route).toEqual([a, b]);
+    expect(roadPoints(null)).toBeNull();
+    expect(roadPoints([[15.35, 121.05]])).toBeNull(); // one point is not a line
   });
 });

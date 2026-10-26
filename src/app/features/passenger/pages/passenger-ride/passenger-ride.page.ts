@@ -11,7 +11,7 @@ import { I18nService } from '../../../../core/i18n/i18n.service';
 import { MessageKey } from '../../../../core/i18n/messages.en';
 import { TranslatePipe } from '../../../../core/i18n/t.pipe';
 import { AppLifecycleService } from '../../../../core/services/app-lifecycle.service';
-import { ageNow, ageText, isStale, rideLines } from '../../../../core/services/map-geometry';
+import { ageNow, ageText, isStale, rideLines, roadPoints } from '../../../../core/services/map-geometry';
 import { AppMap, LatLng, MapService, rideMapInset } from '../../../../core/services/map.service';
 import { NetworkService } from '../../../../core/services/network.service';
 import { RideService } from '../../../../core/services/ride.service';
@@ -252,7 +252,7 @@ export class PassengerRidePage implements ViewDidEnter, ViewWillLeave, OnDestroy
     // The live driver glides to each new position, and looks old when it is (Phase 12).
     this.map.setMarker('driver', driver, { glide: true });
     this.map.setMarkerStale('driver', stale);
-    const lines = rideLines(ride.status, pickup, destination, driver, stale, this.driven);
+    const lines = rideLines(ride.status, pickup, destination, driver, stale, this.driven, roadPoints(ride.route));
     this.map.setLine('route', lines.route);
     this.map.setLine('approach', lines.approach);
     this.map.setLine('trail', lines.trail);

@@ -67,13 +67,20 @@ export function rideLines(
   driver: LatLng | null,
   driverStale: boolean,
   driven: LatLng[] | null,
+  road: LatLng[] | null = null,
 ): RideLines {
-  const route = [pickup, destination];
+  // The road the fare was measured on (after Phase 13); a straight line for rides booked before it.
+  const route = road && road.length >= 2 ? road : [pickup, destination];
   if (status === 'completed' || status === 'cancelled') {
     return driven && driven.length >= 2 ? { route: null, approach: null, trail: driven } : { route, approach: null, trail: null };
   }
   const approaching = (status === 'accepted' || status === 'driver_arriving') && driver && !driverStale;
   return { route, approach: approaching ? [driver, pickup] : null, trail: null };
+}
+
+/** The API's road line ([[lat, lng], …]) as map points; null when there is none (older rides). */
+export function roadPoints(route: [number, number][] | null | undefined): LatLng[] | null {
+  return route && route.length >= 2 ? route.map(([lat, lng]) => ({ lat, lng })) : null;
 }
 
 /** Same place (to ~1 m)? Then there's nothing to glide or redraw. */
