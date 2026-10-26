@@ -187,11 +187,18 @@ export class PassengerBookPage implements ViewDidEnter, ViewWillLeave {
         void this.loadFromPrice();
         return;
       }
-      this.options.set(this.options() ?? (await this.rides.bookingOptions()));
+      // Asked on every visit, not once: the admin may have switched a ride type off or moved the
+      // service area meanwhile. A failed check keeps the last answer when there is one.
+      const known = this.options();
+      this.options.set(await this.rides.bookingOptions().catch((e: unknown) => {
+        if (known) return known;
+        throw e;
+      }));
       this.gate.set('ready');
       this.ensureMap();
-      // A draft that arrives at step 3 without fares ("Mag-book ulit" from the ride screen).
-      if (this.step() === 3 && !this.draft.estimate() && !this.estimating()) {
+      // At step 3 the fares are asked again on every visit: a draft without fares ("Mag-book ulit"),
+      // or a kept one priced before the admin saved a new fare.
+      if (this.step() === 3 && !this.estimating()) {
         void this.fetchEstimate();
       }
       // 3. Location, only when no pin is set yet (a kept draft wins).
@@ -439,7 +446,9 @@ export class PassengerBookPage implements ViewDidEnter, ViewWillLeave {
     this.estimating.set(true);
     this.estimateFailed.set(false);
     try {
-      const estimate = await this.rides.estimate(pickup, destination, this.draft.rideType() === 'two_way' ? this.draft.waitMinutes() : null);
+      // The chosen stay goes along whatever card is picked (one-way ignores it), so switching to
+      // Balikan after choosing a stay never shows a waiting fee priced without it.
+      const estimate = await this.rides.estimate(pickup, destination, this.draft.waitChosen() ? this.draft.waitMinutes() : null);
       this.draft.estimate.set(estimate);
       this.drawRoute(); // the road replaces the straight line
       this.fitBothAfterResize();

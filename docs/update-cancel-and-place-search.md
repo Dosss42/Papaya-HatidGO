@@ -128,3 +128,21 @@ The server is unchanged: drivers within 3 km still get the push notification ("N
 | One big card per request | **Compact rows** (≥ 64px, split by Hairline): the pickup place over "3.9 km away · 4.1 km trip" on the left, the fare and the ride type on the right; header "Requests near you (n) · Nearest first" |
 
 **Emulator check:** two bookings across town showed as two rows (3.9 km and 8.2 km away); the sheet opened from the row (`p13x-13-board-redesign.png`, `p13x-14-auto-sheet.png`). **Tests:** API 254, app 130.
+
+## 7. Admin fare and settings changes reach the app (2026-10-27)
+
+**The report:** waiting-fee changes saved in the admin did not show in the app.
+
+**What was checked:** every fee field and every setting in Fares & settings, from the admin form to the database to the API.
+- The server was right. Each estimate reads the newest fare row, and each setting is read fresh on every request.
+- A Balikan stay of 30 min, with 10 free minutes at ₱2/min, costs ₱40 (new test in `AdminWebApiTest`).
+
+**Why the app looked stale:**
+1. **The saved fare itself.** It had 50 free minutes and ₱0.00 per minute. The stay choices are 15, 30 and 60 min, so the waiting fee came out ₱0 every time, and the app said "waiting is free".
+2. **Booking options were loaded once.** The booking screen fetched them (ride types, service area, shortest trip) only the first time it opened. They now load on every visit to Book. If that check fails, the last answer is kept.
+3. **A kept fare was never re-priced.** A booking left at step 3 kept the fare it was first priced with. Step 3 now asks for the fare again on every visit.
+4. **The chosen stay could get lost.** It was sent only when Balikan was already the chosen card. It is now always sent, and one-way ignores it.
+
+**Now visible in the app:** the price details show the admin's waiting rule under "Waiting", for example "First 10 min free, then ₱2.00/min. Charged for the real wait."
+
+**What stays the same:** a ride that is already booked keeps the fare it was booked with (decision #5). Only the waiting fee uses the real waiting minutes at the end.

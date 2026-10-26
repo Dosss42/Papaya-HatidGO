@@ -363,6 +363,11 @@
     white-space: nowrap;
   }
 
+  &__note {
+    display: block;
+    font-size: 0.875rem;
+  }
+
   &__total {
     padding-top: 8px;
     border-top: 2px solid var(--hg-line);

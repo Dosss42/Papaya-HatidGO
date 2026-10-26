@@ -364,6 +364,7 @@ export const FIL: Record<MessageKey, string> = {
   'book.row.return': 'Pabalik',
   'book.row.waiting': 'Paghihintay',
   'book.row.waitingFree': '₱0 (libre ang paghihintay)',
+  'book.row.waitingRule': 'Libre ang unang {free} min, tapos {fee} bawat minuto. Ayon sa totoong hintay.',
   'book.row.service': 'Service fee',
   'book.row.total': 'Kabuuan',
   'book.estimateNotice': 'Tantya lang ito. Cash ang bayad sa driver.',

@@ -362,6 +362,7 @@ export const EN = {
   'book.row.return': 'Way back',
   'book.row.waiting': 'Waiting',
   'book.row.waitingFree': '₱0 (waiting is free)',
+  'book.row.waitingRule': 'First {free} min free, then {fee}/min. Charged for the real wait.',
   'book.row.service': 'Service fee',
   'book.row.total': 'Total',
   'book.estimateNotice': 'This is an estimate. You pay the driver in cash.',

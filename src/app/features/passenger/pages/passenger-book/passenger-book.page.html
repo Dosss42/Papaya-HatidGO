@@ -320,8 +320,14 @@
                     @if (chosen.ride_type === 'two_way') {
                       <div><dt>{{ 'book.row.return' | t }}</dt><dd>{{ peso(chosen.return_fare ?? '0') }}</dd></div>
                       <div>
-                        <dt>{{ 'book.row.waiting' | t }}</dt>
-                        <dd>{{ +chosen.waiting_fee === 0 ? ('book.row.waitingFree' | t) : peso(chosen.waiting_fee) }}</dd>
+                        <dt>
+                          {{ 'book.row.waiting' | t }}
+                          <!-- The admin's waiting rule, so a ₱0 under a long free time doesn't look like a broken fee. -->
+                          @if (+chosen.breakdown.waiting_fee_per_minute > 0) {
+                            <span class="breakdown__note">{{ 'book.row.waitingRule' | t: { free: chosen.breakdown.waiting_free_minutes, fee: peso(chosen.breakdown.waiting_fee_per_minute) } }}</span>
+                          }
+                        </dt>
+                        <dd>{{ +chosen.waiting_fee === 0 && +chosen.breakdown.waiting_fee_per_minute === 0 ? ('book.row.waitingFree' | t) : peso(chosen.waiting_fee) }}</dd>
                       </div>
                     }
                     @if (+chosen.service_fee > 0) {
