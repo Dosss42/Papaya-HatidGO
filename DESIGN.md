@@ -296,7 +296,7 @@ The One-way / Balikan cards follow the **Plan Card** rules: full width, 84px min
 - **Compact map (online only):** edge to edge, ~32vh, under the status-bar scrim. The sheet overlaps its bottom by 16px with a 16px top radius. The marker moves only with each sent position. "Where am I?" is a 52px white pill with a 2px Field Line ring, bottom-right. No map while offline or with GPS lost.
 - **Today card:** Warm Field, 2px Hairline, 64px, "Today: ₱… · n rides" in 1.2rem/800 with a chevron (→ Earnings). It shows "Today: —" until the server answers, never a made-up ₱0.
 - **Tips:** Soft Ink lines with a 22px outline icon (battery, volume), no card.
-- **Request takeover:** a full-screen white modal, nothing else on screen.
+- **Request takeover:** a full-screen white modal, nothing else on screen. **Since the request board (after Phase 13) it opens only when the driver taps a request in the list** (or by auto-accept), never by itself; a new request rings once.
   - The order: title + countdown pill (Papaya Tint, 2px Deep Papaya, tabular numbers) → type tag (Balikan = 3px Ink ring) → **fare 3.5rem/800**, the largest number → Pickup / Drop-off rows (orange outline icons, the landmark in Soft Ink) → note card → actions.
   - Skip (outline) left, Accept (orange, 1.8× wider, 72px) right, 20px apart.
   - "Taken" / "gone" replace the content with a centered Soft Ink mark + the sentence, then close after 3 s.

@@ -36,13 +36,13 @@ describe('DriverShiftService (Phase 11)', () => {
   let http: HttpTestingController;
   let shift: DriverShiftService;
   let gps: { checkPermission: ReturnType<typeof vi.fn>; getCurrentPosition: ReturnType<typeof vi.fn> };
-  let alert: { unlock: ReturnType<typeof vi.fn>; start: ReturnType<typeof vi.fn>; stop: ReturnType<typeof vi.fn> };
+  let alert: { unlock: ReturnType<typeof vi.fn>; start: ReturnType<typeof vi.fn>; stop: ReturnType<typeof vi.fn>; once: ReturnType<typeof vi.fn> };
   let location: { startIdle: ReturnType<typeof vi.fn>; startRide: ReturnType<typeof vi.fn>; stop: ReturnType<typeof vi.fn> };
   let i18n: I18nService;
 
   beforeEach(() => {
     gps = { checkPermission: vi.fn(async () => 'granted'), getCurrentPosition: vi.fn(async () => fix) };
-    alert = { unlock: vi.fn(), start: vi.fn(), stop: vi.fn() };
+    alert = { unlock: vi.fn(), start: vi.fn(), stop: vi.fn(), once: vi.fn() };
     location = { startIdle: vi.fn(async () => undefined), startRide: vi.fn(async () => undefined), stop: vi.fn(async () => undefined) };
     TestBed.configureTestingModule({
       providers: [
@@ -156,22 +156,31 @@ describe('DriverShiftService (Phase 11)', () => {
     expect(shift.goError()?.message).toBe(i18n.t('location.GPS_OFF'));
   });
 
-  it('shows the nearest request first, rings, and counts the others', async () => {
+  it('lists requests nearest first, rings once, and never opens one by itself (the list decides)', async () => {
     await online([offer(1, 1.5), offer(2, 0.3)]);
-    expect(shift.shown()?.offer_id).toBe(2);
-    expect(shift.queued()).toBe(1);
-    expect(alert.start).toHaveBeenCalled();
+    expect(shift.offers().map((o) => o.offer_id)).toEqual([2, 1]);
+    expect(shift.shown()).toBeNull(); // no popup: the driver chooses from the list
+    expect(alert.once).toHaveBeenCalledTimes(1);
+    expect(alert.start).not.toHaveBeenCalled(); // no repeating ring
+
+    const polled = shift.poll(); // the same requests again: no second ring
+    http.expectOne(`${api}/drivers/me/offers`).flush({ data: [offer(1, 1.5), offer(2, 0.3)], meta: { is_online: true } });
+    await polled;
+    expect(alert.once).toHaveBeenCalledTimes(1);
   });
 
-  it('Laktawan declines and moves to the next request', async () => {
+  it('Laktawan declines the chosen request and leaves the rest in the list', async () => {
     await online([offer(1, 1.5), offer(2, 0.3)]);
+    shift.choose(shift.offers()[0]);
     shift.skip();
-    expect(shift.shown()?.offer_id).toBe(1);
+    expect(shift.shown()).toBeNull();
+    expect(shift.offers().map((o) => o.offer_id)).toEqual([1]);
     http.expectOne(`${api}/rides/20/decline`).flush({ data: null });
   });
 
   it('says "taken" when another driver accepted first', async () => {
     await online([offer(1, 0.3)]);
+    shift.choose(shift.offers()[0]);
     const accepting = shift.accept();
     http.expectOne(`${api}/rides/10/accept`).flush(
       { message: 'Taken', code: 'RIDE_TAKEN' },
@@ -184,6 +193,7 @@ describe('DriverShiftService (Phase 11)', () => {
 
   it('says "gone" when the request disappears while on screen', async () => {
     await online([offer(1, 0.3)]);
+    shift.choose(shift.offers()[0]);
     const polled = shift.poll();
     http.expectOne(`${api}/drivers/me/offers`).flush({ data: [], meta: { is_online: true } });
     await polled;
@@ -193,6 +203,7 @@ describe('DriverShiftService (Phase 11)', () => {
 
   it('accepting starts the ride: no more offers, the trail instead', async () => {
     await online([offer(1, 0.3)]);
+    shift.choose(shift.offers()[0]);
     const accepting = shift.accept();
     http.expectOne(`${api}/rides/10/accept`).flush({ data: { id: 10, status: 'accepted' } });
     await accepting;
@@ -218,6 +229,7 @@ describe('DriverShiftService (Phase 11)', () => {
 
   it('a lost accept answer: if the server gave the ride to this driver, it opens instead of "gone"', async () => {
     await online([offer(1, 0.3)]);
+    shift.choose(shift.offers()[0]);
     const accepting = shift.accept();
     http.expectOne(`${api}/rides/10/accept`).error(new ProgressEvent('timeout')); // no answer (status 0)
     await settle();
@@ -237,7 +249,7 @@ describe('DriverShiftService (Phase 11)', () => {
     const live = { ...offer(1, 0.3), expires_at: new Date(serverNow.getTime() + 60_000).toISOString() };
     http.expectOne(`${api}/drivers/me/offers`).flush({ data: [live], meta: { is_online: true, server_now: serverNow.toISOString() } });
     await settle();
-    expect(shift.shown()?.offer_id).toBe(1);
+    expect(shift.offers()[0]?.offer_id).toBe(1); // still listed: not treated as expired
   });
 
   it('shows "No internet" only after two failed checks in a row, and clears it on the next success', async () => {

@@ -50,6 +50,8 @@ export class DriverShiftService {
   private synced = false;
   /** Offers the driver already answered (or that ended on screen): never shown again. */
   private readonly handled = new Set<number>();
+  /** Requests already announced with the short ring (by ride id): each rings once. */
+  private readonly announced = new Set<number>();
 
   readonly state = signal<ShiftState>('offline');
   /** Why going online failed (the server's checklist reason or the GPS), with the next step. */
@@ -153,6 +155,7 @@ export class DriverShiftService {
 
     this.state.set('online');
     this.handled.clear();
+    this.announced.clear();
     void KeepAwake.keepAwake().catch(() => undefined);
     await this.location.startIdle(fix);
     this.startPolling();
@@ -191,6 +194,7 @@ export class DriverShiftService {
     this.forced.set(null);
     this.goError.set(null);
     this.handled.clear();
+    this.announced.clear();
     this.tried.clear();
     this.synced = false;
     void KeepAwake.allowSleep().catch(() => undefined); // even if a ride was open
@@ -262,7 +266,7 @@ export class DriverShiftService {
         const listed = [...offers, ...board].some((o) => o.ride_id === current.ride_id);
         if (!listed && !(await this.claimIfMine(current))) this.end('gone');
       } else if (!current && !this.autoAccept()) {
-        this.showNext();
+        this.announceNew(); // the list on Home shows it; the driver chooses
       }
     } catch {
       // No internet or a slow server: try again in 5 s (the banner after two misses in a row).
@@ -286,9 +290,9 @@ export class DriverShiftService {
     const offer = this.shown();
     if (!offer || this.accepting()) return;
     this.handled.add(offer.offer_id);
+    this.offers.update((list) => list.filter((o) => o.ride_id !== offer.ride_id));
     this.board.update((list) => list.filter((o) => o.ride_id !== offer.ride_id));
     this.clearShown();
-    this.showNext();
     if (offer.offer_id > 0) void this.api.decline(offer.ride_id).catch(() => undefined);
   }
 
@@ -378,17 +382,18 @@ export class DriverShiftService {
     return Date.now() + this.clockOffset;
   }
 
-  private showNext(): void {
-    const now = this.now();
-    const next = this.offers().find((o) => !this.handled.has(o.offer_id) && Date.parse(o.expires_at) > now) ?? null;
-    this.shown.set(next);
-    this.outcome.set(null);
-    this.acceptError.set(null);
-    if (next) this.alert.start();
-    else this.alert.stop();
+  /**
+   * The student's choice (after Phase 13): requests are NOT pushed onto the screen. Every new one
+   * joins the list on Home (nearest first) and the driver picks; one short ring + vibration says a
+   * new one arrived. The request screen opens only when the driver taps one (or by auto-accept).
+   */
+  private announceNew(): void {
+    const fresh = [...this.offers(), ...this.board()].filter((o) => !this.announced.has(o.ride_id));
+    fresh.forEach((o) => this.announced.add(o.ride_id));
+    if (fresh.length > 0) this.alert.once();
   }
 
-  /** Show "taken" / "gone" for 3 s, then the next request (if any) or back to waiting. */
+  /** Show "taken" / "gone" for 3 s, then back to the list. */
   private end(outcome: OfferOutcome): void {
     const offer = this.shown();
     if (!offer) return;
@@ -399,7 +404,7 @@ export class DriverShiftService {
     if (this.outcomeTimer) clearTimeout(this.outcomeTimer);
     this.outcomeTimer = setTimeout(() => {
       this.outcomeTimer = null;
-      if (this.shown()?.offer_id === offer.offer_id) this.showNext();
+      if (this.shown()?.offer_id === offer.offer_id) this.clearShown();
     }, OUTCOME_MS);
   }
 

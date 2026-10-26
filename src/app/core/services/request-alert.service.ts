@@ -32,6 +32,14 @@ export class RequestAlertService {
       });
   }
 
+  /**
+   * Ring ONE time: a new request was added to the driver's list (after Phase 13, the list
+   * replaced the automatic full-screen request). Nothing is kept ringing.
+   */
+  once(): void {
+    if (!this.timer) this.ring();
+  }
+
   /** Ring now, then every 5 s until stop(). */
   start(): void {
     if (this.timer) return;

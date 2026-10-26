@@ -92,3 +92,19 @@ Captures: `.impeccable/review/p13x-*.png`.
 Captures: `p13x-08-board.png`, `p13x-09-board-takeover.png`, `p13x-10-auto-accepted.png`.
 
 **Tests:** API **253** (4 new: the board at 4 km without an alert; choosing accepts it and only one driver wins; beyond reach neither shown nor accepted, and the admin can widen it; offline or busy drivers see no board. The Phase 9 test "not offered to you" now applies beyond the board's reach). App **130** (3 new: board listed without the tone and skipped without a decline; auto-accept takes the nearest request within the radius only; off = nothing by itself).
+
+### 6b. List only: no automatic popup (the student, same day)
+
+**The student:** "Why does it still pop up by itself? Better to show all the passengers who booked, and the driver has the option to take one."
+
+**Change:** no request opens on the driver's screen by itself any more, however close. Every new request joins **Requests near you** on Home (nearest first), with **one short ring + vibration** (once per request, never repeating). The request screen opens only when the driver **taps** a request, or by **auto-accept** if the driver turned it on.
+
+| Before (Phase 11 + 6) | Now |
+|---|---|
+| Drivers within 3 km: full-screen request, ringing every 5 s | Everyone: the list; one ring when a new request arrives |
+| Skip → the next request popped up | Skip → back to the list |
+| "Taken" / "gone" → the next request popped up | "Taken" / "gone" for 3 s → back to the list |
+
+The server is unchanged: drivers within 3 km still get the push notification ("New ride request") when the app is in the background. Admin label: "Drivers notified first (push + ring) within".
+
+**Emulator check:** Maria booked **0.3 km** from Juan: no popup; the request appeared in the list with one ring (`p13x-11-list-only.png`). **Tests:** app **130** (the Phase 11 request tests now choose from the list first; new: rings once, never opens by itself).
