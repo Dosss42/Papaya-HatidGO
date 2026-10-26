@@ -310,8 +310,8 @@ The One-way / Balikan cards follow the **Plan Card** rules: full width, 84px min
 - **While the driver is on the way**, the passenger's quiet Cancel text button is replaced by a centred Soft Ink line saying when it opens. When it opens because the driver is late, the cancel sheet starts on "The driver is taking long".
 
 ### The request board (after Phase 13)
-- **Auto-accept** on Driver Home (online): choice chips Off / 2 km / 3 km / 5 km (56px, chosen = 3px Deep Papaya + Papaya Tint + 800), with a Soft Ink hint when on.
-- **Requests near you** + a count pill: one Warm Field card per request (2px Field Line, 16px radius). The fare first and largest (1.5rem/800), the ride type tag (Balikan with the 3px Ink ring, as on the takeover), the pickup landmark (1.1rem/700), then "Pickup: 4.0 km from you · Drop-off: 3.5 km trip" in Soft Ink. Tapping opens the usual request screen, without the tone. Empty: one Soft Ink line.
+- **Auto-accept** on Driver Home (online): ONE menu row on Warm Field with a 2px Field Line ring: a Deep Papaya flash icon, "Auto-accept", and the value on the right ("Off" in Soft Ink, or "Within 3 km" in Deep Papaya 800) + chevron. It opens an hg-sheet: "Off: I choose myself" / Within 2 / 3 / 5 km.
+- **Requests near you (n) · Nearest first:** every open request in the service area as compact rows (≥ 64px, 2px Hairline between): the pickup place (1.05rem/700, two lines max) over "3.9 km away · 4.1 km trip" (Soft Ink) on the left; the fare (1.3rem/800) over the ride type tag on the right (Balikan with the 3px Ink ring). The whole row is the button and opens the request screen (no tone). Empty: one Soft Ink line.
 
 ### Notifications (Phase 13)
 - **Alerts tab:** a bell, in both roles (the driver's 5-tab bar sets its labels at the 16px floor with no side padding, so "Earnings" fits at 360dp). Unread count in a Deep Papaya pill with a 2px white ring, "9+" above nine, and "N unread" for screen readers.

@@ -2,12 +2,12 @@ import { Component, ElementRef, OnDestroy, computed, effect, inject, signal, vie
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
-import { IonContent, IonFooter, IonIcon, IonRefresher, IonRefresherContent, IonSpinner, ViewWillEnter } from '@ionic/angular';
+import { ActionSheetController, IonContent, IonFooter, IonIcon, IonRefresher, IonRefresherContent, IonSpinner, ViewWillEnter } from '@ionic/angular';
 import { environment } from '../../../../../environments/environment';
 import { addIcons } from 'ionicons';
 import {
-  alertCircle, batteryChargingOutline, callOutline, chevronForward, cloudOfflineOutline, ellipseOutline, locateOutline,
-  lockClosedOutline, timeOutline, volumeHighOutline,
+  alertCircle, batteryChargingOutline, callOutline, checkmarkCircle, chevronForward, cloudOfflineOutline, ellipseOutline, flashOutline,
+  locateOutline, lockClosedOutline, timeOutline, volumeHighOutline,
 } from 'ionicons/icons';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { MessageKey } from '../../../../core/i18n/messages.en';
@@ -67,6 +67,7 @@ export class DriverHomePage implements ViewWillEnter, OnDestroy {
   private readonly rides = inject(RideService);
   private readonly maps = inject(MapService);
   protected readonly shift = inject(DriverShiftService);
+  private readonly sheets = inject(ActionSheetController);
   private inFlight: Promise<void> | null = null;
 
   private readonly mapEl = viewChild<ElementRef<HTMLElement>>('map');
@@ -95,7 +96,30 @@ export class DriverHomePage implements ViewWillEnter, OnDestroy {
       .sort((a, b) => (a.pickup.distance_from_you_km ?? 99) - (b.pickup.distance_from_you_km ?? 99));
   });
   /** Auto-accept choices: off, or a radius in km (the student's 2–5 km). */
-  protected readonly autoChoices: (number | null)[] = [null, 2, 3, 5];
+  private readonly autoChoices: (number | null)[] = [null, 2, 3, 5];
+
+  /**
+   * Auto-accept as one row that opens a sheet (the student's redesign: the four big chips took the
+   * room the list needs). Like the language sheet: the current choice has a check and a tinted row.
+   */
+  protected async chooseAutoAccept(): Promise<void> {
+    const current = this.shift.autoAcceptKm();
+    const sheet = await this.sheets.create({
+      header: this.i18n.t('board.autoSheet'),
+      subHeader: this.i18n.t('board.autoExplain'),
+      cssClass: 'hg-sheet',
+      buttons: [
+        ...this.autoChoices.map((km) => ({
+          text: km === null ? this.i18n.t('board.autoOffLong') : this.i18n.t('board.autoWithin', { km }),
+          icon: km === current ? 'checkmark-circle' : 'ellipse-outline',
+          cssClass: km === current ? 'hg-sheet__current' : undefined,
+          handler: () => this.shift.setAutoAccept(km),
+        })),
+        { text: this.i18n.t('common.cancel'), role: 'cancel' },
+      ],
+    });
+    await sheet.present();
+  }
   /** The compact map: only while online with a position that was SENT, never a stale marker (brief § 2). */
   protected readonly showMap = computed(() => this.online() && !!this.shift.position() && !this.shift.gpsLost());
 
@@ -204,8 +228,8 @@ export class DriverHomePage implements ViewWillEnter, OnDestroy {
 
   constructor() {
     addIcons({
-      alertCircle, batteryChargingOutline, callOutline, chevronForward, cloudOfflineOutline, ellipseOutline, locateOutline,
-      lockClosedOutline, timeOutline, volumeHighOutline,
+      alertCircle, batteryChargingOutline, callOutline, checkmarkCircle, chevronForward, cloudOfflineOutline, ellipseOutline,
+      flashOutline, locateOutline, lockClosedOutline, timeOutline, volumeHighOutline,
     });
 
     // The compact map: made when it appears, removed when it goes (offline = no map, brief § 2).

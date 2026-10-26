@@ -70,46 +70,48 @@
         </a>
       }
 
-      <!-- The request board (after Phase 13): choose a ride nearby, or let auto-accept take one. -->
+      <!-- The request board (after Phase 13): EVERY open booking in town, nearest first, as compact
+           rows so many fit; the driver taps one to decide. Auto-accept is one row (a sheet to choose). -->
       @if (online()) {
-        <section class="board" aria-labelledby="board-title">
-          <fieldset class="board__auto">
-            <legend class="hg-field__label">{{ 'board.autoLabel' | t }}</legend>
-            <div class="board__chips">
-              @for (km of autoChoices; track $index) {
-                <button type="button" class="board__chip" [class.board__chip--on]="shift.autoAcceptKm() === km"
-                  [attr.aria-pressed]="shift.autoAcceptKm() === km" (click)="shift.setAutoAccept(km)">
-                  {{ km === null ? ('board.autoOff' | t) : ('board.autoKm' | t: { km: km }) }}
-                </button>
-              }
-            </div>
-            @if (shift.autoAcceptKm(); as km) {
-              <p class="hg-field__hint">{{ 'board.autoHint' | t: { km: km } }}</p>
-            }
-          </fieldset>
+        <button type="button" class="hg-menu__row board__auto" (click)="chooseAutoAccept()">
+          <ion-icon name="flash-outline" aria-hidden="true" />
+          <span class="hg-menu__label">{{ 'board.autoShort' | t }}</span>
+          <span class="board__auto-value" [class.board__auto-value--on]="shift.autoAcceptKm() !== null">
+            {{ shift.autoAcceptKm() === null ? ('board.autoOff' | t) : ('board.autoWithin' | t: { km: shift.autoAcceptKm()! }) }}
+          </span>
+          <ion-icon class="board__auto-go" name="chevron-forward" aria-hidden="true" />
+        </button>
 
-          <h2 id="board-title" class="board__title">
-            {{ 'board.title' | t }}
-            @if (requests().length) {
-              <span class="board__count">{{ requests().length }}</span>
+        <section class="board" aria-labelledby="board-title">
+          <header class="board__head">
+            <h2 id="board-title" class="board__title">
+              {{ 'board.title' | t }}
+              @if (requests().length) {
+                <span class="board__count">{{ requests().length }}</span>
+              }
+            </h2>
+            @if (requests().length > 1) {
+              <span class="board__sorted">{{ 'board.sorted' | t }}</span>
             }
-          </h2>
+          </header>
           @if (requests().length === 0) {
             <p class="board__empty" role="status">{{ 'board.empty' | t }}</p>
           } @else {
             <ul class="board__list">
               @for (r of requests(); track r.ride_id) {
                 <li>
-                  <button type="button" class="board__item" (click)="shift.choose(r)">
-                    <span class="board__top">
-                      <span class="board__fare">{{ peso(r.estimated_total) }}</span>
-                      <span class="board__type" [class.board__type--two]="r.ride_type === 'two_way'">
-                        {{ (r.ride_type === 'one_way' ? 'book.oneWay' : 'book.twoWay') | t }}
+                  <button type="button" class="req" (click)="shift.choose(r)">
+                    <span class="req__main">
+                      <span class="req__place">{{ r.pickup.landmark || ('book.pinOnly' | t) }}</span>
+                      <span class="req__meta">
+                        {{ 'board.away' | t: { km: km(r.pickup.distance_from_you_km) } }} · {{ 'board.trip' | t: { km: km(r.distance_km) } }}
                       </span>
                     </span>
-                    <span class="board__place">{{ r.pickup.landmark || ('book.pinOnly' | t) }}</span>
-                    <span class="board__distances">
-                      {{ 'offer.pickupKm' | t: { km: km(r.pickup.distance_from_you_km) } }} · {{ 'offer.destKm' | t: { km: km(r.distance_km) } }}
+                    <span class="req__side">
+                      <span class="req__fare">{{ peso(r.estimated_total) }}</span>
+                      <span class="req__type" [class.req__type--two]="r.ride_type === 'two_way'">
+                        {{ (r.ride_type === 'one_way' ? 'book.oneWay' : 'book.twoWay') | t }}
+                      </span>
                     </span>
                   </button>
                 </li>

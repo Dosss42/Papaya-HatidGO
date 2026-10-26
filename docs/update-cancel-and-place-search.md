@@ -116,3 +116,15 @@ The server is unchanged: drivers within 3 km still get the push notification ("N
 **Change:** the list now reaches **the whole service area by default**: every online driver in town sees every booking, nearest first (setting `matching.board_radius_km` = **0**; a migration changed the existing 5 to 0). The admin can still limit it to a distance ("Drivers see open requests within (0 = the whole service area)", 0–50 km).
 
 **Emulator check:** Juan at the northern edge saw the student's own booking in Poblacion Central and a test booking in the center, both "Pickup: 8.2 km from you" (`p13x-12-whole-town.png`). **Tests:** API **254** (new: a driver ~7.8 km away sees and accepts by default; the 5 km limit still works when the admin sets it).
+
+### 6d. Redesign for many bookings (the student, same day)
+
+**The student:** "If there are many bookings it only shows the nearest… show all the bookings, even far. Adjust the auto-accept button, then the list."
+
+| Before | Now |
+|---|---|
+| The server sent at most 20 requests | **Every** open request in the service area, nearest first (requests only live ~2 minutes, so the list stays short) |
+| Four big auto-accept chips | **One row**: "⚡ Auto-accept · Off ›" → a sheet: "Off: I choose myself" / Within 2 / 3 / 5 km (like the language sheet: check + tinted row on the current choice) |
+| One big card per request | **Compact rows** (≥ 64px, split by Hairline): the pickup place over "3.9 km away · 4.1 km trip" on the left, the fare and the ride type on the right; header "Requests near you (n) · Nearest first" |
+
+**Emulator check:** two bookings across town showed as two rows (3.9 km and 8.2 km away); the sheet opened from the row (`p13x-13-board-redesign.png`, `p13x-14-auto-sheet.png`). **Tests:** API 254, app 130.
