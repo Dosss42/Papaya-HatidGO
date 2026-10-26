@@ -9,6 +9,7 @@ Index of the project's design and development documents. Each phase leaves a rec
 | [../PRODUCT.md](../PRODUCT.md) | Product facts: users, purpose, rules, scope, open decisions |
 | [phase-0-analysis.md](phase-0-analysis.md) | System analysis: architecture, navigation, ERD, workflows, API, SQLite, GPS, notifications, security, testing, phases, decisions log |
 | [system-structure.md](system-structure.md) | The three folders (API, mobile app, admin website): what each does, how they work together, why they're separate, how to run them, where the secrets live |
+| [developer-start-checklist.md](developer-start-checklist.md) | Before you start developing: what to start, where to test (browser, phone, admin), `adb:reverse`, rebuilding, finishing and saving, troubleshooting |
 | [operating-guide.md](operating-guide.md) | Step by step: start the system, prepare the phones, run the demo, shut down, troubleshooting, a printable checklist |
 | [environment-setup.md](environment-setup.md) | JAVA_HOME, ANDROID_HOME, PATH and adb, explained |
 | [building-apk-and-installing.md](building-apk-and-installing.md) | How-to: reopen in VS Code, run on phone, build/install an APK, make another app installable |
