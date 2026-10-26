@@ -68,16 +68,57 @@ describe('DriverShiftService (Phase 11)', () => {
   afterEach(() => shift.reset());
 
   /** Mag-online → GPS fix → PATCH accepted → the first offers poll answered with `offers`. */
-  async function online(offers: Offer[] = []): Promise<void> {
+  async function online(offers: Offer[] = [], board: Offer[] = []): Promise<void> {
     const going = shift.goOnline();
     await settle();
     const patch = http.expectOne(`${api}/drivers/me/availability`);
     expect(patch.request.body).toEqual({ is_online: true, lat: fix.lat, lng: fix.lng });
     patch.flush({ data: { is_online: true, eligible: true, checks: [] } });
     await going;
-    http.expectOne(`${api}/drivers/me/offers`).flush({ data: offers, meta: { is_online: true } });
+    http.expectOne(`${api}/drivers/me/offers`).flush({ data: offers, meta: { is_online: true, board } });
     await settle();
   }
+
+  /** A request on the board, as the API sends it: no offer yet (offer_id null). */
+  const onBoard = (id: number, km: number): Offer => ({ ...offer(id, km), offer_id: null as unknown as number });
+
+  it('lists the request board without ringing; choosing opens it quietly; skipping declines nothing (after Phase 13)', async () => {
+    await online([], [onBoard(5, 4.0)]);
+
+    expect(shift.board().map((o) => o.offer_id)).toEqual([-50]); // its own key: minus the ride id
+    expect(shift.shown()).toBeNull();
+    expect(alert.start).not.toHaveBeenCalled();
+
+    shift.choose(shift.board()[0]);
+    expect(shift.shown()?.ride_id).toBe(50);
+    expect(alert.start).not.toHaveBeenCalled();
+
+    shift.skip();
+    expect(shift.shown()).toBeNull();
+    expect(shift.board()).toEqual([]);
+    http.expectNone(`${api}/rides/50/decline`); // no offer was made, so nothing to decline
+  });
+
+  it('auto-accepts the nearest request within the chosen radius, never one farther (after Phase 13)', async () => {
+    shift.setAutoAccept(3);
+    await online([], [onBoard(4, 4.0), onBoard(2, 2.0)]);
+
+    // 2.0 km is within 3 km: accepted without a tap. 4.0 km is left on the board.
+    const accept = http.expectOne(`${api}/rides/20/accept`);
+    accept.flush({ data: { id: 20, status: 'accepted' } });
+    await settle();
+    expect(shift.rideId()).toBe(20);
+    expect(location.startRide).toHaveBeenCalledWith(20);
+    expect(alert.start).not.toHaveBeenCalled();
+  });
+
+  it('with auto-accept off, nothing is accepted by itself', async () => {
+    shift.setAutoAccept(null);
+    await online([], [onBoard(2, 1.0)]);
+
+    http.expectNone(`${api}/rides/20/accept`);
+    expect(shift.board()).toHaveLength(1);
+  });
 
   it('goes online with a real position, unlocks the tone in the tap, and starts the idle location', async () => {
     await online();

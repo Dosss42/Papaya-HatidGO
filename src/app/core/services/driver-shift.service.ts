@@ -5,6 +5,7 @@ import { byNearest, offlineReason, OfflineReason } from '../../features/driver/d
 import { Eligibility, Offer } from '../../shared/models/driver-ride.model';
 import { LocationError } from '../../shared/models/location.model';
 import { ApiError } from '../../shared/utilities/api-error';
+import { AppSettingsRepository } from '../database/app-settings.repository';
 import { I18nService } from '../i18n/i18n.service';
 import { MessageKey } from '../i18n/messages.en';
 import { AppLifecycleService } from './app-lifecycle.service';
@@ -38,6 +39,7 @@ export class DriverShiftService {
   private readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
   private readonly rides = inject(RideService);
+  private readonly settings = inject(AppSettingsRepository);
 
   private pollTimer: ReturnType<typeof setInterval> | null = null;
   private outcomeTimer: ReturnType<typeof setTimeout> | null = null;
@@ -59,6 +61,16 @@ export class DriverShiftService {
 
   /** Open requests, nearest pickup first (brief § 4). */
   readonly offers = signal<Offer[]>([]);
+  /**
+   * The request board (after Phase 13): open requests nearby that were NOT sent to this driver's
+   * alert, nearest first. Home lists them; tapping one opens the same takeover, without the tone.
+   */
+  readonly board = signal<Offer[]>([]);
+  /**
+   * Auto-accept (after Phase 13): a request whose pickup is within this many km is accepted at
+   * once, without tapping. null = off (the default). Saved on the phone.
+   */
+  readonly autoAcceptKm = signal<number | null>(null);
   /** The ONE request on screen (the full-screen takeover), and how it ended, if it did. */
   readonly shown = signal<Offer | null>(null);
   readonly outcome = signal<OfferOutcome | null>(null);
@@ -82,6 +94,8 @@ export class DriverShiftService {
   readonly sentAt = this.location.sentAt;
 
   constructor() {
+    void this.settings.get('auto_accept_km').then((v) => this.autoAcceptKm.set(v ? Number(v) : null)).catch(() => undefined);
+
     // The server refused an idle ping (409 NOT_ONLINE): it has already stopped matching us.
     effect(() => {
       if (this.location.serverOffline() && this.state() === 'online') void this.forceOffline();
@@ -202,6 +216,7 @@ export class DriverShiftService {
     this.connectionLost.set(false);
     this.clearShown();
     this.offers.set([]);
+    this.board.set([]);
     if (this.rideId() === null) {
       void this.location.stop();
       void KeepAwake.allowSleep().catch(() => undefined);
@@ -226,7 +241,7 @@ export class DriverShiftService {
     if (this.polling || this.state() !== 'online' || this.rideId() !== null) return;
     this.polling = true;
     try {
-      const { offers, isOnline, clockOffsetMs } = await this.api.offers();
+      const { offers, board, isOnline, clockOffsetMs } = await this.api.offers();
       this.clockOffset = clockOffsetMs;
       this.failedPolls = 0;
       this.connectionLost.set(false);
@@ -236,14 +251,17 @@ export class DriverShiftService {
         return;
       }
       const now = this.now();
-      this.offers.set(byNearest(offers.filter((o) => !this.handled.has(o.offer_id) && Date.parse(o.expires_at) > now)));
+      const open = (o: Offer) => !this.handled.has(o.offer_id) && Date.parse(o.expires_at) > now;
+      this.offers.set(byNearest(offers.filter(open)));
+      this.board.set(byNearest(board.filter((o) => open(o) && !offers.some((x) => x.ride_id === o.ride_id))));
 
       const current = this.shown();
       if (current && !this.outcome()) {
-        // Gone from the list while on screen: another driver took it, or it was cancelled / expired.
+        // Gone from the lists while on screen: another driver took it, or it was cancelled / expired.
         // If the driver had tapped Tanggapin and the answer was lost, it may be theirs: check first.
-        if (!offers.some((o) => o.offer_id === current.offer_id) && !(await this.claimIfMine(current))) this.end('gone');
-      } else if (!current) {
+        const listed = [...offers, ...board].some((o) => o.ride_id === current.ride_id);
+        if (!listed && !(await this.claimIfMine(current))) this.end('gone');
+      } else if (!current && !this.autoAccept()) {
         this.showNext();
       }
     } catch {
@@ -260,14 +278,54 @@ export class DriverShiftService {
     if (this.shown() && !this.outcome() && !this.accepting()) this.end('gone');
   }
 
-  /** Laktawan: closes at once; recorded as declined so the next nearest driver gets it. */
+  /**
+   * Laktawan: closes at once; a real offer is recorded as declined so the next nearest driver
+   * gets it. A board request only leaves this driver's list (there is no offer to decline).
+   */
   skip(): void {
     const offer = this.shown();
     if (!offer || this.accepting()) return;
     this.handled.add(offer.offer_id);
+    this.board.update((list) => list.filter((o) => o.ride_id !== offer.ride_id));
     this.clearShown();
     this.showNext();
-    void this.api.decline(offer.ride_id).catch(() => undefined);
+    if (offer.offer_id > 0) void this.api.decline(offer.ride_id).catch(() => undefined);
+  }
+
+  /** A request chosen from the board (Home's list): the same takeover, without the tone. */
+  choose(offer: Offer): void {
+    if (this.shown() || this.accepting() || this.rideId() !== null) return;
+    this.shown.set(offer);
+    this.outcome.set(null);
+    this.acceptError.set(null);
+  }
+
+  /** Off, or a radius in km (Home's auto-accept chips); remembered on this phone. */
+  setAutoAccept(km: number | null): void {
+    this.autoAcceptKm.set(km);
+    void this.settings.set('auto_accept_km', km === null ? '' : String(km)).catch(() => undefined);
+    if (km !== null && !this.shown()) this.autoAccept();
+  }
+
+  /**
+   * With auto-accept on: the nearest open request (alert or board) whose pickup is within the
+   * radius is accepted at once. The takeover shows "Accepting…" and then the ride opens, so the
+   * driver sees what happened. Returns true when it started one.
+   */
+  private autoAccept(): boolean {
+    const km = this.autoAcceptKm();
+    if (km === null || this.shown() || this.accepting() || this.rideId() !== null) return false;
+    const now = this.now();
+    const pick = byNearest([...this.offers(), ...this.board()]).find(
+      (o) => !this.handled.has(o.offer_id) && Date.parse(o.expires_at) > now
+        && o.pickup.distance_from_you_km !== null && o.pickup.distance_from_you_km <= km,
+    );
+    if (!pick) return false;
+    this.shown.set(pick);
+    this.outcome.set(null);
+    this.acceptError.set(null);
+    void this.accept();
+    return true;
   }
 
   /** Tanggapin → Tinatanggap… → the ride screen, or the honest reason it's gone. */
@@ -362,6 +420,7 @@ export class DriverShiftService {
     this.rideId.set(rideId);
     this.stopPolling();
     this.offers.set([]);
+    this.board.set([]);
     void KeepAwake.keepAwake().catch(() => undefined);
     void this.location.startRide(rideId);
   }

@@ -63,3 +63,32 @@ Captures: `.impeccable/review/p13x-*.png`.
 ---
 
 **For the student:** in MapTiler's dashboard, restrict the key to your app and admin site before release (it's visible inside the APK, like any map key).
+
+---
+
+## 6. Hybrid dispatch: the request board and auto-accept (2026-10-27)
+
+**The problem (the student):** a passenger farther than 3 km from every driver got no driver at all, and drivers couldn't see or choose rides themselves. "Show the passengers so the driver can choose… and a button that auto-accepts within 2–5 km, like other platforms."
+
+**Decision (the student chose both recommended options):** a **hybrid**, as many platforms do:
+
+| Part | How it works |
+|---|---|
+| **Ringing alert** (kept, Phase 11) | The nearest drivers within **3 km** get the full-screen alert with the tone, as before (admin: "Ringing alert for drivers within") |
+| **Request board** (new) | Every online driver sees **open requests within 5 km** on Home, nearest first: fare, ride type, pickup landmark, "Pickup: 4.0 km from you · Drop-off: 3.5 km trip". Tapping one opens the same request screen (no tone) to Accept or Skip (admin: "Drivers see open requests within", 1–20 km) |
+| **Auto-accept** (new, off by default) | The driver picks Off / 2 / 3 / 5 km on Home. A request whose pickup is that near is accepted for them at once and the ride opens. The choice is saved on the phone |
+
+**Rules kept:**
+- **One winner:** accepting from the board uses the same race-safe accept. A second driver gets "Another driver took it", and the ride leaves everyone's board.
+- **Nothing personal before accepting:** the passenger's name and phone only after accepting, as with the alert.
+- **Who sees the board:** only drivers who are online, located in the last 3 minutes, verified, with a verified tricycle and no ride now. Accepting re-checks everything, including the subscription.
+- **Skipping a board request** only hides it for that driver (there was no offer to decline).
+
+**Emulator check (real API):**
+- Juan online; Maria booked a pickup **4 km** away: no alert (outside 3 km), and the request appeared on Juan's board (₱65.30, "Pickup: 4.0 km from you · Drop-off: 3.5 km trip", by road).
+- Tapping it opened the request screen; Accept gave Juan the ride. ✅
+- With auto-accept at **5 km**, Maria's next booking 4 km away was accepted by itself, and the ride screen opened. ✅
+
+Captures: `p13x-08-board.png`, `p13x-09-board-takeover.png`, `p13x-10-auto-accepted.png`.
+
+**Tests:** API **253** (4 new: the board at 4 km without an alert; choosing accepts it and only one driver wins; beyond reach neither shown nor accepted, and the admin can widen it; offline or busy drivers see no board. The Phase 9 test "not offered to you" now applies beyond the board's reach). App **130** (3 new: board listed without the tone and skipped without a decline; auto-accept takes the nearest request within the radius only; off = nothing by itself).

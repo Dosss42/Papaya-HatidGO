@@ -4,6 +4,7 @@ import { RideType } from './ride.model';
 
 /** An open request (GET /drivers/me/offers): what's needed to decide, nothing personal. */
 export interface Offer {
+  /** A real offer's id; NEGATIVE (-ride_id) for a request on the board, which has no offer yet. */
   offer_id: number;
   ride_id: number;
   expires_at: string; // the REAL countdown

@@ -78,7 +78,24 @@ export class DriverHomePage implements ViewWillEnter, OnDestroy {
   protected readonly today = signal<Earnings | null>(null);
   protected readonly peso = peso;
 
+  /** 0.8 / 3.4: one decimal is enough to decide. */
+  protected km(value: number | string | null): string {
+    return value === null ? '?' : (Math.round(Number(value) * 10) / 10).toFixed(1);
+  }
+
   protected readonly online = computed(() => this.shift.state() === 'online');
+  /**
+   * The request board on Home (after Phase 13): ringing offers and board requests in one list,
+   * nearest pickup first, one row per ride.
+   */
+  protected readonly requests = computed(() => {
+    const seen = new Set<number>();
+    return [...this.shift.offers(), ...this.shift.board()]
+      .filter((o) => !seen.has(o.ride_id) && !!seen.add(o.ride_id))
+      .sort((a, b) => (a.pickup.distance_from_you_km ?? 99) - (b.pickup.distance_from_you_km ?? 99));
+  });
+  /** Auto-accept choices: off, or a radius in km (the student's 2–5 km). */
+  protected readonly autoChoices: (number | null)[] = [null, 2, 3, 5];
   /** The compact map: only while online with a position that was SENT, never a stale marker (brief § 2). */
   protected readonly showMap = computed(() => this.online() && !!this.shift.position() && !this.shift.gpsLost());
 

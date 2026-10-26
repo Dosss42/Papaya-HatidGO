@@ -37,12 +37,18 @@ export class DriverRideService {
    * The open requests, whether the SERVER still has this driver online (meta.is_online), and
    * how far this phone's clock is from the server's (ms to ADD to Date.now(); expiry is the server's).
    */
-  offers(): Promise<{ offers: Offer[]; isOnline: boolean; clockOffsetMs: number }> {
+  /**
+   * My ringing offers, plus the request board (after Phase 13): open requests nearby the driver
+   * may choose. Board entries have no offer yet (offer_id null from the API); they get
+   * offer_id = -ride_id here, one key that never collides with a real offer's id.
+   */
+  offers(): Promise<{ offers: Offer[]; board: Offer[]; isOnline: boolean; clockOffsetMs: number }> {
     return apiCall(
       this.http
-        .get<{ data: Offer[]; meta: { is_online: boolean; server_now?: string } }>(`${this.base}/drivers/me/offers`)
+        .get<{ data: Offer[]; meta: { is_online: boolean; server_now?: string; board?: Offer[] } }>(`${this.base}/drivers/me/offers`)
         .pipe(map((r) => ({
           offers: r.data,
+          board: (r.meta?.board ?? []).map((o) => ({ ...o, offer_id: -o.ride_id })),
           isOnline: r.meta?.is_online ?? true,
           clockOffsetMs: r.meta?.server_now ? Date.parse(r.meta.server_now) - Date.now() : 0,
         }))),

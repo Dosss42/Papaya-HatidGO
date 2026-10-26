@@ -309,6 +309,10 @@ The One-way / Balikan cards follow the **Plan Card** rules: full width, 84px min
 - **A name from the map** fills the landmark with a Soft Ink hint under it: "Named from the map. You can change it." Typing replaces it for good.
 - **While the driver is on the way**, the passenger's quiet Cancel text button is replaced by a centred Soft Ink line saying when it opens. When it opens because the driver is late, the cancel sheet starts on "The driver is taking long".
 
+### The request board (after Phase 13)
+- **Auto-accept** on Driver Home (online): choice chips Off / 2 km / 3 km / 5 km (56px, chosen = 3px Deep Papaya + Papaya Tint + 800), with a Soft Ink hint when on.
+- **Requests near you** + a count pill: one Warm Field card per request (2px Field Line, 16px radius). The fare first and largest (1.5rem/800), the ride type tag (Balikan with the 3px Ink ring, as on the takeover), the pickup landmark (1.1rem/700), then "Pickup: 4.0 km from you · Drop-off: 3.5 km trip" in Soft Ink. Tapping opens the usual request screen, without the tone. Empty: one Soft Ink line.
+
 ### Notifications (Phase 13)
 - **Alerts tab:** a bell, in both roles (the driver's 5-tab bar sets its labels at the 16px floor with no side padding, so "Earnings" fits at 360dp). Unread count in a Deep Papaya pill with a 2px white ring, "9+" above nine, and "N unread" for screen readers.
 - **Alert rows:** a 44px round icon by subject (tricycle, paper, card, power), the time in Soft Ink, a 1.05rem title, the body in Soft Ink. **New** = the word "New" in a papaya pill + an 800 title + a papaya-tint icon + Ink body; read rows are calm. Rows are split by 2px Hairline; the whole row is the button.
