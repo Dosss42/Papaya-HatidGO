@@ -22,7 +22,8 @@ console.log(`Building the app for ${api}`);
 run('node scripts/ensure-map-key.js');
 run('npx ng build');
 run('npx cap sync android');
-run(process.platform === 'win32' ? 'gradlew.bat assembleDebug' : './gradlew assembleDebug', join(root, 'android'));
+// cmd.exe doesn't run a file from the current folder without ".\" in front.
+run(process.platform === 'win32' ? '.\\gradlew.bat assembleDebug' : './gradlew assembleDebug', join(root, 'android'));
 
 const apk = join(root, 'android/app/build/outputs/apk/debug/app-debug.apk');
 const site = join(root, '../papaya-hatidgo-api/public/download');
