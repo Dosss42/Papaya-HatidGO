@@ -9,6 +9,7 @@
     "build": "node scripts/ensure-map-key.js && ng build",
     "android:dev": "node scripts/ensure-map-key.js && ng build --configuration development && npx cap sync android",
     "android:prod": "node scripts/ensure-map-key.js && ng build && npx cap sync android",
+    "apk:site": "node scripts/build-site-apk.mjs",
     "adb:reverse": "node scripts/adb-reverse.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "node scripts/ensure-map-key.js && ng test",
